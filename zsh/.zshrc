@@ -80,7 +80,7 @@ for config (~/.zsh/*.zsh) source $config
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git pip python brew osx vi-mode colored-man-pages cp)
+plugins=(git pip python brew macos vi-mode colored-man-pages cp extract)
 
 source $ZSH/oh-my-zsh.sh
 
