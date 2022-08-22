@@ -11,6 +11,9 @@
 " This must be first, because it changes other options as a side effect.
 set nocompatible
 
+" set leader key to comma
+let mapleader=","
+
 colorscheme sourcerer
 
 " Turn off swap files
@@ -69,9 +72,6 @@ augroup ws
   autocmd FileType c,cpp,java,php,js,json,css,scss,sass,py,rb,coffee,python,twig,xml,yml autocmd BufWritePre <buffer> :call setline(1,map(getline(1,"$"),'substitute(v:val,"\\s\\+$","","")'))
 augroup end
 
-" set leader key to comma
-let mapleader=","
-
 " show matching brackets/parenthesis
 set showmatch
 
@@ -112,4 +112,42 @@ set fillchars=vert:▒
 
 set autoread                    " Reload files changed outside vim
 
+set textwidth=80
+
+" Remaps ; to : for easy commands
 : nmap ; :
+
+" Run pathogen package manager
+execute pathogen#infect()
+
+
+" Config for vimwiki
+let g:vimwiki_list = [{'path': '~/vimwiki/',
+                     \ 'syntax': 'markdown', 'ext': '.md'}]
+
+" Stuff for Prose
+map <F10> :Goyo <CR>
+
+" Config for VimPencil
+augroup pencil
+  autocmd!
+  autocmd FileType markdown,mkd,vimwiki call pencil#init({'wrap': 'soft'})
+  autocmd FileType txt        call pencil#init({'textwidth': 74})
+augroup END
+
+func! AsciiMode()
+  syntax off
+  setlocal virtualedit=all
+  setlocal cc=80
+  hi ColorColumn ctermbg=8 guibg=8
+  autocmd BufWritePre * :%s/\s\+$//e
+endfu
+com! ASC call AsciiMode()
+
+" ASCII Art Helpers
+" This basically manually types Unicode characters
+map .\ i<C-v>u2572<Esc>
+map ./ i<C-v>u2571<Esc>
+map .l i<C-v>u2502<Esc>
+map .- i<C-v>u2500<Esc>
+map .z i<C-v>u2581<Esc>
