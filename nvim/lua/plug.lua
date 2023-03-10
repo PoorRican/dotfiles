@@ -42,6 +42,7 @@ return require('packer').startup(function(use)
     }
   end
   }
+  use 'airblade/vim-gitgutter'
 
   -- Rust config from https://rsdlt.github.io/posts/rust-nvim-ide-guide-walkthrough-development-debug/
   use 'williamboman/mason.nvim'    
