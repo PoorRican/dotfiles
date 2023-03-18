@@ -32,10 +32,13 @@ return require('packer').startup(function(use)
   use { 'Yggdroot/indentLine' }                      -- see indentation
   use { 'tpope/vim-fugitive' }                       -- git integration
   use { 'junegunn/gv.vim' }                          -- commit history
-  use { 'windwp/nvim-autopairs' }                    -- automatically close brackets, parentheses, curly braces, and so on
+  use {
+    'windwp/nvim-autopairs',                         -- automatically close brackets, parentheses, curly braces, and so on
+    config = function() require("nvim-autopairs").setup {} end
+  }
   use { 'voldikss/vim-floaterm' }                    -- floating terminal
   use {
-    "folke/trouble.nvim",                              -- diagnostics, references, quickfix and location lists
+    "folke/trouble.nvim",                            -- diagnostics, references, quickfix and location lists
     requires = "nvim-tree/nvim-web-devicons",
     config = function()
     require("trouble").setup {
@@ -43,6 +46,13 @@ return require('packer').startup(function(use)
   end
   }
   use 'airblade/vim-gitgutter'
+  use {
+    'ThePrimeagen/refactoring.nvim',
+    requires = {
+        {"nvim-lua/plenary.nvim"},
+        {"nvim-treesitter/nvim-treesitter"}
+    }
+  }
 
   -- Rust config from https://rsdlt.github.io/posts/rust-nvim-ide-guide-walkthrough-development-debug/
   use 'williamboman/mason.nvim'    

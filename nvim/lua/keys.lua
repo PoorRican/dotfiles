@@ -24,6 +24,9 @@ map('n', '<leader>ft', [[:Telescope tags<cr>]], {})
 -- map('n', '<leader>fb', [[:Telescope buffers<cr>]], {})
 map('n', '<leader>fh', [[:Telescope help_tags<cr>]], {})
 
+map('v', '<Leader>ca', [[:RustCodeAction]], {})
+map('n', '<Leader>ca', [[:RustCodeAction]], {})
+
 -- █▓▒░ Git integrations
 
 map('n', '<Leader>gv', [[:GV<CR>]], {})
