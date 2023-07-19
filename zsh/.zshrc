@@ -120,3 +120,4 @@ function mcd() {
 function xpand() {
     expand -t 4 "$1" > _"$1" && mv _"$1" "$1";
 }
+export PATH="/usr/local/sbin:$PATH"
