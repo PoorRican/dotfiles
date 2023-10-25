@@ -45,12 +45,15 @@ map('n', "<Leader>dw", ":call vimspector#AddWatch()<cr>", {})
 map('n', "<Leader>de", ":call vimspector#Evaluate()<cr>", {})
 
 -- █▓▒░ Code Rice
+-- pneumonic "comment block"
 map('n', '<Leader>cb', [[i<C-v> █▓▒░ <Esc>]], {})
 map('n', '<Leader>cB', [[i<C-v> █▓▒░  ░▒▓█ <Esc>]], {})
 
 -- █▓▒░ FloatTerm configuration
 map('n', "<Leader>.i", ":FloatermNew --name=floaterm --height=0.8 --width=0.7 --autoclose=2 zsh <CR> ", {})
 map('n', "<Leader>.", ":FloatermToggle floaterm<CR>", {})
+map('n', "<Leader>.n", ":FloatermNext<CR>", {})
+map('n', "<Leader>.p", ":FloatermPrev<CR>", {})
 map('t', "<Esc>", "<C-\\><C-n>:q<CR>", {})
 
 -- █▓▒░ Trouble configuration
