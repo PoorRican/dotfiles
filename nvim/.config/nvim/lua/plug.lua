@@ -64,6 +64,9 @@ return require('packer').startup(function(use)
   -- Completion framework:
   use 'hrsh7th/nvim-cmp' 
 
+  -- GitHub Copilot
+  use 'github/copilot.vim'
+
   -- LSP completion source:
   use 'hrsh7th/cmp-nvim-lsp'
 
