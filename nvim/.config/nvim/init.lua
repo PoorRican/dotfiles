@@ -132,8 +132,13 @@ cmp.setup({
 
 -- Treesitter Plugin Setup 
 require('nvim-treesitter.configs').setup {
-  ensure_installed = { "lua", "rust", "toml" },
+  ensure_installed = {
+      "lua", "rust", "toml",
+      "html", "htmldjango", "javascript", "json",
+      "typescript", "yaml", "vim"
+  },
   auto_install = true,
+  auto_tag = true,
   highlight = {
     enable = true,
     additional_vim_regex_highlighting=false,
