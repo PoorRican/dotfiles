@@ -17,14 +17,14 @@ return require('packer').startup(function(use)
   use { 'mhinz/vim-startify' }                       -- start screen
   use { 'DanilaMihailov/beacon.nvim' }               -- cursor jump
   use {
-    'nvim-lualine/lualine.nvim',                     -- statusline
-    requires = {'kyazdani42/nvim-web-devicons',
-                opt = true}
-  }
-  use {
     "xero/evangelion.nvim",
     config = function() require("evangelion").setup{} end,
     run = ":colorscheme evangelion"
+  }
+  use {
+    'nvim-lualine/lualine.nvim',                     -- statusline
+    requires = {'kyazdani42/nvim-web-devicons',
+                opt = true}
   }
 
   -- [[ Dev ]]
