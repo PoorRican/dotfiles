@@ -135,13 +135,13 @@ require('nvim-treesitter.configs').setup {
   ensure_installed = {
       "lua", "rust", "toml",
       "html", "htmldjango", "javascript", "json",
-      "typescript", "yaml", "vim"
+      "typescript", "yaml", "vim", "tsx"
   },
   auto_install = true,
   auto_tag = true,
   highlight = {
     enable = true,
-    additional_vim_regex_highlighting=false,
+    additional_vim_regex_highlighting=true,
   },
   ident = { enable = true }, 
   rainbow = {
