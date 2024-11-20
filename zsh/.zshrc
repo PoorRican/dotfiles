@@ -120,3 +120,10 @@ function xpand() {
     expand -t 4 "$1" > _"$1" && mv _"$1" "$1";
 }
 export PATH="/usr/local/sbin:$PATH"
+
+# bun completions
+[ -s "/Users/swe/.bun/_bun" ] && source "/Users/swe/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
