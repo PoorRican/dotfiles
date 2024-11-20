@@ -8,7 +8,7 @@ NAME="Backup Routine"
 VERSION="0.1"
 
 BACKUP_DIR="/Volumes/FIGS_HDD/backups"
-CMD="rsync -trh --progress "
+CMD="rsync -trh --progress --exclude=venv/* --exclude=.env/* --exclude=node_modules/* --exclude=target/*"
 DIRS=(repos Documents Music dotfiles vimwiki)
 
 # print name
