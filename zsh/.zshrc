@@ -164,3 +164,8 @@ function sshlocal() {
 
   ssh -i ~/.ssh/$1 swe@$1.local
 }
+
+# print local hostname
+function whereami() {
+  echo "You are on $(hostname)"
+}
