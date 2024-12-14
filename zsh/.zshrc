@@ -154,3 +154,13 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 #unset __conda_setup
 # <<< conda initialize <<<
 
+
+# >>> helper for connecting to local SSH servers
+function sshlocal() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: sshlocal <server>"
+    return 1
+  fi
+
+  ssh -i ~/.ssh/$1 swe@$1.local
+}
