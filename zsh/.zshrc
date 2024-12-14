@@ -14,7 +14,18 @@ export PATH=$HOME/bin:/usr/local/bin:$PATH
 for config (~/.zsh/*.zsh) source $config
 
 # Path to your oh-my-zsh installation.
- export ZSH="/Users/swe/.oh-my-zsh"
+# Detect OS and set path to oh-my-zsh installation accordingly
+case "$(uname)" in
+  "Darwin")
+    export ZSH="/Users/swe/.oh-my-zsh"
+    ;;
+  "Linux")
+    export ZSH="/home/swe/.oh-my-zsh"
+    ;;
+  *)
+    echo "Unsupported operating system"
+    ;;
+esac
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
