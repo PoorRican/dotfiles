@@ -14,8 +14,24 @@ require('plug')      -- Plugins
 
 require('impatient')
 
+-- LSP Setup
 require("mason").setup()
 require("mason-lspconfig").setup()
+
+require('lspconfig').pyright.setup({
+  settings = {
+    python = {
+      analysis = {
+        typeCheckingMode = "basic",
+        diagnosticMode = "workspace",
+        inlayHints = {
+          variableTypes = true,
+          functionReturnTypes = true,
+        },
+      },
+    },
+  },
+})
 
 -- █▓▒░ Setup VimWiki ░▒▓█  
 vim.cmd([[
@@ -133,7 +149,7 @@ cmp.setup({
 -- Treesitter Plugin Setup 
 require('nvim-treesitter.configs').setup {
   ensure_installed = {
-      "lua", "rust", "toml",
+      "lua", "rust", "toml", "python",
       "html", "htmldjango", "javascript", "json",
       "typescript", "yaml", "vim", "tsx"
   },

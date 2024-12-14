@@ -11,7 +11,6 @@ return require('packer').startup(function(use)
     requires = 'kyazdani42/nvim-web-devicons'        -- filesystem icons
   }
   use { 'lewis6991/impatient.nvim' }                 -- speeds up load time
-  use 'vimwiki/vimwiki'
 
   -- [[ Ricing ]]
   use { 'mhinz/vim-startify' }                       -- start screen
@@ -93,4 +92,9 @@ return require('packer').startup(function(use)
   end
   }
   use 'MaxMEllon/vim-jsx-pretty'
+
+
+  -- Useful for writing
+  use 'vimwiki/vimwiki'
+  use 'junegunn/goyo.vim'
 end)
