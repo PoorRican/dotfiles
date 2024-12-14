@@ -56,10 +56,10 @@ GIT_PROMPT() {
   then
     case "$PROMPT_STYLE" in
       ascii)
-        echo "$reset_color%F{cyan}▒░"
+        echo "$reset_color%F{orange}▒░"
       ;;
       arrows)
-        echo "$reset_color%F{cyan}"
+        echo "$reset_color%F{orange}"
       ;;
     esac
     return
