@@ -105,7 +105,7 @@ source $ZSH/oh-my-zsh.sh
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
 # users are encouraged to define aliases within the ZSH_CUSTOM folder.
 # For a full list of active aliases, run `alias`.
-alias zshcon="vim ~/.zshrc"
+alias zshcon="nvim ~/.zshrc"
 alias uh="cd .."
 alias uhh="cd ../.."
 alias goo="git reset --soft HEAD^"
@@ -127,3 +127,19 @@ export PATH="/usr/local/sbin:$PATH"
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+#__conda_setup="$('/Users/swe/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+#if [ $? -eq 0 ]; then
+#    eval "$__conda_setup"
+#else
+#    if [ -f "/Users/swe/miniconda3/etc/profile.d/conda.sh" ]; then
+#        . "/Users/swe/miniconda3/etc/profile.d/conda.sh"
+#    else
+#        export PATH="/Users/swe/miniconda3/bin:$PATH"
+#    fi
+#fi
+#unset __conda_setup
+# <<< conda initialize <<<
+
