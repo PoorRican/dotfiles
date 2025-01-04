@@ -1,0 +1,16 @@
+[user]
+	name = Josue Figueroa
+	email = poor.rican@pm.me
+[core]
+	autocrlf = input
+[init]
+	defaultBranch = master
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[push]
+	autoSetupRemote = true
+[http]
+	postBuffer = 157286400
