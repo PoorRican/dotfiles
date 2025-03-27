@@ -20,7 +20,10 @@ map('n', '<Leader>tg', [[:TagbarToggle<CR>]], {})
 map('n', '<Leader>td', [[:TodoTelescope<cr>]], {})
 map('n', '<leader>ff', [[:Telescope git_files<cr>]], {})
 map('n', '<leader>fg', [[:Telescope live_grep<cr>]], {})
-map('n', '<leader>ft', [[:Telescope tags<cr>]], {})
+map('n', '<leader>fd', [[:Telescope lsp_definitions<cr>]], {}) 
+map('n', '<leader>fs', [[:Telescope lsp_dynamic_workspace_symbols<cr>]], {})
+map('n', '<leader>fr', [[:Telescope lsp_references<cr>]], {})
+map('n', '<leader>fu', [[:Telescope lsp_incoming_calls<cr>]], {})
 -- map('n', '<leader>fb', [[:Telescope buffers<cr>]], {})
 map('n', '<leader>fh', [[:Telescope help_tags<cr>]], {})
 
@@ -29,8 +32,7 @@ map('n', '<Leader>ca', [[:RustCodeAction]], {})
 
 -- █▓▒░ Git integrations
 
-map('n', '<Leader>gv', [[:GV<CR>]], {})
--- map('n', 'ff', [[:Telescope find_files]], {})
+map('n', '<Leader>gv', [[:GV<CR>]], {})  -- show git branch log
 
 -- █▓▒░ Vimspector
 map('n', "<F9>",  ":call vimspector#Launch()<cr>", {})
@@ -70,8 +72,5 @@ map("n", "<leader>xl", "<cmd>TroubleToggle loclist<cr>",
   {silent = true, noremap = true}
 )
 map("n", "<leader>xq", "<cmd>TroubleToggle quickfix<cr>",
-  {silent = true, noremap = true}
-)
-map("n", "gR", "<cmd>TroubleToggle lsp_references<cr>",
   {silent = true, noremap = true}
 )
