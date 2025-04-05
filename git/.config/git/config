@@ -3,6 +3,7 @@
 	email = poor.rican@pm.me
 [core]
 	autocrlf = input
+	editor = nvim
 [init]
 	defaultBranch = master
 [filter "lfs"]

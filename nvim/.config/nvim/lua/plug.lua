@@ -15,10 +15,11 @@ return require('packer').startup(function(use)
   -- [[ Ricing ]]
   use { 'mhinz/vim-startify' }                       -- start screen
   use { 'DanilaMihailov/beacon.nvim' }               -- cursor jump
+  use { "xero/evangelion.nvim" }
   use {
-    "xero/evangelion.nvim",
-    config = function() require("evangelion").setup{} end,
-    run = ":colorscheme evangelion"
+    "scottmckendry/cyberdream.nvim",
+    config = function() require("cyberdream").setup{} end,
+    run = ":colorscheme cyberdream"
   }
   use {
     'nvim-lualine/lualine.nvim',                     -- statusline
@@ -66,9 +67,6 @@ return require('packer').startup(function(use)
 
   -- Completion framework:
   use 'hrsh7th/nvim-cmp' 
-
-  -- GitHub Copilot
-  use 'github/copilot.vim'
 
   -- LSP completion source:
   use 'hrsh7th/cmp-nvim-lsp'
