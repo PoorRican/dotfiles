@@ -22,5 +22,5 @@
 	helper = 
 	helper = !/usr/bin/gh auth git-credential
 [filter "replacesensitive"]
-	clean = sed 's/authtoken: .*/authtoken: PLACEHOLDER/g'
+	clean = sed 's/.*authtoken:.*/  authtoken: {PLACEHOLDER}/g'
 	smudge = cat
