@@ -74,6 +74,12 @@
       ];
     };
 
+    homeConfigurations."${username}" = home-manager.lib.homeManagerConfiguration {
+      pkgs = import nixpkgs { system = "${system}"; };
+      modules = [ ./home.nix ];
+      extraSpecialArgs = { inherit username homeDirectory; };
+    };
+
     # --- Build & Activation Instructions ---
     # NOTE: The 'apps' block for 'nix run .#rebuild' is intentionally omitted
     #       to avoid the previous evaluation issues.

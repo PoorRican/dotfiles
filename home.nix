@@ -8,9 +8,9 @@
   # !! IMPORTANT: Update this if you change nixpkgs branch !!
   home.stateVersion = "25.05";
 
-  # Basic user info (redundant if passed via nix-darwin, but good practice)
-  #home.username = ${username};
-  #home.homeDirectory = ${homeDirectory};
+  # Basic user info
+  home.username = "${username}";
+  home.homeDirectory = "${homeDirectory}";
 
   # Packages specifically for this user (includes GUI apps, user tools)
   home.packages = with pkgs; [
@@ -31,10 +31,6 @@
     iterm2
     # firefox
     # visual-studio-code
-    slack
-
-    # IDEs
-    jetbrains-toolbox
   ];
 
   # Git configuration
