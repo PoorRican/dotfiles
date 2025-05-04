@@ -24,23 +24,22 @@
     bat # Cat alternative with syntax highlighting
     jq # JSON processor
     gh # GitHub CLI
+    stow
 
     # Fonts
     jetbrains-mono
 
     # GUI Apps (managed via homebrew casks if needed, see home-manager docs)
+    kitty
     iterm2
     # firefox
     # visual-studio-code
   ];
 
   # Git configuration
-  programs.git = {
-    enable = true;
-    extraConfig = {
-      include.path = "./git/.config/git/config";
-    };
-  };
+  #programs.git = {
+  #  enable = true;
+  #};
 
   # Example: Zsh configuration (customize as needed)
   # programs.zsh = {
