@@ -23,6 +23,7 @@
     fd # Fast find alternative
     bat # Cat alternative with syntax highlighting
     jq # JSON processor
+    gh # GitHub CLI
 
     # Fonts
     jetbrains-mono
@@ -36,16 +37,9 @@
   # Git configuration
   programs.git = {
     enable = true;
-    userName = "PoorRican"; # <--- Set Your Git Name
-    userEmail = "josue.figueroa@pm.me"; # <--- Set Your Git Email
     extraConfig = {
-      init.defaultBranch = "master";
-      # Add other git config settings here
+      include.path = "./git/.config/git/config";
     };
-    # signing = { # Example GPG signing
-    #   key = "YOUR_GPG_KEY_ID";
-    #   signByDefault = true;
-    # };
   };
 
   # Example: Zsh configuration (customize as needed)
