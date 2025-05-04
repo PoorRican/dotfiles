@@ -25,12 +25,16 @@
     jq # JSON processor
 
     # Fonts
-    #(nerdfonts.override { fonts = [ "JetBrainsMono" ]; }) # Example Nerd Font
+    jetbrains-mono
 
     # GUI Apps (managed via homebrew casks if needed, see home-manager docs)
     iterm2
     # firefox
     # visual-studio-code
+    slack
+
+    # IDEs
+    jetbrains-toolbox
   ];
 
   # Git configuration
