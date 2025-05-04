@@ -15,3 +15,12 @@
 	autoSetupRemote = true
 [http]
 	postBuffer = 157286400
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[filter "replacesensitive"]
+	clean = sed 's/authtoken: .*/authtoken: PLACEHOLDER/g'
+	smudge = cat
