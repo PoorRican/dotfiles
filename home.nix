@@ -18,6 +18,7 @@
     # go
     # nodejs_20 # Example specific version
 
+
     # CLI tools
     ripgrep # Fast grep alternative
     fd # Fast find alternative
@@ -25,6 +26,8 @@
     jq # JSON processor
     gh # GitHub CLI
     stow
+    neovim
+    tmux
 
     # Fonts
     jetbrains-mono
