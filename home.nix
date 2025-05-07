@@ -28,6 +28,7 @@
     stow
     neovim
     tmux
+    oh-my-zsh
 
     # Fonts
     jetbrains-mono
