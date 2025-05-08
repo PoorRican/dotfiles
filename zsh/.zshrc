@@ -108,6 +108,7 @@ source $ZSH/oh-my-zsh.sh
 # else
 #   export EDITOR='mvim'
 # fi
+export EDITOR='nvim'
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -169,3 +170,8 @@ function sshlocal() {
 function whereami() {
   echo "You are on $(hostname)"
 }
+
+export PATH=$PATH:/Users/swe/.local/bin
+
+# Added by Windsurf
+export PATH="/Users/swe/.codeium/windsurf/bin:$PATH"
