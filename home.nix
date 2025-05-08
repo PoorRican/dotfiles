@@ -17,6 +17,7 @@
     # Dev tools
     # go
     # nodejs_20 # Example specific version
+    bun
 
 
     # CLI tools
