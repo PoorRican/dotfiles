@@ -18,7 +18,10 @@
     # go
     # nodejs_20 # Example specific version
     bun
-
+    google-cloud-sdk
+    pulumi
+    pulumiPackages.pulumi-language-python
+    awscli2
 
     # CLI tools
     ripgrep # Fast grep alternative

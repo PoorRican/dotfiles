@@ -25,7 +25,8 @@
     # Set to your system architecture
     # Use "aarch64-darwin" for Apple Silicon (M1, M2, M3...)
     # Use "x86_64-darwin" for Intel Macs
-    system = "x86_64-darwin"; # <--- SET CORRECT ARCHITECTURE
+    #system = "x86_64-darwin"; # <--- SET CORRECT ARCHITECTURE
+    system = "aarch64-darwin"; # <--- SET CORRECT ARCHITECTURE
     # --- !!! END OF EDITABLE VARIABLES !!! ---
 
     # Helper for home directory path
