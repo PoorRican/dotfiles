@@ -16,11 +16,12 @@
   home.packages = with pkgs; [
     # Dev tools
     # go
-    # nodejs_20 # Example specific version
+    nodejs_22
     bun
     google-cloud-sdk
     pulumi
     pulumiPackages.pulumi-language-python
+    pulumiPackages.pulumi-nodejs
     awscli2
 
     # CLI tools
