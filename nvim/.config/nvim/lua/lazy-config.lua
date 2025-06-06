@@ -83,7 +83,13 @@ return {
 
   -- [[ LSP, Completion, Treesitter ]]
   { 'williamboman/mason.nvim', cmd = "Mason" },
-  { 'williamboman/mason-lspconfig.nvim', dependencies = {"williamboman/mason.nvim", "neovim/nvim-lspconfig"} },
+  {
+    'williamboman/mason-lspconfig.nvim',
+    dependencies = {"williamboman/mason.nvim", "neovim/nvim-lspconfig"},
+    opts = {
+      ensure_installed = { "ruff_lsp", "marksman", "yamlls", "jsonls", "bashls", "lua_ls", "nil_ls", "html", "cssls", "gopls", "tsserver" }
+    }
+  },
   { 'neovim/nvim-lspconfig', event = {"BufReadPre", "BufNewFile"} }, -- Load on buffer events
   {
     'simrat39/rust-tools.nvim',
@@ -94,6 +100,11 @@ return {
     end,
   },
   {
+    "pmizio/typescript-tools.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+    opts = {}, -- Using default options
+  },
+  {
     'nvim-treesitter/nvim-treesitter',
     build = ":TSUpdate",
     event = {"BufReadPost", "BufNewFile"},
@@ -101,7 +112,7 @@ return {
       require('nvim-treesitter.configs').setup {
         highlight = { enable = true },
         indent = { enable = true },
-        -- ensure_installed = { "c", "lua", "vim", "vimdoc", "query", "rust", "javascript", "typescript" }, -- Add languages
+        ensure_installed = { "bash", "c", "cpp", "css", "go", "html", "javascript", "json", "lua", "nix", "python", "rust", "toml", "tsx", "typescript", "yaml" },
         auto_install = true,
       }
     end,
