@@ -31,7 +31,6 @@
     jq # JSON processor
     gh # GitHub CLI
     stow
-    neovim
     tmux
     oh-my-zsh
 
@@ -44,6 +43,32 @@
     # firefox
     # visual-studio-code
   ];
+
+  programs.neovim = {
+    enable = true;
+    plugins = with pkgs.vimPlugins; [
+      lazy-nvim
+      nvim-treesitter-textobjects # For better text objects based on treesitter
+      (nvim-treesitter.withPlugins (grammars: with grammars; [
+        tree-sitter-bash
+        tree-sitter-c
+        tree-sitter-cpp
+        tree-sitter-css
+        tree-sitter-go
+        tree-sitter-html
+        tree-sitter-javascript
+        tree-sitter-json
+        tree-sitter-lua
+        tree-sitter-nix
+        tree-sitter-python
+        tree-sitter-rust
+        tree-sitter-toml
+        tree-sitter-tsx
+        tree-sitter-typescript
+        tree-sitter-yaml
+      ]))
+    ];
+  };
 
   # Git configuration
   #programs.git = {

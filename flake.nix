@@ -57,31 +57,37 @@
         # Import the main system configuration settings
         ./darwin-configuration.nix
 
-        # Import the home-manager module for nix-darwin integration
-        home-manager.darwinModules.home-manager
-        {
-          # Configure home-manager settings here at the system level
-          home-manager.useGlobalPkgs = true; # Let HM use the pkgs defined above
-          home-manager.useUserPackages = true; # Let HM manage packages defined in home.nix
-          home-manager.extraSpecialArgs = { inherit pkgs username homeDirectory; }; # Pass args to HM's modules
-
-          # Tell home-manager which user(s) to manage and where their config is
-          home-manager.users.${username} = import ./home.nix;
-
-          # Set the state version for home-manager itself. Match nixpkgs branch.
-          # !! IMPORTANT: Update this if you change nixpkgs branch !!
-          #home.stateVersion = "25.05"; # Use the string format here
-        }
+        # home-manager is now managed independently via 'home-manager switch'
+        # home-manager.darwinModules.home-manager,
+        # {
+        #   home-manager.useGlobalPkgs = true;
+        #   home-manager.useUserPackages = true;
+        #   home-manager.extraSpecialArgs = { inherit pkgs username homeDirectory; };
+        #   home-manager.users.${username} = import ./home.nix;
+        #   #home.stateVersion = "25.05";
+        # }
       ];
     };
 
     homeConfigurations."${username}" = home-manager.lib.homeManagerConfiguration {
-      pkgs = import nixpkgs { system = "${system}"; };
-      modules = [ ./home.nix ];
-      extraSpecialArgs = { inherit username homeDirectory; };
+      pkgs = import nixpkgs { system = "${system}"; }; # Use the system-specific pkgs
+      # Pass system-level specialArgs plus any others needed by home.nix modules
+      extraSpecialArgs = { inherit inputs pkgs username homeDirectory; }; 
+      modules = [
+        ./home.nix
+        # You could add other home-manager specific modules here if needed
+      ];
     };
 
     # --- Build & Activation Instructions ---
+    # For system changes (darwin-configuration.nix):
+    # 1. nix build '.#darwinConfigurations.swe.system'
+    # 2. sudo ./result/bin/darwin-rebuild switch
+    #
+    # For user environment changes (home.nix):
+    # 1. home-manager switch --flake .#swe
+    #
+
     # NOTE: The 'apps' block for 'nix run .#rebuild' is intentionally omitted
     #       to avoid the previous evaluation issues.
 

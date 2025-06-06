@@ -14,7 +14,6 @@
     git # Smaller git package, use 'git' if you need full features
     wget
     curl
-    neovim
     htop # Example process viewer
     coreutils # Provides GNU core utilities (like gls)
   ];
