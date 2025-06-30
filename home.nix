@@ -23,6 +23,8 @@
     pulumiPackages.pulumi-language-python
     pulumiPackages.pulumi-nodejs
     awscli2
+    cargo
+    git-lfs
 
     # CLI tools
     ripgrep # Fast grep alternative
@@ -33,6 +35,7 @@
     stow
     tmux
     oh-my-zsh
+    yazi
 
     # Fonts
     jetbrains-mono
