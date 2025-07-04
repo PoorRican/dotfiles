@@ -108,6 +108,7 @@ source $ZSH/oh-my-zsh.sh
 # else
 #   export EDITOR='mvim'
 # fi
+export EDITOR='nvim'
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -171,4 +172,6 @@ function whereami() {
 }
 
 export PATH=$PATH:/home/swe/.local/bin
+export PATH=$PATH:/Users/swe/.local/bin
+export PATH="/Users/swe/.codeium/windsurf/bin:$PATH"
 alias claude="/home/swe/.claude/local/claude"

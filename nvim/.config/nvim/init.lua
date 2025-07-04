@@ -6,36 +6,41 @@
 vim.g.mapleader = ","
 vim.g.localleader = "\\"
 
--- IMPORTS
+-- IMPORTS (vars, opts, keys are kept, plugins managed by lazy.nvim)
 require('vars')      -- Variables
 require('opts')      -- Options
 require('keys')      -- Keymaps
-require('plug')      -- Plugins
 
-require('impatient')
+-- Bootstrap lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "--branch=stable", -- Use the latest stable release
+    lazyrepo,
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
 
--- LSP Setup
-require("mason").setup()
-require("mason-lspconfig").setup()
-
-require('lspconfig').pyright.setup({
-  settings = {
-    python = {
-      analysis = {
-        typeCheckingMode = "basic",
-        diagnosticMode = "workspace",
-        inlayHints = {
-          variableTypes = true,
-          functionReturnTypes = true,
-        },
-      },
-    },
+-- Setup lazy.nvim with your plugin configurations from lua/lazy-config.lua
+require("lazy").setup(require("lazy-config"), {
+  checker = {
+    enabled = true,
+    notify = true,
+  },
+  change_detection = {
+    enabled = true,
+    notify = true,
   },
 })
 
 -- █▓▒░ Setup VimWiki ░▒▓█  
+-- This can be moved to the vimwiki plugin config in lazy-config.lua if preferred
 vim.cmd([[
-
 let g:vimwiki_list = [{'path': '~/vimwiki/',
                      \ 'syntax': 'markdown', 'ext': '.md'}]
 
@@ -46,21 +51,8 @@ let g:vimwiki_list = [{'path': '~/vimwiki/',
 " augroup END
 ]])
 
--- [[ Rust Tools ]]
-local rt = require("rust-tools")
-
-rt.setup({
-  server = {
-    on_attach = function(_, bufnr)
-      -- Hover actions
-      vim.keymap.set("n", "<C-space>", rt.hover_actions.hover_actions, { buffer = bufnr })
-      -- Code action groups
-      vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
-    end,
-  },
-})
-
 -- LSP Diagnostics Options Setup 
+-- This diagnostic setup can remain here or be integrated into LSP plugin configs in lazy-config.lua
 local sign = function(opts)
   vim.fn.sign_define(opts.name, {
     texthl = opts.name,
@@ -93,84 +85,9 @@ set signcolumn=yes
 autocmd CursorHold * lua vim.diagnostic.open_float(nil, { focusable = false })
 ]])
 
--- Completion Plugin Setup
-local cmp = require("cmp")
-cmp.setup({
-  -- Enable LSP snippets
-  snippet = {
-    expand = function(args)
-        vim.fn["vsnip#anonymous"](args.body)
-    end,
-  },
-  mapping = {
-    ['<C-p>'] = cmp.mapping.select_prev_item(),
-    ['<C-n>'] = cmp.mapping.select_next_item(),
-    -- Add tab support
-    ['<S-Tab>'] = cmp.mapping.select_prev_item(),
-    ['<Tab>'] = cmp.mapping.select_next_item(),
-    ['<C-S-f>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.close(),
-    ['<CR>'] = cmp.mapping.confirm({
-      behavior = cmp.ConfirmBehavior.Insert,
-      select = true,
-    })
-  },
-  -- Installed sources:
-  sources = {
-    { name = 'path' },                              -- file paths
-    { name = 'nvim_lsp', keyword_length = 3 },      -- from language server
-    { name = 'nvim_lsp_signature_help'},            -- display function signatures with current parameter emphasized
-    { name = 'nvim_lua', keyword_length = 2},       -- complete neovim's Lua runtime API such vim.lsp.*
-    { name = 'buffer', keyword_length = 2 },        -- source current buffer
-    { name = 'vsnip', keyword_length = 2 },         -- nvim-cmp source for vim-vsnip 
-    { name = 'calc'},                               -- source for math calculation
-  },
-  window = {
-      completion = cmp.config.window.bordered(),
-      documentation = cmp.config.window.bordered(),
-  },
-  formatting = {
-      fields = {'menu', 'abbr', 'kind'},
-      format = function(entry, item)
-          local menu_icon ={
-              nvim_lsp = 'λ',
-              vsnip = '⋗',
-              buffer = 'Ω',
-              path = '🖫',
-          }
-          item.menu = menu_icon[entry.source.name]
-          return item
-      end,
-  },
-})
+-- Individual plugin setups (like nvim-cmp, treesitter, nvim-tree, lualine, todo-comments, mason, lspconfig, rust-tools)
+-- are now expected to be handled within their respective configurations in lua/lazy-config.lua
+-- (either via `opts = {}` or a `config = function() ... end` block).
 
--- Treesitter Plugin Setup 
-require('nvim-treesitter.configs').setup {
-  ensure_installed = {
-      "lua", "rust", "toml", "python",
-      "html", "htmldjango", "javascript", "json",
-      "typescript", "yaml", "vim", "tsx"
-  },
-  auto_install = true,
-  auto_tag = true,
-  highlight = {
-    enable = true,
-    additional_vim_regex_highlighting=true,
-  },
-  ident = { enable = true }, 
-  rainbow = {
-    enable = true,
-    extended_mode = true,
-    max_file_lines = nil,
-  }
-}
-
-require('nvim-tree').setup{}
-require('lualine').setup {}
-require('todo-comments').setup{}
-
-
--- Setup copilot
+-- Setup copilot (can be moved to copilot plugin config in lazy-config.lua if you add it as a plugin)
 vim.g.copilot_no_tab_map = true

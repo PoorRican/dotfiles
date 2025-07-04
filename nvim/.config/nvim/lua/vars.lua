@@ -15,4 +15,4 @@ vim.o.packpath = vim.o.packpath .. ',' .. packer_path
 -- [[ Theme ]]
 opt.syntax = "ON"                -- str:  Allow syntax highlighting
 opt.termguicolors = true         -- bool: If term supports ui color then enable
-cmd('colorscheme evangelion')    -- cmd:  Set the colorscheme
+-- cmd('colorscheme evangelion')    -- cmd:  Set the colorscheme (Moved to lazy-config.lua)

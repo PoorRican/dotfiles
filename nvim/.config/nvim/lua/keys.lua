@@ -54,9 +54,11 @@ map('n', '<Leader>cB', [[i<C-v> █▓▒░  ░▒▓█ <Esc>]], {})
 -- █▓▒░ FloatTerm configuration
 map('n', "<Leader>.i", ":FloatermNew --name=floaterm --height=0.8 --width=0.7 --autoclose=2 zsh <CR> ", {})
 map('n', "<Leader>.", ":FloatermToggle floaterm<CR>", {})
+map('n', "<C-t>", ":FloatermToggle floaterm<CR>", {})
 map('n', "<Leader>.n", ":FloatermNext<CR>", {})
 map('n', "<Leader>.p", ":FloatermPrev<CR>", {})
-map('t', "<Esc>", "<C-\\><C-n>:q<CR>", {})
+-- Use Ctrl+\ Ctrl+n to exit terminal mode (default)
+-- map('t', "<Esc>", "<C-\\><C-n>:q<CR>", {})
 
 -- █▓▒░ Trouble configuration
 map("n", "<leader>xx", "<cmd>TroubleToggle<cr>",
@@ -74,3 +76,6 @@ map("n", "<leader>xl", "<cmd>TroubleToggle loclist<cr>",
 map("n", "<leader>xq", "<cmd>TroubleToggle quickfix<cr>",
   {silent = true, noremap = true}
 )
+
+-- █▓▒░ Claude Code
+vim.keymap.set('n', '<leader>cc', '<cmd>ClaudeCode<CR>', { desc = 'Toggle Claude Code' })
