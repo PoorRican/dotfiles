@@ -18,9 +18,12 @@ for config (~/.zsh/*.zsh) source $config
 case "$(uname)" in
   "Darwin")
     export ZSH="/Users/swe/.oh-my-zsh"
+    export PATH="$PATH:/Users/swe/.local/bin"
+    export PATH="/Users/swe/.codeium/windsurf/bin:$PATH"
     ;;
   "Linux")
     export ZSH="/home/swe/.oh-my-zsh"
+    export PATH="$PATH:/home/swe/.local/bin"
     ;;
   *)
     echo "Unsupported operating system"
@@ -171,7 +174,4 @@ function whereami() {
   echo "You are on $(hostname)"
 }
 
-export PATH=$PATH:/home/swe/.local/bin
-export PATH=$PATH:/Users/swe/.local/bin
-export PATH="/Users/swe/.codeium/windsurf/bin:$PATH"
 alias claude="/home/swe/.claude/local/claude"
