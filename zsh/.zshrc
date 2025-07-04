@@ -169,3 +169,6 @@ function sshlocal() {
 function whereami() {
   echo "You are on $(hostname)"
 }
+
+export PATH=$PATH:/home/swe/.local/bin
+alias claude="/home/swe/.claude/local/claude"
