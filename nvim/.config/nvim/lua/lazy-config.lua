@@ -66,7 +66,28 @@ return {
     "folke/trouble.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     cmd = {"TroubleToggle", "Trouble"},
-    opts = {}, -- lazy.nvim will call require("trouble").setup(opts)
+    opts = {
+      modes = {
+        lsp = {
+          filter = {
+            -- Filter out virtual environments and system locations
+            ["not"] = {
+              filename = {
+                "%.local/share/nvim/mason/",
+                "%.pyenv/",
+                "%.venv/",
+                "venv/",
+                "__pycache__/",
+                "site%-packages/",
+                "dist%-packages/",
+                "/usr/lib/python",
+                "/usr/local/lib/python",
+              },
+            },
+          },
+        },
+      },
+    },
   },
   { 'airblade/vim-gitgutter', event = {"BufReadPost", "BufWritePost"} },
   {
@@ -91,15 +112,88 @@ return {
   },
 
   -- [[ LSP, Completion, Treesitter ]]
-  { 'williamboman/mason.nvim', cmd = "Mason" },
+  {
+    'williamboman/mason.nvim',
+    event = {"BufReadPre", "BufNewFile"},
+    config = function()
+      require("mason").setup()
+    end
+  },
   {
     'williamboman/mason-lspconfig.nvim',
     dependencies = {"williamboman/mason.nvim", "neovim/nvim-lspconfig"},
-    opts = {
-      ensure_installed = { "ruff_lsp", "marksman", "yamlls", "jsonls", "bashls", "lua_ls", "nil_ls", "html", "cssls", "gopls", "tsserver" }
-    }
+    event = {"BufReadPre", "BufNewFile"},
+    config = function()
+      require("mason-lspconfig").setup({
+        ensure_installed = { "ruff", "pyright", "marksman", "yamlls", "jsonls", "bashls", "lua_ls", "html", "cssls", "gopls", "ts_ls" }
+      })
+    end
   },
-  { 'neovim/nvim-lspconfig', event = {"BufReadPre", "BufNewFile"} }, -- Load on buffer events
+  {
+    'neovim/nvim-lspconfig',
+    event = {"BufReadPre", "BufNewFile"},
+    config = function()
+      local lspconfig = require("lspconfig")
+
+      -- Helper function to find Python interpreter
+      local function get_python_path()
+        local util = require("lspconfig.util")
+        local path = util.path
+        
+        -- Check for .venv/bin/python
+        local venv_python = path.join(vim.fn.getcwd(), ".venv", "bin", "python")
+        if vim.fn.executable(venv_python) == 1 then
+          return venv_python
+        end
+        
+        -- Check for uv managed Python
+        local uv_python = vim.fn.system("uv which python 2>/dev/null"):gsub("\n", "")
+        if vim.fn.executable(uv_python) == 1 then
+          return uv_python
+        end
+        
+        -- Fall back to system Python
+        return vim.fn.exepath("python3") or vim.fn.exepath("python")
+      end
+
+      -- Configure ruff for Python linting/formatting
+      lspconfig.ruff.setup({
+        cmd = { vim.fn.expand("~/.local/share/nvim/mason/bin/ruff"), "server" },
+        filetypes = {"python"},
+        root_dir = lspconfig.util.root_pattern("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".venv", "uv.lock", ".git"),
+      })
+
+      -- Configure pyright for Python type checking and intellisense
+      lspconfig.pyright.setup({
+        cmd = { vim.fn.expand("~/.local/share/nvim/mason/bin/pyright-langserver"), "--stdio" },
+        filetypes = {"python"},
+        root_dir = lspconfig.util.root_pattern("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".venv", "uv.lock", ".git"),
+        settings = {
+          python = {
+            pythonPath = get_python_path(),
+            analysis = {
+              autoSearchPaths = true,
+              useLibraryCodeForTypes = true,
+              diagnosticMode = "workspace",
+              typeCheckingMode = "basic",
+            },
+          },
+        },
+      })
+
+      -- Configure other LSP servers
+      lspconfig.lua_ls.setup({})
+      lspconfig.marksman.setup({})
+      lspconfig.yamlls.setup({})
+      lspconfig.jsonls.setup({})
+      lspconfig.bashls.setup({})
+      lspconfig.nil_ls.setup({})
+      lspconfig.html.setup({})
+      lspconfig.cssls.setup({})
+      lspconfig.gopls.setup({})
+      lspconfig.ts_ls.setup({})
+    end
+  },
   {
     'simrat39/rust-tools.nvim',
     ft = "rust", -- Load for rust files
@@ -153,6 +247,46 @@ return {
           ['<C-Space>'] = cmp.mapping.complete(),
           ['<C-e>'] = cmp.mapping.abort(),
           ['<CR>'] = cmp.mapping.confirm({ select = true }),
+          -- Tab and Shift-Tab for cycling through completion items
+          ['<Tab>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif vim.fn["vsnip#available"](1) == 1 then
+              vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-expand-or-jump)", true, true, true), "")
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
+          ['<S-Tab>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_prev_item()
+            elseif vim.fn["vsnip#jumpable"](-1) == 1 then
+              vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(vsnip-jump-prev)", true, true, true), "")
+            else
+              -- Dedent: remove one level of indentation
+              local line = vim.api.nvim_get_current_line()
+              local col = vim.api.nvim_win_get_cursor(0)[2]
+              local before_cursor = line:sub(1, col)
+              local indent_size = vim.bo.shiftwidth
+              
+              -- Check if we're at the beginning or only whitespace before cursor
+              if before_cursor:match("^%s*$") then
+                -- Calculate current indent level
+                local current_indent = #before_cursor:match("^%s*")
+                if current_indent >= indent_size then
+                  -- Remove one indent level
+                  local new_indent = current_indent - indent_size
+                  local new_line = string.rep(" ", new_indent) .. line:sub(current_indent + 1)
+                  vim.api.nvim_set_current_line(new_line)
+                  vim.api.nvim_win_set_cursor(0, {vim.api.nvim_win_get_cursor(0)[1], new_indent})
+                else
+                  fallback()
+                end
+              else
+                fallback()
+              end
+            end
+          end, { "i", "s" }),
         }),
         sources = cmp.config.sources({
           { name = 'nvim_lsp' },

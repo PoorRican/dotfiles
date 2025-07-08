@@ -57,23 +57,31 @@ map('n', "<Leader>.", ":FloatermToggle floaterm<CR>", {})
 map('n', "<C-t>", ":FloatermToggle floaterm<CR>", {})
 map('n', "<Leader>.n", ":FloatermNext<CR>", {})
 map('n', "<Leader>.p", ":FloatermPrev<CR>", {})
--- Use Ctrl+\ Ctrl+n to exit terminal mode (default)
--- map('t', "<Esc>", "<C-\\><C-n>:q<CR>", {})
+-- Terminal mode mappings for FloatTerm
+map('t', "<C-t>", "<C-\\><C-n>:FloatermToggle floaterm<CR>", {})
+map('t', "<Esc>", "<C-\\><C-n>", {})
+map('t', "<C-h>", "<C-\\><C-n><C-w>h", {})
+map('t', "<C-j>", "<C-\\><C-n><C-w>j", {})
+map('t', "<C-k>", "<C-\\><C-n><C-w>k", {})
+map('t', "<C-l>", "<C-\\><C-n><C-w>l", {})
 
--- █▓▒░ Trouble configuration
-map("n", "<leader>xx", "<cmd>TroubleToggle<cr>",
+-- █▓▒░ Trouble configuration (v3 syntax)
+map("n", "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>",
   {silent = true, noremap = true}
 )
-map("n", "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<cr>",
+map("n", "<leader>xw", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
   {silent = true, noremap = true}
 )
-map("n", "<leader>xd", "<cmd>TroubleToggle document_diagnostics<cr>",
+map("n", "<leader>xd", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
   {silent = true, noremap = true}
 )
-map("n", "<leader>xl", "<cmd>TroubleToggle loclist<cr>",
+map("n", "<leader>xl", "<cmd>Trouble loclist toggle<cr>",
   {silent = true, noremap = true}
 )
-map("n", "<leader>xq", "<cmd>TroubleToggle quickfix<cr>",
+map("n", "<leader>xq", "<cmd>Trouble qflist toggle<cr>",
+  {silent = true, noremap = true}
+)
+map("n", "<leader>xs", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
   {silent = true, noremap = true}
 )
 

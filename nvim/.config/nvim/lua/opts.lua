@@ -39,7 +39,7 @@ opt.splitbelow = true            -- bool: Place new window below the current one
 -- noselect: Do not select, force to select one from the menu
 -- shortness: avoid showing extra messages when using completion
 -- updatetime: set updatetime for CursorHold
-vim.opt.completeopt = {'menuone', 'noselect', 'noinsert'}
+vim.opt.completeopt = {} --{'menuone', 'noselect', 'noinsert'}
 vim.opt.shortmess = vim.opt.shortmess + { c = true}
 vim.api.nvim_set_option('updatetime', 300) 
 
@@ -52,9 +52,24 @@ set signcolumn=yes
 autocmd CursorHold * lua vim.diagnostic.open_float(nil, { focusable = false })
 ]])
 
--- Treesitter folding 
-vim.wo.foldmethod = 'expr'
-vim.wo.foldexpr = 'nvim_treesitter#foldexpr()'
+-- Stable folding configuration
+vim.wo.foldmethod = 'indent'        -- Use indentation-based folding for stability
+vim.opt.foldlevelstart = 99         -- Start with all folds open (global option)
+vim.wo.foldenable = true            -- Enable folding
+vim.wo.foldnestmax = 3              -- Maximum fold nesting (prevents excessive folding)
+
+-- Python-specific folding improvements
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "python", 
+  callback = function()
+    -- For Python, use a more stable approach
+    vim.wo.foldmethod = 'indent'
+    vim.wo.foldnestmax = 4          -- Allow deeper nesting for Python
+    -- Prevent folds from closing automatically
+    vim.opt.foldclose = ""          -- Don't auto-close folds
+    vim.opt.foldopen = "block,hor,mark,percent,quickfix,search,tag,undo"
+  end
+})
 
 -- Vimspector options
 vim.cmd([[
