@@ -20,11 +20,12 @@
     bun
     google-cloud-sdk
     pulumi
-    pulumiPackages.pulumi-language-python
+    pulumiPackages.pulumi-python
     pulumiPackages.pulumi-nodejs
     awscli2
     cargo
     git-lfs
+    luarocks
 
     # CLI tools
     ripgrep # Fast grep alternative
@@ -52,6 +53,30 @@
     plugins = with pkgs.vimPlugins; [
       lazy-nvim
       nvim-treesitter-textobjects # For better text objects based on treesitter
+      (nvim-treesitter.withPlugins (parsers: with parsers; [
+        tree-sitter-bash
+        tree-sitter-c
+        tree-sitter-cpp
+        tree-sitter-css
+        tree-sitter-go
+        tree-sitter-html
+        tree-sitter-javascript
+        tree-sitter-json
+        tree-sitter-lua
+        tree-sitter-nix
+        tree-sitter-python
+        tree-sitter-rust
+        tree-sitter-ssh_config
+        tree-sitter-sql
+        tree-sitter-toml
+        tree-sitter-tmux
+        tree-sitter-tsx
+        tree-sitter-typescript
+        tree-sitter-xml
+        tree-sitter-csv
+        tree-sitter-tmux
+        tree-sitter-yaml
+      ]))
       (nvim-treesitter.withPlugins (grammars: with grammars; [
         tree-sitter-bash
         tree-sitter-c
@@ -65,9 +90,15 @@
         tree-sitter-nix
         tree-sitter-python
         tree-sitter-rust
+        tree-sitter-ssh_config
+        tree-sitter-sql
         tree-sitter-toml
+        tree-sitter-tmux
         tree-sitter-tsx
         tree-sitter-typescript
+        tree-sitter-xml
+        tree-sitter-csv
+        tree-sitter-tmux
         tree-sitter-yaml
       ]))
     ];
