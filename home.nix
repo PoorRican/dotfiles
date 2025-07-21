@@ -26,6 +26,8 @@
     cargo
     git-lfs
     luarocks
+    sqlite
+    helix
 
     # CLI tools
     ripgrep # Fast grep alternative
@@ -37,6 +39,9 @@
     tmux
     oh-my-zsh
     yazi
+    
+    # LSP servers
+    pyright # Python LSP server
 
     # Fonts
     jetbrains-mono
@@ -52,6 +57,7 @@
     enable = true;
     plugins = with pkgs.vimPlugins; [
       lazy-nvim
+      nvim-lspconfig
       nvim-treesitter-textobjects # For better text objects based on treesitter
       (nvim-treesitter.withPlugins (parsers: with parsers; [
         tree-sitter-bash
