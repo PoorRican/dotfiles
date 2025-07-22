@@ -39,6 +39,7 @@
     tmux
     oh-my-zsh
     yazi
+    nmap
     
     # LSP servers
     pyright # Python LSP server
