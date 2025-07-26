@@ -174,4 +174,4 @@ function whereami() {
   echo "You are on $(hostname)"
 }
 
-alias claude="/home/swe/.claude/local/claude"
+
