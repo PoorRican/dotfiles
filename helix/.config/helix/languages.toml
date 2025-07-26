@@ -1,0 +1,14 @@
+# define servers
+[language-server.ty]
+command = "ty"
+args    = ["server"]
+
+[language-server.pyright]
+command = "pyright-langserver"
+args    = ["stdio"]
+
+
+# attach servers
+[[language]]
+name = "python"
+language-servers = ["ty", "pyright"]
