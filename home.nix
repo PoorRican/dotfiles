@@ -28,6 +28,8 @@
     luarocks
     sqlite
     helix
+    postgresql_17_jit
+    tree
 
     # CLI tools
     ripgrep # Fast grep alternative
