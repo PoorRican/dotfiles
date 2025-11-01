@@ -85,6 +85,12 @@ set signcolumn=yes
 autocmd CursorHold * lua vim.diagnostic.open_float(nil, { focusable = false })
 ]])
 
+-- Auto-save configuration
+vim.cmd([[
+autocmd InsertLeave,FocusLost * silent! update
+autocmd FocusLost * silent! wall
+]])
+
 -- Individual plugin setups (like nvim-cmp, treesitter, nvim-tree, lualine, todo-comments, mason, lspconfig, rust-tools)
 -- are now expected to be handled within their respective configurations in lua/lazy-config.lua
 -- (either via `opts = {}` or a `config = function() ... end` block).
