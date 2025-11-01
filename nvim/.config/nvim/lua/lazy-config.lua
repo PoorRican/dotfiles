@@ -125,7 +125,7 @@ return {
     event = {"BufReadPre", "BufNewFile"},
     config = function()
       require("mason-lspconfig").setup({
-        ensure_installed = { "ruff", "pyright", "marksman", "yamlls", "jsonls", "bashls", "lua_ls", "html", "cssls", "gopls", "ts_ls" }
+        ensure_installed = { "ruff", "pyright", "marksman", "yamlls", "jsonls", "bashls", "lua_ls", "html", "cssls", "ts_ls" }
       })
     end
   },
@@ -165,7 +165,7 @@ return {
 
       -- Configure pyright for Python type checking and intellisense
       lspconfig.pyright.setup({
-        cmd = { vim.fn.expand("~/.local/share/nvim/mason/bin/pyright-langserver"), "--stdio" },
+        cmd = { vim.fn.expand("~/.config/nvim/pyright-wrapper.sh"), "--stdio" },
         filetypes = {"python"},
         root_dir = lspconfig.util.root_pattern("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".venv", "uv.lock", ".git"),
         settings = {
@@ -174,10 +174,42 @@ return {
             analysis = {
               autoSearchPaths = true,
               useLibraryCodeForTypes = true,
-              diagnosticMode = "workspace",
+              autoImportCompletions = true,
+              -- Change to openFilesOnly to reduce memory usage
+              diagnosticMode = "openFilesOnly",
               typeCheckingMode = "basic",
+              -- Add memory optimization settings
+              logLevel = "Warning",
+              -- Exclude patterns to reduce indexing
+              exclude = {
+                "**/__pycache__",
+                "**/node_modules",
+                "**/.venv",
+                "**/venv",
+                "**/.git",
+                "**/dist",
+                "**/build",
+                "**/.mypy_cache",
+                "**/.pytest_cache",
+                "**/.tox",
+                "**/site-packages",
+              },
+              -- Limit the number of files analyzed
+              extraPaths = {},
+              stubPath = "",
             },
           },
+        },
+        -- Add init_options to control node.js memory
+        init_options = {
+          nodeOptions = {
+            -- Increase max memory to 8GB (default is ~4GB)
+            maxOldSpaceSize = 8192,
+          },
+        },
+        -- Add flags to control memory usage
+        flags = {
+          debounce_text_changes = 300,
         },
       })
 
