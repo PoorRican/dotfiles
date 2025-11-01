@@ -30,6 +30,10 @@
     helix
     postgresql_17_jit
     tree
+    mosh
+    graphviz
+    rclone
+    firebase-tools
 
     # CLI tools
     ripgrep # Fast grep alternative
@@ -54,6 +58,7 @@
     iterm2
     # firefox
     # visual-studio-code
+    glrnvim
   ];
 
   programs.neovim = {
