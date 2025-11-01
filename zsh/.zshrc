@@ -11,6 +11,14 @@
 # If you come from bash you might have to change your $PATH.
 export PATH=$HOME/bin:/usr/local/bin:$PATH
 
+# Source home-manager session variables and add to PATH
+if [ -e ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then
+  source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+fi
+
+# Add home-manager profile to PATH
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$PATH"
+
 for config (~/.zsh/*.zsh) source $config
 
 # Path to your oh-my-zsh installation.
@@ -174,4 +182,14 @@ function whereami() {
   echo "You are on $(hostname)"
 }
 
+
+
+# Fix SSL certificates for Python on macOS with Nix
+export SSL_CERT_FILE="/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt"
+export REQUESTS_CA_BUNDLE="/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt"
+
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/swe/.lmstudio/bin"
+# End of LM Studio CLI section
 
