@@ -11,7 +11,7 @@ This is a macOS dotfiles repository managed using Nix Flakes with nix-darwin and
 - **home.nix**: User-specific environment managed by home-manager (user packages, program configurations)
 
 The repository includes configuration directories for:
-- **nvim/**: Neovim configuration with lazy-nvim plugin manager and treesitter support
+- **nvim/.config/nvim/**: Neovim configuration with lazy-nvim plugin manager and treesitter support (nested structure mimics XDG config)
 - **zsh/**: Zsh shell configuration 
 - **tmux/**: Terminal multiplexer configuration
 - **git/**: Git configuration files
