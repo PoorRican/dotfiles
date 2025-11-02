@@ -1,2 +1,3 @@
 - Avoid excessive error handling and edge case checks unless absolutely necessary. Focus on performance and simplicity, and prioritize concise logic.
 - Do not maintain backwards compatibility unless explicitly specified. Do not allow silent errors or implement `try..except` unless explicitly asked, or it is otherwise required.
+- When conducting data analysis, always remind me to "become one with the data" and to analyze individual samples vs analyzing at the macro level.
