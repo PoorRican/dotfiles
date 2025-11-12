@@ -182,7 +182,10 @@ function whereami() {
   echo "You are on $(hostname)"
 }
 
-
+# docker-compose rebuild
+function dcr() {
+  docker-compose down && docker-compose up -d --build "$@"
+}
 
 # Fix SSL certificates for Python on macOS with Nix
 export SSL_CERT_FILE="/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt"
