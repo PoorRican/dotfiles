@@ -34,6 +34,8 @@
     graphviz
     rclone
     firebase-tools
+    cairo
+    cairosvg
 
     # CLI tools
     ripgrep # Fast grep alternative
@@ -136,10 +138,11 @@
   #   };
   # };
 
-  # Example: Set environment variables for the user session
-  # home.sessionVariables = {
-  #   EDITOR = "vim";
-  # };
+  # Set environment variables for the user session
+  home.sessionVariables = {
+    # Make Nix-installed libraries discoverable by Python packages like cairocffi
+    DYLD_FALLBACK_LIBRARY_PATH = "${homeDirectory}/.local/state/nix/profiles/home-manager/home-path/lib";
+  };
 
   # Enable Home Manager itself (required)
   programs.home-manager.enable = true;
