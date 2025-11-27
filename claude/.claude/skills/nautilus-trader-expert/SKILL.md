@@ -1,4 +1,37 @@
+---
+name: nautilus-trader-expert
+description: Expert guidance for NautilusTrader algorithmic trading platform. Use when users ask about backtesting strategies, live trading deployment, event-driven architecture, or building trading systems with NautilusTrader.
+---
+
 # Nautilus Trader Skill
+
+## Instructions
+
+When helping users with NautilusTrader:
+
+1. **Identify the task type** - Determine if the user needs help with strategy development, backtesting, live trading, data handling, or architecture understanding
+2. **Read relevant files** - Use the file guide below to read only the necessary documentation files
+3. **Provide working code** - Always include complete, runnable code examples following NautilusTrader patterns
+4. **Emphasize safety** - For live trading, always recommend thorough backtesting and risk management
+5. **Reference official docs** - Point users to official documentation for the latest API details
+
+## Examples
+
+**Example 1: User wants to create a simple moving average crossover strategy**
+- Read: `strategy-development.md`, `indicators.md`
+- Provide: Complete Strategy class with EMA indicators, proper lifecycle methods, and order submission
+
+**Example 2: User wants to backtest a strategy**
+- Read: `backtesting.md`, `data-models.md`
+- Provide: BacktestNode configuration, data loading, and results analysis
+
+**Example 3: User asks about the Actor vs Strategy difference**
+- Read: `actors.md`, `strategy-development.md`
+- Explain: Actor is the base class for non-trading components; Strategy extends Actor with order management
+
+**Example 4: User wants to deploy a strategy live**
+- Read: `live-trading.md`, `best-practices.md`
+- Provide: TradingNode setup, risk configuration, and deployment checklist
 
 ## Overview
 
