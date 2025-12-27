@@ -23,7 +23,6 @@
     pulumiPackages.pulumi-python
     pulumiPackages.pulumi-nodejs
     awscli2
-    cargo
     git-lfs
     luarocks
     sqlite
@@ -36,6 +35,9 @@
     firebase-tools
     cairo
     cairosvg
+
+    # rust toolchain
+    rustup
 
     # CLI tools
     ripgrep # Fast grep alternative
