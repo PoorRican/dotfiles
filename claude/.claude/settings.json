@@ -1,8 +1,54 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.astral.sh)",
+      "WebSearch",
+      "WebFetch(domain:docs.langchain.com)",
+      "WebFetch(domain:docs.x.ai)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:sparkco.ai)",
+      "WebFetch(domain:www.swarnendu.de)",
+      "Bash(python:*)",
+      "WebFetch(domain:discordpy.readthedocs.io)",
+      "Bash(uv run:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:fireworks.ai)",
+      "WebFetch(domain:docs.fireworks.ai)",
+      "WebFetch(domain:python.langchain.com)",
+      "Bash(pip show:*)",
+      "Bash(uv pip show:*)",
+      "WebFetch(domain:console.groq.com)",
+      "mcp__notion__notion-get-self",
+      "WebFetch(domain:langchain-ai.github.io)",
+      "WebFetch(domain:dev.to)",
+      "mcp__notion__notion-search",
+      "mcp__notion__notion-fetch",
+      "Skill(using-nautilus-trader)",
+      "WebFetch(domain:nautilustrader.io)",
+      "WebFetch(domain:docs.nautilustrader.io)",
+      "Bash(cat:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(python3:*)",
+      "WebFetch(domain:docs.kalshi.com)",
+      "Bash(uv add:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(curl:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "defaultMode": "plan"
+  },
   "statusLine": {
     "type": "command",
     "command": "input=$(cat); current_dir=$(echo \"$input\" | jq -r '.workspace.current_dir'); git_info=$(cd \"$current_dir\" 2>/dev/null && git branch --show-current 2>/dev/null | sed 's/^/ (/; s/$/)/' || echo ''); printf \"%s@%s:%s%s\" \"$(whoami)\" \"$(hostname -s)\" \"$(basename \"$current_dir\")\" \"$git_info\""
+  },
+  "enabledPlugins": {
+    "pyright-lsp@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "Notion@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": true
 }
