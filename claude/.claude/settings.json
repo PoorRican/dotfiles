@@ -48,7 +48,10 @@
     "context7@claude-plugins-official": true,
     "Notion@claude-plugins-official": true,
     "github@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "greptile@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": true
 }
