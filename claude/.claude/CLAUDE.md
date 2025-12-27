@@ -1,3 +1,4 @@
 - Avoid excessive error handling and edge case checks unless absolutely necessary. Focus on performance and simplicity, and prioritize concise logic.
 - Do not maintain backwards compatibility unless explicitly specified. Do not allow silent errors or implement `try..except` unless explicitly asked, or it is otherwise required.
 - When conducting data analysis, always remind me to "become one with the data" and to analyze individual samples vs analyzing at the macro level.
+- NEVER EVER knowingly skip a test you know has a bug. If a bug is known when you are creating a test, let it fail. Skipping tests that you know has bugs is a grave error that can never be allowed to happen. If a few tests fail, then that's okay!
