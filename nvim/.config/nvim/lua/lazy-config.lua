@@ -156,11 +156,28 @@ return {
         return vim.fn.exepath("python3") or vim.fn.exepath("python")
       end
 
+      -- LSP keybindings on attach
+      local on_attach = function(client, bufnr)
+        local opts = { buffer = bufnr, silent = true }
+        vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+        vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+        vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+        vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+        vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+        vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+        vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+        vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, opts)
+        vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+        vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+        vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, opts)
+      end
+
       -- Configure ruff for Python linting/formatting
       lspconfig.ruff.setup({
         cmd = { vim.fn.expand("~/.local/share/nvim/mason/bin/ruff"), "server" },
         filetypes = {"python"},
         root_dir = lspconfig.util.root_pattern("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".venv", "uv.lock", ".git"),
+        on_attach = on_attach,
       })
 
       -- Configure pyright for Python type checking and intellisense
@@ -211,19 +228,20 @@ return {
         flags = {
           debounce_text_changes = 300,
         },
+        on_attach = on_attach,
       })
 
       -- Configure other LSP servers
-      lspconfig.lua_ls.setup({})
-      lspconfig.marksman.setup({})
-      lspconfig.yamlls.setup({})
-      lspconfig.jsonls.setup({})
-      lspconfig.bashls.setup({})
-      lspconfig.nil_ls.setup({})
-      lspconfig.html.setup({})
-      lspconfig.cssls.setup({})
-      lspconfig.gopls.setup({})
-      lspconfig.ts_ls.setup({})
+      lspconfig.lua_ls.setup({ on_attach = on_attach })
+      lspconfig.marksman.setup({ on_attach = on_attach })
+      lspconfig.yamlls.setup({ on_attach = on_attach })
+      lspconfig.jsonls.setup({ on_attach = on_attach })
+      lspconfig.bashls.setup({ on_attach = on_attach })
+      lspconfig.nil_ls.setup({ on_attach = on_attach })
+      lspconfig.html.setup({ on_attach = on_attach })
+      lspconfig.cssls.setup({ on_attach = on_attach })
+      lspconfig.gopls.setup({ on_attach = on_attach })
+      lspconfig.ts_ls.setup({ on_attach = on_attach })
     end
   },
   {
