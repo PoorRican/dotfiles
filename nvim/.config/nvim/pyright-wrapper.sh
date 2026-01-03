@@ -5,4 +5,4 @@
 export NODE_OPTIONS="--max-old-space-size=8192"
 
 # Execute the actual pyright-langserver with all arguments
-exec /Users/swe/.local/share/nvim/mason/bin/pyright-langserver "$@"
+exec "$HOME/.local/share/nvim/mason/bin/pyright-langserver" "$@"
