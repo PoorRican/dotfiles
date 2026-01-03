@@ -188,8 +188,10 @@ function dcr() {
 }
 
 # Fix SSL certificates for Python on macOS with Nix
-export SSL_CERT_FILE="/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt"
-export REQUESTS_CA_BUNDLE="/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt"
+if [[ -f "/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt" ]]; then
+  export SSL_CERT_FILE="/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt"
+  export REQUESTS_CA_BUNDLE="/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt"
+fi
 
 
 # Added by LM Studio CLI (lms)
