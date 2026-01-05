@@ -18,18 +18,11 @@ return {
     "xero/evangelion.nvim",
     lazy = false,
     priority = 1000,
-    config = function()
-      vim.cmd.colorscheme("evangelion")
-    end,
   }, -- Colorscheme
   {
     "scottmckendry/cyberdream.nvim",
     lazy = false, -- Load colorschemes early
     priority = 1000,
-    config = function()
-      require("cyberdream").setup{}
-      vim.cmd.colorscheme("cyberdream")
-    end,
   },
   {
     'nvim-lualine/lualine.nvim',
