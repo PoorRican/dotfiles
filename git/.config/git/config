@@ -22,3 +22,5 @@
 [filter "replacesensitive"]
 	clean = sed 's/.*authtoken:.*/  authtoken: {PLACEHOLDER}/g'
 	smudge = cat
+[pull]
+	rebase = true
