@@ -351,6 +351,31 @@ return {
     end,
   },
 
+  -- [[ Focus & Dimming ]]
+  {
+    "folke/snacks.nvim",
+    opts = {
+      dim = {
+        scope = {
+          min_size = 5,
+          max_size = 20,
+          siblings = true,
+        },
+        animate = {
+          enabled = vim.fn.has("nvim-0.10") == 1,
+          easing = "outQuad",
+          duration = {
+            step = 20,
+            total = 300,
+          },
+        },
+        filter = function(buf)
+          return vim.g.snacks_dim ~= false and vim.b[buf].snacks_dim ~= false and vim.bo[buf].buftype == ""
+        end,
+      }
+    }
+  },
+
   -- [[ Other Utilities ]]
   { 'puremourning/vimspector', cmd = "Vimspector" }, -- Or other specific Vimspector commands
   {
