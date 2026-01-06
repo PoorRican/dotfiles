@@ -38,6 +38,8 @@ require("lazy").setup(require("lazy-config"), {
   },
 })
 
+vim.cmd.colorscheme("sourcerer")
+
 -- █▓▒░ Setup VimWiki ░▒▓█  
 -- This can be moved to the vimwiki plugin config in lazy-config.lua if preferred
 vim.cmd([[
