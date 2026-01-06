@@ -198,3 +198,4 @@ fi
 export PATH="$PATH:/Users/swe/.lmstudio/bin"
 # End of LM Studio CLI section
 
+source ~/.zsh/sourcerer.zsh
