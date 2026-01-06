@@ -24,7 +24,7 @@ map('n', '<leader>fd', [[:Telescope lsp_definitions<cr>]], {})
 map('n', '<leader>fs', [[:Telescope lsp_dynamic_workspace_symbols<cr>]], {})
 map('n', '<leader>fr', [[:Telescope lsp_references<cr>]], {})
 map('n', '<leader>fu', [[:Telescope lsp_incoming_calls<cr>]], {})
--- map('n', '<leader>fb', [[:Telescope buffers<cr>]], {})
+map('n', '<leader>fb', [[:Telescope buffers<cr>]], {})
 map('n', '<leader>fh', [[:Telescope help_tags<cr>]], {})
 
 map('v', '<Leader>ca', [[:RustCodeAction]], {})
