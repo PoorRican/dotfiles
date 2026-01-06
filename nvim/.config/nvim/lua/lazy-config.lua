@@ -50,6 +50,14 @@ return {
   { 'tpope/vim-fugitive', cmd = {"Git", "G"} },
   { 'junegunn/gv.vim', cmd = "GV" },
   {
+    "rbong/vim-flog",
+    lazy = true,
+    cmd = { "Flog", "Flogsplit", "Floggit" },
+    dependencies = {
+      "tpope/vim-fugitive",
+    },
+  },
+  {
     'windwp/nvim-autopairs',
     event = "InsertEnter", -- Load when entering insert mode
     opts = {}, -- lazy.nvim will call require("nvim-autopairs").setup(opts)
