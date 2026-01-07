@@ -124,68 +124,66 @@ return {
     'williamboman/mason-lspconfig.nvim',
     dependencies = {"williamboman/mason.nvim", "neovim/nvim-lspconfig"},
     event = {"BufReadPre", "BufNewFile"},
-    config = function()
-      require("mason-lspconfig").setup({
-        ensure_installed = { "ruff", "pyright", "marksman", "yamlls", "jsonls", "bashls", "lua_ls", "html", "cssls", "ts_ls" }
-      })
-    end
+    opts = {
+      ensure_installed = { "ruff", "pyright", "marksman", "yamlls", "jsonls", "bashls", "lua_ls", "html", "cssls", "ts_ls" },
+      automatic_enable = false,  -- We'll call vim.lsp.enable() manually
+    },
   },
   {
     'neovim/nvim-lspconfig',
     event = {"BufReadPre", "BufNewFile"},
     config = function()
-      local lspconfig = require("lspconfig")
-
       -- Helper function to find Python interpreter
       local function get_python_path()
-        local util = require("lspconfig.util")
-        local path = util.path
-        
         -- Check for .venv/bin/python
-        local venv_python = path.join(vim.fn.getcwd(), ".venv", "bin", "python")
+        local venv_python = vim.fn.getcwd() .. "/.venv/bin/python"
         if vim.fn.executable(venv_python) == 1 then
           return venv_python
         end
-        
+
         -- Check for uv managed Python
         local uv_python = vim.fn.system("uv which python 2>/dev/null"):gsub("\n", "")
         if vim.fn.executable(uv_python) == 1 then
           return uv_python
         end
-        
+
         -- Fall back to system Python
         return vim.fn.exepath("python3") or vim.fn.exepath("python")
       end
 
-      -- LSP keybindings on attach
-      local on_attach = function(client, bufnr)
-        local opts = { buffer = bufnr, silent = true }
-        vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
-        vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
-        vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
-        vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
-        vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-        vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
-        vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
-        vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, opts)
-        vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
-        vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
-        vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, opts)
-      end
+      -- LSP keybindings via LspAttach autocmd
+      vim.api.nvim_create_autocmd('LspAttach', {
+        group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+        callback = function(ev)
+          local opts = { buffer = ev.buf, silent = true }
+          vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+          vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+          vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+          vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+          vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+          vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+          vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+          vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, opts)
+          vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+          vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+          vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, opts)
+        end,
+      })
+
+      local python_root_files = {"pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".venv", "uv.lock", ".git"}
 
       -- Configure ruff for Python linting/formatting
-      lspconfig.ruff.setup({
+      vim.lsp.config('ruff', {
         cmd = { vim.fn.expand("~/.local/share/nvim/mason/bin/ruff"), "server" },
         filetypes = {"python"},
-        root_dir = lspconfig.util.root_pattern("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".venv", "uv.lock", ".git"),
-        on_attach = on_attach,
+        root_markers = python_root_files,
       })
 
       -- Configure pyright for Python type checking and intellisense
-      lspconfig.pyright.setup({
+      vim.lsp.config('pyright', {
         cmd = { vim.fn.expand("~/.config/nvim/pyright-wrapper.sh"), "--stdio" },
         filetypes = {"python"},
-        root_dir = lspconfig.util.root_pattern("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".venv", "uv.lock", ".git"),
+        root_markers = python_root_files,
         settings = {
           python = {
             pythonPath = get_python_path(),
@@ -193,12 +191,9 @@ return {
               autoSearchPaths = true,
               useLibraryCodeForTypes = true,
               autoImportCompletions = true,
-              -- Change to openFilesOnly to reduce memory usage
               diagnosticMode = "openFilesOnly",
               typeCheckingMode = "basic",
-              -- Add memory optimization settings
               logLevel = "Warning",
-              -- Exclude patterns to reduce indexing
               exclude = {
                 "**/__pycache__",
                 "**/node_modules",
@@ -212,46 +207,42 @@ return {
                 "**/.tox",
                 "**/site-packages",
               },
-              -- Limit the number of files analyzed
               extraPaths = {},
               stubPath = "",
             },
           },
         },
-        -- Add init_options to control node.js memory
         init_options = {
           nodeOptions = {
-            -- Increase max memory to 8GB (default is ~4GB)
             maxOldSpaceSize = 8192,
           },
         },
-        -- Add flags to control memory usage
         flags = {
           debounce_text_changes = 300,
         },
-        on_attach = on_attach,
       })
 
-      -- Configure other LSP servers
-      lspconfig.lua_ls.setup({ on_attach = on_attach })
-      lspconfig.marksman.setup({ on_attach = on_attach })
-      lspconfig.yamlls.setup({ on_attach = on_attach })
-      lspconfig.jsonls.setup({ on_attach = on_attach })
-      lspconfig.bashls.setup({ on_attach = on_attach })
-      lspconfig.nil_ls.setup({ on_attach = on_attach })
-      lspconfig.html.setup({ on_attach = on_attach })
-      lspconfig.cssls.setup({ on_attach = on_attach })
-      lspconfig.gopls.setup({ on_attach = on_attach })
-      lspconfig.ts_ls.setup({ on_attach = on_attach })
+      -- Enable all LSP servers
+      vim.lsp.enable({
+        'ruff',
+        'pyright',
+        'lua_ls',
+        'marksman',
+        'yamlls',
+        'jsonls',
+        'bashls',
+        'nil_ls',
+        'html',
+        'cssls',
+        'gopls',
+        'ts_ls',
+      })
     end
   },
   {
-    'simrat39/rust-tools.nvim',
-    ft = "rust", -- Load for rust files
-    dependencies = {"neovim/nvim-lspconfig"},
-    config = function()
-      require('rust-tools').setup({})
-    end,
+    'mrcjkb/rustaceanvim',
+    version = '^5',
+    lazy = false,  -- Plugin handles lazy loading itself
   },
   {
     "pmizio/typescript-tools.nvim",
