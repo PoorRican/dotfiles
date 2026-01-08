@@ -167,6 +167,29 @@ return {
           vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
           vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
           vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, opts)
+
+          -- Document highlight on cursor hold
+          local client = vim.lsp.get_client_by_id(ev.data.client_id)
+          if client and client:supports_method('textDocument/documentHighlight') then
+            local highlight_group = vim.api.nvim_create_augroup('LspDocumentHighlight', { clear = false })
+            vim.api.nvim_clear_autocmds({ group = highlight_group, buffer = ev.buf })
+
+            vim.api.nvim_create_autocmd('CursorHold', {
+              group = highlight_group,
+              buffer = ev.buf,
+              callback = function()
+                vim.lsp.buf.document_highlight()
+              end,
+            })
+
+            vim.api.nvim_create_autocmd('CursorMoved', {
+              group = highlight_group,
+              buffer = ev.buf,
+              callback = function()
+                vim.lsp.buf.clear_references()
+              end,
+            })
+          end
         end,
       })
 
@@ -251,14 +274,12 @@ return {
   },
   {
     'nvim-treesitter/nvim-treesitter',
-    build = ":TSUpdate",
     event = {"BufReadPost", "BufNewFile"},
     config = function()
       require('nvim-treesitter.configs').setup {
         highlight = { enable = true },
         indent = { enable = true },
-        ensure_installed = { "bash", "c", "cpp", "css", "go", "html", "javascript", "json", "lua", "nix", "python", "rust", "toml", "tsx", "typescript", "yaml" },
-        auto_install = true,
+        auto_install = false,
       }
     end,
   },
