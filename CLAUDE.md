@@ -4,11 +4,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-This is a macOS dotfiles repository managed using Nix Flakes with nix-darwin and home-manager. The configuration follows a clean separation between system-wide and user-specific settings:
+This is a dotfiles repository which manages various configurations and CLI utilities, and supports both macOS and Linux environments.
 
-- **flake.nix**: Main entry point defining inputs (nixpkgs, nix-darwin, home-manager) and outputs for both system and user configurations
-- **darwin-configuration.nix**: System-wide macOS settings managed by nix-darwin (system packages, preferences, user accounts)
-- **home.nix**: User-specific environment managed by home-manager (user packages, program configurations)
+GNU `stow` is used to sync the configs, and an XDG config layout is used for sanity. For package management on macOS, `home-manager` is used. For Linux environments, package management is out-of-scope for this repository.
+
+### Repository Layout
+
+```
+.
+├── ░▒▓ OLD ▓▒░             # archived, legacy configurations
+├── banners                 # custom banners
+├── bin                     # custom binaries / scripts
+├── claude                  # claude code configuration
+├── DepartureMono-1.500     # imported font
+├── docs                    # helpful documents explaining certain configurations/packages
+├── figlet                  # figlet fonts
+├── ghostty
+├── git
+├── helix                   # helix (text editor) configuration
+├── nvim
+├── tmux
+├── zellij
+└── zsh
+```
+
+For many of the top-level directories, there is a nested structure (eg: `nvim/.config/nvim`) to mimic XDG config.
 
 The repository includes configuration directories for:
 - **nvim/.config/nvim/**: Neovim configuration with lazy-nvim plugin manager and treesitter support (nested structure mimics XDG config)
@@ -16,9 +36,39 @@ The repository includes configuration directories for:
 - **tmux/**: Terminal multiplexer configuration
 - **git/**: Git configuration files
 
-## Common Commands
+## High-level Module Notes
 
-### Building and Activating Configurations
+- Neovim is configured with lazy-nvim and comprehensive treesitter grammar support
+- Aside from the `home-manager`, and nix flakes, ALL configurations MUST be compatible for BOTH macOS AND Linux.
+- When possible, defer to XDG home configs as a universal template.
+
+## `home-manager` Config
+
+This is the `home-manager` configuration which is used on macOS.
+
+- **flake.nix**: Main entry point defining inputs (nixpkgs, nix-darwin, home-manager) and outputs for both system and user configurations
+- **darwin-configuration.nix**: System-wide macOS settings managed by nix-darwin (system packages, preferences, user accounts)
+- **home.nix**: User-specific environment managed by home-manager (user packages, program configurations)
+
+Other notes:
+- The `home.nix`, and all flakes are currently configured for macOS ONLY. On Linux systems, nix is not implemented, and not used.
+- The flake uses input following for consistency (all inputs use the same nixpkgs)
+- System and user configurations are built separately for better isolation
+- macOS system defaults are configured for development efficiency (faster key repeat, show file extensions, dock autohide)
+
+
+### Configuration Details
+
+- **System**: Configured for aarch64-darwin (Apple Silicon)
+- **Username**: swe (configured in flake.nix variables)
+- **Nix features**: Experimental features (nix-command, flakes) enabled
+- **Package management**: System packages in darwin-configuration.nix, user packages in home.nix
+- **Development tools**: nodejs_22, bun, awscli2, google-cloud-sdk, pulumi configured in home.nix
+- **CLI tools**: ripgrep, fd, bat, jq, gh, tmux, oh-my-zsh available
+
+### Common Commands
+
+#### Building and Activating Configurations
 
 **System configuration (darwin-configuration.nix changes):**
 ```bash
@@ -31,7 +81,7 @@ sudo ./result/bin/darwin-rebuild switch
 home-manager switch --flake .#swe
 ```
 
-### Maintenance Commands
+#### Maintenance Commands
 
 **Garbage collection:**
 ```bash
@@ -42,25 +92,3 @@ nix-collect-garbage -d
 ```bash
 nix flake update
 ```
-
-## Configuration Details
-
-- **System**: Configured for aarch64-darwin (Apple Silicon)
-- **Username**: swe (configured in flake.nix variables)
-- **Nix features**: Experimental features (nix-command, flakes) enabled
-- **Package management**: System packages in darwin-configuration.nix, user packages in home.nix
-- **Development tools**: nodejs_22, bun, awscli2, google-cloud-sdk, pulumi configured in home.nix
-- **CLI tools**: ripgrep, fd, bat, jq, gh, tmux, oh-my-zsh available
-
-## Key Architecture Notes
-
-- The flake uses input following for consistency (all inputs use the same nixpkgs)
-- System and user configurations are built separately for better isolation
-- Neovim is configured with lazy-nvim and comprehensive treesitter grammar support
-- macOS system defaults are configured for development efficiency (faster key repeat, show file extensions, dock autohide)
-
-## Host OS Notes
-
-- The `home.nix`, and all flakes are currently configured for macOS ONLY. On Linux systems, nix is not implemented, and not used.
-- All other configurations MUST be compatible for both macOS AND Linux.
-- When possible, defer to XDG home configs as a universal template.
