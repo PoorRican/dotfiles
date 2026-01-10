@@ -35,6 +35,7 @@
     firebase-tools
     cairo
     cairosvg
+    zellij
 
     # rust toolchain
     rustup
