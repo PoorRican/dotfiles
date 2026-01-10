@@ -50,6 +50,7 @@ require("lazy").setup({
 		require("ui.tint"),
 		require("ui.treesitter"),
 		require("ui.beacon"),
+		require("core.claudecode"),
 		require("core.neotree"),
 		require("core.todo"),
 		require("core.refactoring"),
