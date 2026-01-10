@@ -58,3 +58,9 @@ nix flake update
 - System and user configurations are built separately for better isolation
 - Neovim is configured with lazy-nvim and comprehensive treesitter grammar support
 - macOS system defaults are configured for development efficiency (faster key repeat, show file extensions, dock autohide)
+
+## Host OS Notes
+
+- The `home.nix`, and all flakes are currently configured for macOS ONLY. On Linux systems, nix is not implemented, and not used.
+- All other configurations MUST be compatible for both macOS AND Linux.
+- When possible, defer to XDG home configs as a universal template.
