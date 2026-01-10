@@ -84,6 +84,15 @@ return {
 		vim.api.nvim_create_autocmd("VimEnter", {
 			callback = function()
 				vim.schedule(function()
+					local ft = vim.bo.filetype
+					local bufname = vim.api.nvim_buf_get_name(0)
+					-- Skip for git commit/rebase/merge messages
+					if ft == "gitcommit" or ft == "gitrebase"
+						or bufname:match("COMMIT_EDITMSG$")
+						or bufname:match("MERGE_MSG$")
+						or bufname:match("git%-rebase%-todo$") then
+						return
+					end
 					require("neo-tree.command").execute({ action = "show" })
 				end)
 			end,
