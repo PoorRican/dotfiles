@@ -81,3 +81,20 @@ vim.opt.softtabstop = 2
 -- enable auto indentation
 vim.opt.autoindent = true
 
+-- auto-save on focus lost / insert leave
+vim.api.nvim_create_autocmd({ "InsertLeave", "FocusLost" }, {
+	pattern = "*",
+	command = "silent! update",
+})
+
+vim.api.nvim_create_autocmd("FocusLost", {
+	pattern = "*",
+	command = "silent! wall",
+})
+
+-- show diagnostics on cursor hold
+vim.api.nvim_create_autocmd("CursorHold", {
+	callback = function()
+		vim.diagnostic.open_float(nil, { focusable = false })
+	end,
+})
