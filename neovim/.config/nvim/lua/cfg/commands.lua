@@ -16,6 +16,9 @@
 local f = require("utils.functions")
 local r = require("utils.remaps")
 
+-- use ; for commands
+r.noremap("n", ";", ":", "command mode")
+
 -- buffers
 r.noremap("n", "<c-n>", ":bn<cr>", "next buffer")
 r.noremap("n", "<c-p>", ":bp<cr>", "prev buffer")
