@@ -22,7 +22,7 @@ GNU `stow` is used to sync the configs, and an XDG config layout is used for san
 ├── ghostty
 ├── git
 ├── helix                   # helix (text editor) configuration
-├── nvim
+├── neovim
 ├── tmux
 ├── zellij
 └── zsh
@@ -31,7 +31,7 @@ GNU `stow` is used to sync the configs, and an XDG config layout is used for san
 For many of the top-level directories, there is a nested structure (eg: `nvim/.config/nvim`) to mimic XDG config.
 
 The repository includes configuration directories for:
-- **nvim/.config/nvim/**: Neovim configuration with lazy-nvim plugin manager and treesitter support (nested structure mimics XDG config)
+- **neovim/.config/nvim/**: Neovim configuration with lazy.nvim plugin manager and modular plugin structure (see `neovim/.config/nvim/CLAUDE.md` for details)
 - **zsh/**: Zsh shell configuration 
 - **tmux/**: Terminal multiplexer configuration
 - **git/**: Git configuration files
