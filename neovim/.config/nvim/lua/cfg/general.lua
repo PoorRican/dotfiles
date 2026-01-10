@@ -81,6 +81,10 @@ vim.opt.softtabstop = 2
 -- enable auto indentation
 vim.opt.autoindent = true
 
+-- auto-reload files changed externally (for external coding agents)
+vim.opt.autoread = true
+vim.cmd([[autocmd FocusGained,BufEnter * checktime]])
+
 -- auto-save on focus lost / insert leave
 vim.api.nvim_create_autocmd({ "InsertLeave", "FocusLost" }, {
 	pattern = "*",
