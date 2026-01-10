@@ -49,6 +49,7 @@ require("lazy").setup({
 		require("ui.signs"),
 		require("ui.tint"),
 		require("ui.treesitter"),
+		require("core.neotree"),
 	},
   -- this is for live plugin development
   -- if a plugin matches something in this directory, load it locally instead of from GitHub
