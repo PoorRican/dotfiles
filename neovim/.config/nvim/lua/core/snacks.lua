@@ -107,13 +107,13 @@ return {
 			preset = {
 				keys = function()
           -- TODO: ensure that colorscheme is not misconfigured
-					local colors = require("evangelion.unit01").get()
-					vim.api.nvim_set_hl(0, "SnacksDashboardIcon", { fg = colors.dummyplug })
-					vim.api.nvim_set_hl(0, "SnacksDashboardDesc", { fg = colors.adam })
-					vim.api.nvim_set_hl(0, "SnacksDashboardKey", { fg = colors.kaworu, bg = colors.melchior, bold = true })
-					vim.api.nvim_set_hl(0, "SnacksDashboardFooter", { fg = colors.lcl, bold = true })
-					vim.api.nvim_set_hl(0, "SnacksDashboardSpecial", { fg = colors.penpen, bg = colors.melchior, bold = true })
-					vim.api.nvim_set_hl(0, "SnacksDashboardFade", { fg = colors.melchior })
+					-- local colors = require("evangelion.unit01").get()
+					-- vim.api.nvim_set_hl(0, "SnacksDashboardIcon", { fg = colors.dummyplug })
+					-- vim.api.nvim_set_hl(0, "SnacksDashboardDesc", { fg = colors.adam })
+					-- vim.api.nvim_set_hl(0, "SnacksDashboardKey", { fg = colors.kaworu, bg = colors.melchior, bold = true })
+					-- vim.api.nvim_set_hl(0, "SnacksDashboardFooter", { fg = colors.lcl, bold = true })
+					-- vim.api.nvim_set_hl(0, "SnacksDashboardSpecial", { fg = colors.penpen, bg = colors.melchior, bold = true })
+					-- vim.api.nvim_set_hl(0, "SnacksDashboardFade", { fg = colors.melchior })
 					return { {
 							text = {
 								{ "           " .. i.snacks.new .. "  ", hl = "SnacksDashboardIcon" },

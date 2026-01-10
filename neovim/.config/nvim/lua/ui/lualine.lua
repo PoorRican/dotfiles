@@ -7,8 +7,16 @@ return {
 		vim.opt.laststatus = 0
 	end,
 	opts = function()
-		-- evangelion colors
-		local colors = require("evangelion.unit01").get()
+		-- evangelion colors (optional)
+		local ok, eva = pcall(require, "evangelion.unit01")
+		local colors = ok and eva.get() or {
+			fg = "#c2c2b0", bg = "#222222", core = "#151515",
+			fog = "#555555", rei = "#c2c2b0", kaworu = "#875f5f",
+			dummyplug = "#5f875f", lcl = "#af875f", nerv = "#875f5f",
+			unit01 = "#5f5f87", mari = "#87575f", kaji = "#5f5f5f",
+			longingus = "#1a1a1a", adam = "#c2c2b0", melchior = "#333333",
+			penpen = "#5f87af",
+		}
 		-- size display logic
 		local conditions = {
 			buffer_not_empty = function()
@@ -123,8 +131,8 @@ return {
 		active_left({
 			function()
 				local icon
-				local ok, devicons = pcall(require, "nvim-web-devicons")
-				if ok then
+				local _ok, devicons = pcall(require, "nvim-web-devicons")
+				if _ok then
 					icon = devicons.get_icon(vim.fn.expand("%:t"))
 					if icon == nil then
 						icon = devicons.get_icon_by_filetype(vim.bo.filetype)

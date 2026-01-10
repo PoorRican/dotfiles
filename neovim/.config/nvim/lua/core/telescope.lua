@@ -56,7 +56,7 @@ return {
 				},
 				file_browser = {
 					depth = 1,
-					auto_depth = false,
+					auto_depth = true,
 					hidden = { file_browser = true, folder_browser = true },
 					hide_parent_dir = false,
 					collapse_dirs = false,
