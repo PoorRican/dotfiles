@@ -81,6 +81,13 @@ vim.opt.softtabstop = 2
 -- enable auto indentation
 vim.opt.autoindent = true
 
+-- treesitter folding
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.opt.foldlevel = 99
+vim.opt.foldlevelstart = 99
+vim.opt.foldenable = true
+
 -- auto-reload files changed externally (for external coding agents)
 vim.opt.autoread = true
 vim.cmd([[autocmd FocusGained,BufEnter * checktime]])
