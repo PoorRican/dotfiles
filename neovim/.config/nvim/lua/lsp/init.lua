@@ -16,19 +16,12 @@ return {
 		vim.fn.sign_define("DiagnosticSignWarn", { text = icons.diagnostics.warning, texthl = "DiagnosticSignWarn" })
 		vim.fn.sign_define("DiagnosticSignHint", { text = icons.diagnostics.hint, texthl = "DiagnosticSignHint" })
 		vim.fn.sign_define("DiagnosticSignInfo", { text = icons.diagnostics.information, texthl = "DiagnosticSignInfo" })
-		vim.lsp.set_log_level("error") -- 'trace', 'debug', 'info', 'warn', 'error'
-
-		local lspconfig = require("lspconfig")
-		local function on_attach(client, bufnr)
-			remaps.set_default_on_buffer(client, bufnr)
-		end
+		vim.lsp.set_log_level("error")
 
 		local config = {
-			virtual_text = false, -- appears after the line
-			virtual_lines = false, -- appears under the line
-			flags = {
-				debounce_text_changes = 200,
-			},
+			virtual_text = false,
+			virtual_lines = false,
+			flags = { debounce_text_changes = 200 },
 			update_in_insert = true,
 			underline = true,
 			severity_sort = true,
@@ -50,45 +43,49 @@ return {
 				},
 			},
 		}
-		lspconfig.util.default_config = vim.tbl_deep_extend("force", lspconfig.util.default_config, config)
 		vim.diagnostic.config(config)
 
 		local border = { border = "shadow" }
 		vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.hover, border)
 		vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, border)
 
-		local capabilities = vim.lsp.protocol.make_client_capabilities()
+		-- Global LspAttach autocmd replaces per-server on_attach
+		vim.api.nvim_create_autocmd("LspAttach", {
+			callback = function(args)
+				local client = vim.lsp.get_client_by_id(args.data.client_id)
+				if not client then return end
 
-		local default_lsp_config = {
-			on_attach = on_attach,
-			capabilities = capabilities,
-			flags = {
-				debounce_text_changes = 200,
-				allow_incremental_sync = true,
-			},
+				-- Server-specific capability modifications
+				if client.name == "ts_ls" then
+					client.server_capabilities.document_formatting = true
+				elseif client.name == "lua_ls" then
+					client.server_capabilities.document_formatting = false
+					client.server_capabilities.document_range_formatting = false
+				end
+
+				remaps.set_default_on_buffer(client, args.buf)
+			end,
+		})
+
+		-- Define server configs with vim.lsp.config()
+		vim.lsp.config("bashls", require("lsp.bashls"))
+		vim.lsp.config("cssls", require("lsp.cssls"))
+		vim.lsp.config("dockerls", {})
+		vim.lsp.config("html", {})
+		vim.lsp.config("jsonls", require("lsp.jsonls"))
+		vim.lsp.config("lua_ls", require("lsp.luals"))
+		vim.lsp.config("basedpyright", require("lsp.basedpyright"))
+		vim.lsp.config("ruff", require("lsp.ruff"))
+		vim.lsp.config("rust_analyzer", {})
+		vim.lsp.config("tailwindcss", require("lsp.tailwindcss"))
+		vim.lsp.config("ts_ls", require("lsp.tsls"))
+		vim.lsp.config("yamlls", {})
+
+		local server_names = {
+			"bashls", "cssls", "dockerls", "html", "jsonls",
+			"lua_ls", "basedpyright", "ruff", "rust_analyzer",
+			"tailwindcss", "ts_ls", "yamlls",
 		}
-
-		local servers = {
-			bashls = require("lsp.bashls")(on_attach),
-			cssls = require("lsp.cssls")(on_attach),
-			dockerls = {},
-			html = {},
-			jsonls = require("lsp.jsonls")(capabilities),
-			lua_ls = require("lsp.luals")(on_attach),
-			basedpyright = require("lsp.basedpyright")(on_attach),
-			ruff = require("lsp.ruff")(on_attach),
-			rust_analyzer = {},
-			tailwindcss = require("lsp.tailwindcss")(on_attach),
-			ts_ls = require("lsp.tsls")(on_attach),
-			yamlls = {},
-		}
-
-		local server_names = {}
-		local server_configs = {}
-		for server_name, server_config in pairs(servers) do
-			table.insert(server_names, server_name)
-			server_configs[server_name] = server_config
-		end
 
 		local mason_ok, mason = pcall(require, "mason")
 		local mason_lspconfig_ok, mason_lspconfig = pcall(require, "mason-lspconfig")
@@ -97,12 +94,10 @@ return {
 			mason.setup()
 			mason_lspconfig.setup({
 				ensure_installed = server_names,
-				automatic_enable = false,
+				automatic_enable = true,
 			})
-			for s, c in pairs(server_configs) do
-				require("lspconfig")[s].setup(vim.tbl_deep_extend("force", default_lsp_config, c or {}))
-			end
 		end
+
 		require("lsp_lines").setup()
 		require("inc_rename").setup({
 			hl_group = "Substitute",
@@ -126,7 +121,7 @@ return {
 				return diagnostic.message
 			end,
 			gap_size = 1,
-			scope = "line", -- cursor/line
+			scope = "line",
 			padding_top = 0,
 			padding_right = 0,
 			text_align = "right",
