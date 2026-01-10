@@ -1,6 +1,7 @@
 {
   "beacon.nvim": { "branch": "master", "commit": "098ff96c33874339d5e61656f3050dbd587d6bd5" },
   "blink.cmp": { "branch": "main", "commit": "b19413d214068f316c78978b08264ed1c41830ec" },
+  "claudecode.nvim": { "branch": "main", "commit": "93f8e48b1f6cbf2469b378c20b3df4115252d379" },
   "conform.nvim": { "branch": "master", "commit": "8314f4c9e205e7f30b62147069729f9a1227d8bf" },
   "diagflow.nvim": { "branch": "main", "commit": "b13321b517ff64bf42eeac2214085d3c76d83a0d" },
   "fzf-lua": { "branch": "main", "commit": "b8d1356b7120f5cf111709cb2fa504096248fb26" },
