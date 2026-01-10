@@ -36,6 +36,7 @@
     cairo
     cairosvg
     zellij
+		fzf
 
     # rust toolchain
     rustup
@@ -51,7 +52,7 @@
     oh-my-zsh
     yazi
     nmap
-    
+
     # LSP servers
     pyright # Python LSP server
 
