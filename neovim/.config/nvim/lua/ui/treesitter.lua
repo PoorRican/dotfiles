@@ -73,6 +73,48 @@ return {
 					["i;"] = "textsubjects-container-inner",
 				},
 			},
+			textobjects = {
+				select = {
+					enable = true,
+					lookahead = true,
+					keymaps = {
+						["af"] = { query = "@function.outer", desc = "outer function" },
+						["if"] = { query = "@function.inner", desc = "inner function" },
+						["ac"] = { query = "@class.outer", desc = "outer class" },
+						["ic"] = { query = "@class.inner", desc = "inner class" },
+						["aa"] = { query = "@parameter.outer", desc = "outer argument" },
+						["ia"] = { query = "@parameter.inner", desc = "inner argument" },
+						["ai"] = { query = "@conditional.outer", desc = "outer conditional" },
+						["ii"] = { query = "@conditional.inner", desc = "inner conditional" },
+						["al"] = { query = "@loop.outer", desc = "outer loop" },
+						["il"] = { query = "@loop.inner", desc = "inner loop" },
+						["ab"] = { query = "@block.outer", desc = "outer block" },
+						["ib"] = { query = "@block.inner", desc = "inner block" },
+					},
+				},
+				move = {
+					enable = true,
+					set_jumps = true,
+					goto_next_start = {
+						["]f"] = "@function.outer",
+						["]c"] = "@class.outer",
+						["]a"] = "@parameter.inner",
+					},
+					goto_next_end = {
+						["]F"] = "@function.outer",
+						["]C"] = "@class.outer",
+					},
+					goto_previous_start = {
+						["[f"] = "@function.outer",
+						["[c"] = "@class.outer",
+						["[a"] = "@parameter.inner",
+					},
+					goto_previous_end = {
+						["[F"] = "@function.outer",
+						["[C"] = "@class.outer",
+					},
+				},
+			},
 		}
 
 		r.noremap("n", "<leader>rt", function()
