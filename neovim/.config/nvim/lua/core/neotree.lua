@@ -20,9 +20,15 @@ return {
 		sort_case_insensitive = true,
 		default_component_configs = {
 			indent = {
+				indent_size = 2,
+				padding = 1,
+				with_markers = true,
+				indent_marker = "│",
+				last_indent_marker = "└",
 				with_expanders = true,
 				expander_collapsed = "",
 				expander_expanded = "",
+				highlight = "NeoTreeIndentMarker",
 			},
 			icon = {
 				folder_closed = "",
@@ -77,6 +83,14 @@ return {
 		buffers = { follow_current_file = { enabled = true } },
 		git_status = { window = { position = "float" } },
 	},
+	config = function(_, opts)
+		-- git status colors: new = green, modified = blue
+		vim.api.nvim_set_hl(0, "NeoTreeGitAdded", { fg = "#5f875f" })
+		vim.api.nvim_set_hl(0, "NeoTreeGitUntracked", { fg = "#5f875f" })
+		vim.api.nvim_set_hl(0, "NeoTreeGitModified", { fg = "#5f87af" })
+		vim.api.nvim_set_hl(0, "NeoTreeGitUnstaged", { fg = "#5f87af" })
+		require("neo-tree").setup(opts)
+	end,
 	init = function()
 		r.map_virtual({ "<leader>e", desc = "explorer", icon = { icon = "", hl = "Directory" } })
 		r.map_virtual({ "<leader>E", desc = "reveal in explorer", icon = { icon = "", hl = "Directory" } })
