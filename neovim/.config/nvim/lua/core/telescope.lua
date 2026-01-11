@@ -87,9 +87,10 @@ return {
 		r.noremap("n", "<leader>g", function()
 			lga_shortcuts.grep_word_under_cursor({ postfix = " --hidden " })
 		end, "grep under cursor")
-		r.noremap("n", "<leader>f", function()
+		r.noremap("n", "<leader>ff", function()
 			telescope.extensions.file_browser.file_browser()
 		end, "browse files")
+		r.noremap("n", "<leader>fb", "<cmd>Telescope buffers<cr>", "find buffers")
 		r.noremap("n", "<leader>.", function()
 			telescope.extensions.file_browser.file_browser({
 				path = vim.fn.stdpath("config"),
@@ -100,7 +101,9 @@ return {
 			{ "<leader>u", icon = { icon = " ", hl = "Constant" } },
 			{ "<leader>g", icon = { icon = "󱩾 ", hl = "Constant" } },
 			{ "<leader>o", icon = { icon = " ", hl = "Constant" } },
-			{ "<leader>f", icon = { icon = "󰙅 ", hl = "Constant" } },
+			{ "<leader>f", group = "find", icon = { icon = " ", hl = "Constant" } },
+			{ "<leader>ff", icon = { icon = "󰙅 ", hl = "Constant" } },
+			{ "<leader>fb", icon = { icon = "󰈙 ", hl = "Constant" } },
 			{ "<leader>.", icon = { icon = " ", hl = "Constant" } },
 		})
 		telescope.load_extension("undo")
