@@ -115,6 +115,7 @@ function X.set_default_on_buffer(client, bufnr)
 		{ "<leader>lD", group = "show definition", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>lD", group = "virtual lines", icon = { icon = "󱞽", hl = "Constant" } },
 		{ "<leader>/r", group = "show references", icon = { icon = "", hl = "Constant" } },
+		{ "<leader>/t", group = "type definition", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>ra", group = "code actions (range)", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>rr", group = "rename", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>li", group = "ignore warning", icon = { icon = "", hl = "Constant" } },
