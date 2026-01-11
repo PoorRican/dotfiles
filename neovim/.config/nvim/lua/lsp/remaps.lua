@@ -49,6 +49,12 @@ function X.set_default_on_buffer(client, bufnr)
 		end, "show references")
 	end
 
+	if cap.typeDefinitionProvider then
+		buf_set_keymap("n", "<leader>/t", function()
+			require("fzf-lua").lsp_typedefs()
+		end, "type definition")
+	end
+
 	if cap.hoverProvider then
 		buf_set_keymap("n", "K", vim.lsp.buf.hover, "hover docs")
 	end
@@ -108,7 +114,7 @@ function X.set_default_on_buffer(client, bufnr)
 		{ "<leader>lE", group = "show line diagnostics", icon = { icon = "󰅰", hl = "Constant" } },
 		{ "<leader>lD", group = "show definition", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>lD", group = "virtual lines", icon = { icon = "󱞽", hl = "Constant" } },
-		{ "<leader>/lr", group = "show references", icon = { icon = "", hl = "Constant" } },
+		{ "<leader>/r", group = "show references", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>ra", group = "code actions (range)", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>rr", group = "rename", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>li", group = "ignore warning", icon = { icon = "", hl = "Constant" } },
