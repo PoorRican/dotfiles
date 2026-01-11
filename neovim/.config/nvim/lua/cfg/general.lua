@@ -109,3 +109,66 @@ vim.api.nvim_create_autocmd("CursorHold", {
 		vim.diagnostic.open_float(nil, { focusable = false })
 	end,
 })
+
+-- redirect focus to editor window after closing tool windows
+local tool_filetypes = {
+	["neo-tree"] = true,
+	["Trouble"] = true,
+	["trouble"] = true,
+	["dap-repl"] = true,
+	["dapui_scopes"] = true,
+	["dapui_breakpoints"] = true,
+	["dapui_stacks"] = true,
+	["dapui_watches"] = true,
+	["dapui_console"] = true,
+	["qf"] = true,
+	["help"] = true,
+}
+
+local function is_tool_window(winid)
+	if not vim.api.nvim_win_is_valid(winid) then return false end
+	local bufnr = vim.api.nvim_win_get_buf(winid)
+	local ft = vim.bo[bufnr].filetype
+	return tool_filetypes[ft] or false
+end
+
+local function find_editor_window()
+	for _, winid in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+		if vim.api.nvim_win_is_valid(winid) and not is_tool_window(winid) then
+			local config = vim.api.nvim_win_get_config(winid)
+			if config.relative == "" then
+				return winid
+			end
+		end
+	end
+	return nil
+end
+
+local tool_window_just_closed = false
+
+vim.api.nvim_create_autocmd("WinClosed", {
+	callback = function(args)
+		local closed_win = tonumber(args.match)
+		if closed_win and is_tool_window(closed_win) then
+			tool_window_just_closed = true
+			vim.defer_fn(function() tool_window_just_closed = false end, 50)
+		end
+	end,
+})
+
+vim.api.nvim_create_autocmd("WinEnter", {
+	callback = function()
+		if not tool_window_just_closed then return end
+		tool_window_just_closed = false
+
+		vim.defer_fn(function()
+			local current_win = vim.api.nvim_get_current_win()
+			if is_tool_window(current_win) then
+				local editor_win = find_editor_window()
+				if editor_win then
+					vim.api.nvim_set_current_win(editor_win)
+				end
+			end
+		end, 10)
+	end,
+})
