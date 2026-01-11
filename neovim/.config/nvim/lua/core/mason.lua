@@ -42,7 +42,6 @@ return {
 				"php-cs-fixer",
 				"prettier",
 				"prettierd",
-				"python-lsp-server",
 				"rust-analyzer",
 				"shellcheck",
 				"shellharden",
