@@ -30,8 +30,9 @@ vim.opt.signcolumn = "auto:2"
 vim.opt.termguicolors = true
 vim.opt.synmaxcol = 512
 
--- show line numbers
+-- show hybrid line numbers (absolute + relative)
 vim.opt.number = true
+vim.opt.relativenumber = true
 
 -- default no line wrapping
 vim.opt.wrap = false
