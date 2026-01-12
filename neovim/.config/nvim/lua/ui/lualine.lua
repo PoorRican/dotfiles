@@ -1,7 +1,18 @@
 return {
 	"nvim-lualine/lualine.nvim",
 	event = "VeryLazy",
-	dependencies = { "nvim-tree/nvim-web-devicons" },
+	dependencies = {
+		"nvim-tree/nvim-web-devicons",
+		{
+			"SmiteshP/nvim-navic",
+			opts = {
+				lsp = { auto_attach = true },
+				highlight = true,
+				separator = " > ",
+				depth_limit = 4,
+			},
+		},
+	},
 	init = function()
 		-- disable until lualine loads
 		vim.opt.laststatus = 0
@@ -178,6 +189,34 @@ return {
 			padding = { left = 0, right = 1 },
 			separator = { right = "▓▒░", left = "░▒▓" },
 		})
+		active_left({
+			"diff",
+			symbols = { added = "+", modified = "~", removed = "-" },
+			diff_color = {
+				added = { fg = colors.dummyplug },
+				modified = { fg = colors.penpen },
+				removed = { fg = colors.kaworu },
+			},
+			cond = conditions.hide_in_width,
+			padding = { left = 1, right = 1 },
+			separator = { right = "▓▒░", left = "░▒▓" },
+		})
+		active_left({
+			function()
+				local navic = require("nvim-navic")
+				if navic.is_available() then
+					return navic.get_location()
+				end
+				return ""
+			end,
+			cond = function()
+				local navic = require("nvim-navic")
+				return navic.is_available() and conditions.hide_in_width_first()
+			end,
+			padding = { left = 1, right = 1 },
+			color = { fg = colors.fog },
+			separator = { right = "▓▒░", left = "░▒▓" },
+		})
 
 		-- inactive left section
 		inactive_left({
@@ -205,19 +244,14 @@ return {
 		-- active right section
 		active_right({
 			function()
-				if vim.lsp.get_clients then
-					local clients = vim.lsp.get_clients({ bufnr = 0 })
-					local clients_list = {}
-					for _, client in pairs(clients) do
-						if not clients_list[client.name] then
-							if not string.find(client.name, "GitHub Copilot") then
-								table.insert(clients_list, client.name)
-							end
-						end
+				local clients = vim.lsp.get_clients({ bufnr = 0 })
+				local count = 0
+				for _, client in pairs(clients) do
+					if not string.find(client.name, "GitHub Copilot") then
+						count = count + 1
 					end
-					local lsp_lbl = dump(clients_list):gsub("(.*),", "%1")
-					return lsp_lbl:gsub(",", ", ")
 				end
+				return count > 0 and tostring(count) or ""
 			end,
 			icon = " ",
 			color = { bg = colors.kaji, fg = colors.core },
@@ -262,22 +296,6 @@ return {
 			padding = { left = 1, right = 1 },
 			cond = conditions.hide_in_width,
 			separator = { right = "▓▒░" },
-		})
-		active_right({
-			"o:encoding",
-			fmt = string.upper,
-			cond = conditions.hide_in_width,
-			padding = { left = 1, right = 1 },
-			color = { bg = colors.unit01, fg = colors.core },
-		})
-		active_right({
-			"fileformat",
-			fmt = string.lower,
-			icons_enabled = false,
-			cond = conditions.hide_in_width,
-			color = { bg = colors.unit01, fg = colors.core },
-			separator = { right = "▓▒░" },
-			padding = { left = 0, right = 1 },
 		})
 
 		-- inactive right section
