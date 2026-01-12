@@ -31,6 +31,9 @@ vim.opt.undodir = vim.fn.stdpath("data") .. "/undo"
 -- scroll bounds
 vim.o.scrolloff = 13
 
+-- faster CursorHold for LSP document highlight
+vim.opt.updatetime = 300
+
 -- ipad scrolling
 vim.opt.mouse = "a"
 
