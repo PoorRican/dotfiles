@@ -28,6 +28,13 @@ return {
 	verylazy = true,
 	config = function()
 		vim.cmd.colorscheme("sourcerer")
+
+		-- LSP reference highlights - consistent background, readable text
+		local ref_bg = "#3a3a4a"
+		vim.api.nvim_set_hl(0, "LspReferenceText", { bg = ref_bg })
+		vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = ref_bg })
+		vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = ref_bg, fg = "#a0a0a0" })
+
 		f.cmd("Sourcerer", function()
 			vim.cmd.colorscheme("sourcerer")
 			print("time to read code like a wizard")
