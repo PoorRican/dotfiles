@@ -64,6 +64,32 @@ return {
 				end
 
 				remaps.set_default_on_buffer(client, args.buf)
+
+				-- Workaround for inlay hint extmark errors on text change
+				if client.server_capabilities.inlayHintProvider then
+					vim.api.nvim_create_autocmd("InsertLeave", {
+						buffer = args.buf,
+						callback = function()
+							pcall(vim.lsp.inlay_hint.enable, true, { bufnr = args.buf })
+						end,
+					})
+				end
+
+				-- Highlight symbol under cursor
+				if client.server_capabilities.documentHighlightProvider then
+					local group = vim.api.nvim_create_augroup("LspDocumentHighlight", { clear = false })
+					vim.api.nvim_clear_autocmds({ group = group, buffer = args.buf })
+					vim.api.nvim_create_autocmd("CursorHold", {
+						group = group,
+						buffer = args.buf,
+						callback = vim.lsp.buf.document_highlight,
+					})
+					vim.api.nvim_create_autocmd("CursorMoved", {
+						group = group,
+						buffer = args.buf,
+						callback = vim.lsp.buf.clear_references,
+					})
+				end
 			end,
 		})
 
