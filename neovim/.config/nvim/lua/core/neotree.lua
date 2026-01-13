@@ -67,6 +67,7 @@ return {
 				["p"] = "paste_from_clipboard",
 				["q"] = "close_window",
 				["R"] = "refresh",
+				["H"] = "toggle_hidden",
 				["?"] = "show_help",
 			},
 		},
