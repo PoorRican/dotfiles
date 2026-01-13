@@ -6,7 +6,7 @@
 {
   # Home Manager state version (use string format, match nixpkgs branch)
   # !! IMPORTANT: Update this if you change nixpkgs branch !!
-  home.stateVersion = "25.05";
+  home.stateVersion = "25.11";
 
   # Basic user info
   home.username = "${username}";
@@ -62,9 +62,6 @@
     # GUI Apps (managed via homebrew casks if needed, see home-manager docs)
     kitty
     iterm2
-    # firefox
-    # visual-studio-code
-    glrnvim
   ];
 
   programs.neovim = {

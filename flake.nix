@@ -5,14 +5,14 @@
   inputs = {
     # Use the latest stable Nixpkgs branch (adjust if needed, e.g., nixos-unstable)
     # As of May 2025, 24.05 is the latest stable.
-    nixpkgs.url = "github:NixOS/nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
 
     # Use the corresponding nix-darwin branch/tag
     darwin.url = "github:LnL7/nix-darwin";
     darwin.inputs.nixpkgs.follows = "nixpkgs"; # Ensures darwin uses the same nixpkgs
 
     # Use the corresponding home-manager branch/tag
-    home-manager.url = "github:nix-community/home-manager";
+    home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs"; # Ensures home-manager uses the same nixpkgs
   };
 
