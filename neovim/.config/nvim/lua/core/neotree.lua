@@ -89,6 +89,7 @@ return {
 		vim.api.nvim_set_hl(0, "NeoTreeGitUntracked", { fg = "#5f875f" })
 		vim.api.nvim_set_hl(0, "NeoTreeGitModified", { fg = "#5f87af" })
 		vim.api.nvim_set_hl(0, "NeoTreeGitUnstaged", { fg = "#5f87af" })
+		vim.api.nvim_set_hl(0, "NeoTreeDirectoryName", { fg = "#8787af" })
 		require("neo-tree").setup(opts)
 	end,
 	init = function()
