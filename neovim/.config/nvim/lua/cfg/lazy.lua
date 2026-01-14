@@ -54,6 +54,7 @@ require("lazy").setup({
 		require("core.neotree"),
 		require("core.todo"),
 		require("core.refactoring"),
+		require("core.rulebook"),
 		require("core.autopairs"),
 		require("core.dap"),
 	},
