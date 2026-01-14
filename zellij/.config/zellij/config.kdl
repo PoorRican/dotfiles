@@ -266,22 +266,23 @@ plugins {
 load_plugins {
 }
 
-// Sourcerer theme
+// Sourcerer theme (low contrast variant)
 themes {
     sourcerer {
-        fg "#c2c2b0"
-        bg "#222222"
-        black "#222222"
-        red "#aa4450"
-        green "#719611"
-        yellow "#cc8800"
-        blue "#6688aa"
-        magenta "#8f6f8f"
-        cyan "#528b8b"
-        white "#d3d3d3"
-        orange "#ff9800"
+        fg "#9a9a8c"
+        bg "#2a2a2a"
+        black "#2a2a2a"
+        red "#8c4a52"
+        green "#5c7a1a"
+        yellow "#9a7020"
+        blue "#5a7088"
+        magenta "#705a70"
+        cyan "#4a7070"
+        white "#a8a8a0"
+        orange "#b07840"
     }
 }
 
 theme "sourcerer"
 default_mode "normal"
+default_layout "compact"
