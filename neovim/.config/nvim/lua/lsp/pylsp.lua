@@ -1,11 +1,22 @@
 return {
 	root_markers = { "uv.lock", "pyproject.toml", ".git" },
 	settings = {
-		basedpyright = {
-			analysis = {
-				autoSearchPaths = true,
-				useLibraryCodeForTypes = true,
-				diagnosticMode = "openFilesOnly",
+		pylsp = {
+			plugins = {
+				-- Disable pylsp's built-in linters (ruff handles this)
+				pycodestyle = { enabled = false },
+				mccabe = { enabled = false },
+				pyflakes = { enabled = false },
+				pylint = { enabled = false },
+				autopep8 = { enabled = false },
+				yapf = { enabled = false },
+
+				-- Enable mypy
+				pylsp_mypy = {
+					enabled = true,
+					live_mode = true,  -- Run on save
+					strict = false,
+				},
 			},
 		},
 		python = {

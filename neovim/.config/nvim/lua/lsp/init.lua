@@ -100,9 +100,8 @@ return {
 		vim.lsp.config("html", {})
 		vim.lsp.config("jsonls", require("lsp.jsonls"))
 		vim.lsp.config("lua_ls", require("lsp.luals"))
-		vim.lsp.config("basedpyright", require("lsp.basedpyright"))
+		vim.lsp.config("pylsp", require("lsp.pylsp"))
 		vim.lsp.config("ruff", require("lsp.ruff"))
-		vim.lsp.config("ty", require("lsp.ty"))
 		vim.lsp.config("rust_analyzer", {})
 		vim.lsp.config("tailwindcss", require("lsp.tailwindcss"))
 		vim.lsp.config("ts_ls", require("lsp.tsls"))
@@ -111,7 +110,7 @@ return {
 
 		local server_names = {
 			"bashls", "cssls", "dockerls", "html", "jsonls",
-			"lua_ls", "basedpyright", "ruff", "ty", "rust_analyzer",
+			"lua_ls", "pylsp", "ruff", "rust_analyzer",
 			"tailwindcss", "ts_ls", "yamlls", "powershell_es",
 		}
 
