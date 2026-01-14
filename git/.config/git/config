@@ -24,3 +24,5 @@
 	smudge = cat
 [pull]
 	rebase = true
+[commit]
+	verbose = true
