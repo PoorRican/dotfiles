@@ -40,6 +40,7 @@ return {
 				"jsonlint",
 				"lua-language-server",
 				"php-cs-fixer",
+				"powershell-editor-services",
 				"prettier",
 				"prettierd",
 				"rust-analyzer",

@@ -107,11 +107,12 @@ return {
 		vim.lsp.config("tailwindcss", require("lsp.tailwindcss"))
 		vim.lsp.config("ts_ls", require("lsp.tsls"))
 		vim.lsp.config("yamlls", {})
+		vim.lsp.config("powershell_es", require("lsp.powershell"))
 
 		local server_names = {
 			"bashls", "cssls", "dockerls", "html", "jsonls",
 			"lua_ls", "basedpyright", "ruff", "ty", "rust_analyzer",
-			"tailwindcss", "ts_ls", "yamlls",
+			"tailwindcss", "ts_ls", "yamlls", "powershell_es",
 		}
 
 		local mason_ok, mason = pcall(require, "mason")
@@ -121,7 +122,9 @@ return {
 			mason.setup()
 			mason_lspconfig.setup({
 				ensure_installed = server_names,
-				automatic_enable = true,
+				automatic_enable = {
+					exclude = { "pylsp", "pyright" },
+				},
 			})
 		end
 
