@@ -81,27 +81,6 @@ function X.set_default_on_buffer(client, bufnr)
 		end, "document symbols")
 	end
 
-	local ft = vim.bo[bufnr].filetype
-	if ft == "sh" or ft == "lua" then
-		buf_set_keymap("n", "<leader>li", function()
-			local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
-			local msgs = vim.diagnostic.get(bufnr)
-			local last, result = unpack({ "error", "" })
-			if ft == "lua" then
-				result = "---@diagnostic disable-next-line"
-			else
-				for _, d in pairs(msgs) do
-					if d.lnum == (row - 1) and d.code ~= last then
-						result = (result ~= "") and result .. "," .. d.code or "#shellcheck disable=" .. d.code
-						last = tostring(d.code)
-					end
-				end
-			end
-			if result ~= "" then
-				vim.api.nvim_buf_set_lines(0, row - 1, row - 1, false, { result })
-			end
-		end, "ignore warnings")
-	end
 	buf_set_keymap("n", "<leader>lI", ":LspInfo<CR>", "lsp info")
 	buf_set_keymap("n", "<leader>ls", vim.lsp.buf.signature_help, "show signature")
 	buf_set_keymap("n", "<leader>lE", vim.diagnostic.open_float, "show line diagnostics")
@@ -118,7 +97,6 @@ function X.set_default_on_buffer(client, bufnr)
 		{ "<leader>/t", group = "type definition", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>ra", group = "code actions (range)", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>rr", group = "rename", icon = { icon = "", hl = "Constant" } },
-		{ "<leader>li", group = "ignore warning", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>lo", group = "document symbols", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>ld", group = "show declaration", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>lt", group = "toggle lsp", icon = { icon = "", hl = "Constant" } },
