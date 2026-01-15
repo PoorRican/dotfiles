@@ -66,4 +66,4 @@ stow -nv zsh
 
 ## Nix Configuration
 
-See [CLAUDE.md](./CLAUDE.md) for Nix build commands and architecture details.
+See CLAUDE.md for Nix build commands and architecture details.
