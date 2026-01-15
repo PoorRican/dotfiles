@@ -122,7 +122,7 @@ return {
 			mason_lspconfig.setup({
 				ensure_installed = server_names,
 				automatic_enable = {
-					exclude = { "pylsp", "pyright" },
+					exclude = { "pyright" },
 				},
 			})
 		end

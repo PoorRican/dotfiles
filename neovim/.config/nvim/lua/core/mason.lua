@@ -43,6 +43,7 @@ return {
 				"powershell-editor-services",
 				"prettier",
 				"prettierd",
+				"python-lsp-server",
 				"rust-analyzer",
 				"shellcheck",
 				"shellharden",
