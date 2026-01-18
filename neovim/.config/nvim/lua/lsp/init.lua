@@ -101,6 +101,7 @@ return {
 		vim.lsp.config("jsonls", require("lsp.jsonls"))
 		vim.lsp.config("lua_ls", require("lsp.luals"))
 		vim.lsp.config("pylsp", require("lsp.pylsp"))
+		vim.lsp.config("pyright", require("lsp.pyright"))
 		vim.lsp.config("ruff", require("lsp.ruff"))
 		vim.lsp.config("rust_analyzer", {})
 		vim.lsp.config("tailwindcss", require("lsp.tailwindcss"))
@@ -110,7 +111,7 @@ return {
 
 		local server_names = {
 			"bashls", "cssls", "dockerls", "html", "jsonls",
-			"lua_ls", "pylsp", "ruff", "rust_analyzer",
+			"lua_ls", "pylsp", "pyright", "ruff", "rust_analyzer",
 			"tailwindcss", "ts_ls", "yamlls", "powershell_es",
 		}
 
@@ -121,9 +122,6 @@ return {
 			mason.setup()
 			mason_lspconfig.setup({
 				ensure_installed = server_names,
-				automatic_enable = {
-					exclude = { "pyright" },
-				},
 			})
 		end
 
