@@ -100,6 +100,8 @@ function X.set_default_on_buffer(client, bufnr)
 		{ "<leader>lo", group = "document symbols", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>ld", group = "show declaration", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>lt", group = "toggle lsp", icon = { icon = "", hl = "Constant" } },
+		{ "gi", group = "go to implementation", icon = { icon = "", hl = "Constant" } },
+		{ "gI", group = "search implementations", icon = { icon = "", hl = "Constant" } },
 	})
 end
 
