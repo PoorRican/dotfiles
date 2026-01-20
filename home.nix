@@ -123,4 +123,7 @@
 
   # Enable Home Manager itself (required)
   programs.home-manager.enable = true;
+
+  # Disable App Management preflight check for copying apps
+  targets.darwin.copyApps.enableChecks = false;
 }
