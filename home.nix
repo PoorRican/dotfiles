@@ -38,6 +38,8 @@
     zellij
 		fzf
 
+		ruby
+
     # rust toolchain
     rustup
 
