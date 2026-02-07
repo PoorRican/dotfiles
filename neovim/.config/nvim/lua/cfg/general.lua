@@ -175,3 +175,22 @@ vim.api.nvim_create_autocmd("WinEnter", {
 		end, 10)
 	end,
 })
+
+-- colorcolumn: dynamic line width per filetype
+local colorcolumn_filetypes = {
+	python = "79",
+	markdown = "80",
+	typescript = "100",
+	typescriptreact = "100",
+	javascript = "100",
+	javascriptreact = "100",
+	rust = "100",
+}
+
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "*",
+	callback = function()
+		local cc = colorcolumn_filetypes[vim.bo.filetype] or ""
+		vim.wo.colorcolumn = cc
+	end,
+})
