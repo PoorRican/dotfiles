@@ -37,6 +37,7 @@
     cairosvg
     zellij
 		fzf
+		coreutils-full
 
 		ruby
 
