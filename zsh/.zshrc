@@ -199,3 +199,7 @@ export PATH="$PATH:/Users/swe/.lmstudio/bin"
 # End of LM Studio CLI section
 
 source ~/.zsh/sourcerer.zsh
+
+fpath+=~/.zfunc; autoload -Uz compinit; compinit
+
+zstyle ':completion:*' menu select
