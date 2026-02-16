@@ -95,6 +95,7 @@ return {
 
 		-- Define server configs with vim.lsp.config()
 		vim.lsp.config("bashls", require("lsp.bashls"))
+		vim.lsp.config("clangd", require("lsp.clangd"))
 		vim.lsp.config("cssls", require("lsp.cssls"))
 		vim.lsp.config("dockerls", {})
 		vim.lsp.config("html", {})
@@ -110,7 +111,7 @@ return {
 		vim.lsp.config("powershell_es", require("lsp.powershell"))
 
 		local server_names = {
-			"bashls", "cssls", "dockerls", "html", "jsonls",
+			"bashls", "clangd", "cssls", "dockerls", "html", "jsonls",
 			"lua_ls", "pylsp", "pyright", "ruff", "rust_analyzer",
 			"tailwindcss", "ts_ls", "yamlls", "powershell_es",
 		}

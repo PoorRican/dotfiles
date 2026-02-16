@@ -29,6 +29,7 @@ return {
 				"black",
 				"clang-format",
 				"clangd",
+				"codelldb",
 				"css-lsp",
 				"dockerfile-language-server",
 				"eslint-lsp",

@@ -159,6 +159,37 @@ return {
 				},
 			}
 
+			-- C/C++/Rust adapter (codelldb)
+			dap.adapters.codelldb = {
+				type = "server",
+				port = "${port}",
+				executable = {
+					command = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/adapter/codelldb",
+					args = { "--port", "${port}" },
+				},
+			}
+
+			for _, lang in ipairs({ "c", "cpp", "rust" }) do
+				dap.configurations[lang] = {
+					{
+						type = "codelldb",
+						request = "launch",
+						name = "Launch file",
+						program = function()
+							return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+						end,
+						cwd = "${workspaceFolder}",
+					},
+					{
+						type = "codelldb",
+						request = "attach",
+						name = "Attach to process",
+						pid = require("dap.utils").pick_process,
+						cwd = "${workspaceFolder}",
+					},
+				}
+			end
+
 			-- Node/JS adapter
 			dap.adapters["pwa-node"] = {
 				type = "server",
