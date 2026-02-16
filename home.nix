@@ -41,6 +41,11 @@
 
 		ruby
 
+    # C/C++ tools (gcc/clang NOT included — macOS provides Apple Clang via Xcode CLI tools; nix clang risks SDK path conflicts)
+    cmake
+    cmake-format
+    cppcheck
+
     # rust toolchain
     rustup
 
@@ -93,6 +98,7 @@
         tree-sitter-tsx
         tree-sitter-typescript
         tree-sitter-xml
+        tree-sitter-cmake
         tree-sitter-csv
         tree-sitter-yaml
         tree-sitter-gitcommit
