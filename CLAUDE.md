@@ -47,6 +47,11 @@ The repository includes configuration directories for:
 - Aside from the `home-manager`, and nix flakes, ALL configurations MUST be compatible for BOTH macOS AND Linux.
 - When possible, defer to XDG home configs as a universal template.
 
+## Git Commit Conventions
+
+- Group commits by module (e.g., `feat(nvim):`, `feat(nix):`, `feat(zsh):`, `feat(ghostty):`)
+- When committing, only stage files you changed. Ignore unrelated unstaged changes.
+
 ## `home-manager` Config
 
 This is the `home-manager` configuration which is used on macOS.
