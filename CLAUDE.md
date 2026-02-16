@@ -36,6 +36,11 @@ The repository includes configuration directories for:
 - **tmux/**: Terminal multiplexer configuration
 - **git/**: Git configuration files
 
+## Stow Usage
+
+- Re-stow a module: `stow -R <module>` from repo root
+- If a target file already exists (not a symlink), `stow` will refuse. Use `stow --adopt -R <module>` to let stow take ownership — but **`--adopt` overwrites the repo file with the existing target's content**, so restore the desired content afterward.
+
 ## High-level Module Notes
 
 - Neovim is configured with lazy-nvim and comprehensive treesitter grammar support
