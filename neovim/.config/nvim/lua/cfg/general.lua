@@ -126,6 +126,8 @@ local tool_filetypes = {
 	["dapui_console"] = true,
 	["qf"] = true,
 	["help"] = true,
+	["fugitive"] = true,
+	["git"] = true,
 }
 
 local function is_tool_window(winid)
@@ -173,6 +175,15 @@ vim.api.nvim_create_autocmd("WinEnter", {
 				end
 			end
 		end, 10)
+	end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+	callback = function()
+		local ft = vim.bo.filetype
+		if tool_filetypes[ft] and ft ~= "help" then
+			vim.wo.winfixbuf = true
+		end
 	end,
 })
 
