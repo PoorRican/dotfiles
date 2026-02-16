@@ -50,6 +50,7 @@
     rustup
 
     # CLI tools
+    direnv
     ripgrep # Fast grep alternative
     fd # Fast find alternative
     bat # Cat alternative with syntax highlighting
