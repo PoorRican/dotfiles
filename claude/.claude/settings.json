@@ -55,7 +55,20 @@
     "commit-commands@claude-plugins-official": true,
     "feature-dev@claude-plugins-official": true,
     "greptile@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true
+    "claude-md-management@claude-plugins-official": true,
+    "brainstorming-skill@jamie-bitflight-skills": true,
+    "conventional-commits@jamie-bitflight-skills": true,
+    "fastmcp-creator@jamie-bitflight-skills": true,
+    "hallucination-detector@jamie-bitflight-skills": true,
+    "prompt-optimization-claude-45@jamie-bitflight-skills": true,
+    "python3-development@jamie-bitflight-skills": true,
+    "summarizer@jamie-bitflight-skills": true,
+    "uv@jamie-bitflight-skills": true,
+    "verification-gate@jamie-bitflight-skills": true,
+    "xdg-base-directory@jamie-bitflight-skills": true,
+    "rust-skills@rust-skills": true,
+    "clangd-lsp@claude-plugins-official": true
   },
-  "alwaysThinkingEnabled": true
+  "alwaysThinkingEnabled": true,
+  "skipDangerousModePermissionPrompt": true
 }
