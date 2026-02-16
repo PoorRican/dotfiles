@@ -206,3 +206,5 @@ source ~/.zsh/sourcerer.zsh
 fpath+=~/.zfunc; autoload -Uz compinit; compinit
 
 zstyle ':completion:*' menu select
+
+eval "$(direnv hook zsh)"
