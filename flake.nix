@@ -32,12 +32,20 @@
     # Helper for home directory path
     homeDirectory = "/Users/${username}";
 
+    # Overlay: disable failing setproctitle tests on macOS (segfault in fork tests)
+    setproctitleOverlay = final: prev: {
+      python313 = prev.python313.override {
+        packageOverrides = pfinal: pprev: {
+          setproctitle = pprev.setproctitle.overrideAttrs { doInstallCheck = false; };
+        };
+      };
+    };
+
     # Standard Nixpkgs instance for the specified system
-    # You can add overlays or configuration options here if needed
     pkgs = import nixpkgs {
       inherit system;
-      config = { allowUnfree = true; }; # Example: Allow unfree packages
-      # overlays = [ ]; # Add overlays if you have any
+      config = { allowUnfree = true; };
+      overlays = [ setproctitleOverlay ];
     };
 
     # Nix-darwin library functions
@@ -70,7 +78,7 @@
     };
 
     homeConfigurations."${username}" = home-manager.lib.homeManagerConfiguration {
-      pkgs = import nixpkgs { system = "${system}"; }; # Use the system-specific pkgs
+      pkgs = import nixpkgs { system = "${system}"; overlays = [ setproctitleOverlay ]; };
       # Pass system-level specialArgs plus any others needed by home.nix modules
       extraSpecialArgs = { inherit inputs pkgs username homeDirectory; }; 
       modules = [
