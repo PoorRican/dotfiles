@@ -198,6 +198,9 @@ fi
 export PATH="$PATH:/Users/swe/.lmstudio/bin"
 # End of LM Studio CLI section
 
+# PyPI publish token (stored in macOS Keychain)
+export UV_PUBLISH_TOKEN=$(security find-generic-password -a "$USER" -s "pypi-token" -w)
+
 source ~/.zsh/sourcerer.zsh
 
 fpath+=~/.zfunc; autoload -Uz compinit; compinit
