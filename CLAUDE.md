@@ -54,6 +54,14 @@ The repository includes configuration directories for:
 
 ## `home-manager` Config
 
+### Nix Overlay Gotchas
+
+- **Python package test overrides**: Python packages in nixpkgs run tests via `installCheckPhase` (`doInstallCheck`), NOT `checkPhase` (`doCheck`). Override `doInstallCheck = false` to skip failing tests.
+- **Python interpreter targeting**: Override the specific interpreter (e.g., `python313`) not `python3`. Packages reference the concrete version, so `python3.override` won't propagate.
+- **`pythonPackagesExtensions`** is for adding new packages to the set, not overriding existing ones. Use `pythonXYZ.override { packageOverrides = ... }` instead.
+- **`nix flake update` risks**: Updating can fix one issue but introduce new build failures. Prefer targeted overlays over broad updates.
+- The `flake.nix` currently has a `setproctitleOverlay` that disables `doInstallCheck` for `python3.13-setproctitle` (segfaults in fork tests on aarch64-darwin).
+
 This is the `home-manager` configuration which is used on macOS.
 
 - **flake.nix**: Main entry point defining inputs (nixpkgs, nix-darwin, home-manager) and outputs for both system and user configurations
