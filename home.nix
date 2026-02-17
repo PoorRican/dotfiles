@@ -23,6 +23,7 @@
     pulumiPackages.pulumi-python
     pulumiPackages.pulumi-nodejs
     awscli2
+    git
     git-lfs
     luarocks
     sqlite
