@@ -1,0 +1,59 @@
+layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="https://github.com/dj95/zjstatus/releases/latest/download/zjstatus.wasm" {
+                hide_frame_for_single_pane "true"
+
+                format_left  "{mode} {tabs}"
+                format_center ""
+                format_right "{command_git_branch}{datetime}"
+                format_space "#[bg=#111111]"
+                format_hide_on_overlength "false"
+                format_precedence "lrc"
+
+                border_enabled "false"
+
+                // Mode indicators
+                mode_normal        "#[bg=#111111,fg=#719611,bold] NORMAL "
+                mode_locked        "#[bg=#111111,fg=#aa4450,bold] LOCKED "
+                mode_resize        "#[bg=#111111,fg=#6688aa,bold] RESIZE "
+                mode_pane          "#[bg=#111111,fg=#528b8b,bold] PANE "
+                mode_tab           "#[bg=#111111,fg=#ff9800,bold] TAB "
+                mode_scroll        "#[bg=#111111,fg=#8f6f8f,bold] SCROLL "
+                mode_search        "#[bg=#111111,fg=#87ceeb,bold] SEARCH "
+                mode_session       "#[bg=#111111,fg=#87875f,bold] SESSION "
+                mode_move          "#[bg=#111111,fg=#b1d631,bold] MOVE "
+                mode_enter_search  "#[bg=#111111,fg=#87ceeb,bold] SEARCH "
+                mode_rename_tab    "#[bg=#111111,fg=#ff9800,bold] RENAME "
+                mode_rename_pane   "#[bg=#111111,fg=#ff9800,bold] RENAME "
+                mode_tmux          "#[bg=#111111,fg=#ff9800,bold] TMUX "
+                mode_default_to_mode "normal"
+
+                // Tab styling - █▓░ name ░▓█
+                tab_normal              "#[bg=#111111,fg=#949494] █▓░ {index} {name}{fullscreen_indicator}{sync_indicator}{floating_indicator} ░▓█"
+                tab_normal_fullscreen   "#[bg=#111111,fg=#949494] █▓░ {index} {name}{fullscreen_indicator}{sync_indicator}{floating_indicator} ░▓█"
+                tab_normal_sync         "#[bg=#111111,fg=#949494] █▓░ {index} {name}{fullscreen_indicator}{sync_indicator}{floating_indicator} ░▓█"
+                tab_active              "#[bg=#111111,fg=#87ceeb,bold] █▓░ {index} {name}{fullscreen_indicator}{sync_indicator}{floating_indicator} ░▓█"
+                tab_active_fullscreen   "#[bg=#111111,fg=#87ceeb,bold] █▓░ {index} {name}{fullscreen_indicator}{sync_indicator}{floating_indicator} ░▓█"
+                tab_active_sync         "#[bg=#111111,fg=#87ceeb,bold] █▓░ {index} {name}{fullscreen_indicator}{sync_indicator}{floating_indicator} ░▓█"
+                tab_separator           ""
+                tab_rename              "#[bg=#111111,fg=#ff9800] █▓░ {index} {name}{floating_indicator} ░▓█"
+                tab_fullscreen_indicator " []"
+                tab_sync_indicator       " <>"
+                tab_floating_indicator   " *"
+
+                // Git branch
+                command_git_branch_command     "git rev-parse --abbrev-ref HEAD 2>/dev/null"
+                command_git_branch_format      "#[bg=#111111,fg=#87ceeb] {stdout}"
+                command_git_branch_interval    "5"
+                command_git_branch_rendermode  "static"
+
+                // Clock (built-in datetime widget)
+                datetime          "#[bg=#111111,fg=#666666]▓░#[bg=#3a3a3a,fg=#efefef] {format} "
+                datetime_format   "%H:%M %Y-%m-%d"
+                datetime_timezone "America/New_York"
+            }
+        }
+    }
+}

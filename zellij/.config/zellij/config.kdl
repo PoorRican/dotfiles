@@ -127,6 +127,13 @@ keybinds clear-defaults=true {
             }
             SwitchToMode "normal"
         }
+        bind "g" {
+            LaunchOrFocusPlugin "https://github.com/dam4rus/zj-git-branch/releases/latest/download/zellij-git-branch.wasm" {
+                floating true
+                move_to_focused_tab true
+            }
+            SwitchToMode "normal"
+        }
         bind "w" {
             LaunchOrFocusPlugin "session-manager" {
                 floating true
@@ -147,6 +154,91 @@ keybinds clear-defaults=true {
         bind "Alt n" { NewPane; }
         bind "Alt o" { MoveTab "right"; }
         bind "Ctrl q" { Quit; }
+        bind "Ctrl y" {
+            LaunchOrFocusPlugin "https://github.com/karimould/zellij-forgot/releases/latest/download/zellij_forgot.wasm" {
+                "LOAD_ZELLIJ_BINDINGS" "false"
+                // Global
+                "lock/unlock"              "ctrl+g"
+                "quit"                     "ctrl+q"
+                "keybinding cheatsheet"    "ctrl+y"
+                // Pane mode (Ctrl p)
+                ">> pane mode"             "ctrl+p"
+                "new pane"                 "ctrl+p n"
+                "new pane down"            "ctrl+p d"
+                "new pane right"           "ctrl+p r"
+                "close pane"               "ctrl+p x"
+                "toggle fullscreen"        "ctrl+p f"
+                "toggle floating panes"    "ctrl+p w"
+                "toggle embed/float"       "ctrl+p e"
+                "toggle pinned"            "ctrl+p i"
+                "rename pane"              "ctrl+p c"
+                "toggle pane frames"       "ctrl+p z"
+                "switch focus"             "ctrl+p p"
+                "focus left/down/up/right" "ctrl+p h/j/k/l"
+                // Tab mode (Ctrl t)
+                ">> tab mode"              "ctrl+t"
+                "new tab"                  "ctrl+t n"
+                "close tab"                "ctrl+t x"
+                "rename tab"               "ctrl+t r"
+                "sync tab"                 "ctrl+t s"
+                "break pane to new tab"    "ctrl+t b"
+                "break pane left"          "ctrl+t ["
+                "break pane right"         "ctrl+t ]"
+                "goto tab 1-9"             "ctrl+t 1-9"
+                "toggle prev tab"          "ctrl+t tab"
+                "next/prev tab"            "ctrl+t j/k"
+                // Resize mode (Ctrl n)
+                ">> resize mode"           "ctrl+n"
+                "resize increase"          "ctrl+n h/j/k/l"
+                "resize decrease"          "ctrl+n H/J/K/L"
+                "resize increase/decrease" "ctrl+n +/-"
+                // Move mode (Ctrl h)
+                ">> move mode"             "ctrl+h"
+                "move pane"                "ctrl+h h/j/k/l"
+                "move pane (cycle)"        "ctrl+h n/tab"
+                "move pane backwards"      "ctrl+h p"
+                // Scroll mode (Ctrl s)
+                ">> scroll mode"           "ctrl+s"
+                "scroll up/down"           "k/j (in scroll)"
+                "page up/down"             "h/l (in scroll)"
+                "half page up/down"        "u/d (in scroll)"
+                "edit scrollback"          "e (in scroll)"
+                "enter search"             "s (in scroll)"
+                // Search (in scroll)
+                "search next/prev"         "n/p (in search)"
+                "toggle case sensitive"    "c (in search)"
+                "toggle whole word"        "o (in search)"
+                "toggle wrap"              "w (in search)"
+                // Session mode (Ctrl o)
+                ">> session mode"          "ctrl+o"
+                "session manager"          "ctrl+o w"
+                "plugin manager"           "ctrl+o p"
+                "configuration"            "ctrl+o c"
+                "about"                    "ctrl+o a"
+                "detach"                   "ctrl+o d"
+                "git branches"             "ctrl+o g"
+                // Tmux mode (Ctrl b)
+                ">> tmux mode"             "ctrl+b"
+                "tmux split horizontal"    "ctrl+b \""
+                "tmux split vertical"      "ctrl+b %"
+                "tmux new tab"             "ctrl+b c"
+                "tmux close pane"          "ctrl+b x"
+                "tmux next/prev tab"       "ctrl+b n/p"
+                "tmux zoom"                "ctrl+b z"
+                "tmux rename tab"          "ctrl+b ,"
+                "tmux scroll mode"         "ctrl+b ["
+                "tmux detach"              "ctrl+b d"
+                "tmux focus h/j/k/l"       "ctrl+b h/j/k/l"
+                // Alt shortcuts (any mode)
+                "new pane (quick)"         "alt+n"
+                "toggle floating (quick)"  "alt+f"
+                "resize increase/decrease" "alt + / alt -"
+                "prev/next swap layout"    "alt+[ / alt+]"
+                "move tab left/right"      "alt+i / alt+o"
+                "focus left/down/up/right" "alt+h/j/k/l"
+                floating true
+            }
+        }
     }
     shared_except "locked" "move" {
         bind "Ctrl h" { SwitchToMode "move"; }
@@ -259,30 +351,38 @@ plugins {
     strider location="zellij:strider"
     tab-bar location="zellij:tab-bar"
     welcome-screen location="zellij:session-manager" {
-        welcome_screen true
+        welcome_screen false
+    }
+    zjstatus-hints location="https://github.com/b0o/zjstatus-hints/releases/latest/download/zjstatus-hints.wasm" {
+        max_length 0
+        overflow_str "..."
+        pipe_name "zjstatus_hints"
+        hide_in_base_mode true
     }
 }
 
 load_plugins {
+    zjstatus-hints
 }
 
-// Sourcerer theme (low contrast variant)
+// Sourcerer theme (matches Ghostty sourcerer palette)
 themes {
     sourcerer {
-        fg "#9a9a8c"
-        bg "#2a2a2a"
-        black "#2a2a2a"
-        red "#8c4a52"
-        green "#5c7a1a"
-        yellow "#9a7020"
-        blue "#5a7088"
-        magenta "#705a70"
-        cyan "#4a7070"
-        white "#a8a8a0"
-        orange "#b07840"
+        fg "#c2c2b0"
+        bg "#222222"
+        black "#111111"
+        red "#aa4450"
+        green "#719611"
+        yellow "#ff9800"
+        blue "#6688aa"
+        magenta "#8f6f8f"
+        cyan "#528b8b"
+        white "#d3d3d3"
+        orange "#ff9800"
     }
 }
 
 theme "sourcerer"
+pane_frames false
 default_mode "normal"
-default_layout "compact"
+default_layout "default"
