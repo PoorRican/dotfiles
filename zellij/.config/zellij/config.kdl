@@ -385,4 +385,4 @@ themes {
 theme "sourcerer"
 pane_frames false
 default_mode "normal"
-default_layout "default"
+default_layout "sourcerer-layout"

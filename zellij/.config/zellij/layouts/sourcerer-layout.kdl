@@ -44,7 +44,7 @@ layout {
                 tab_floating_indicator   " *"
 
                 // Git branch
-                command_git_branch_command     "git rev-parse --abbrev-ref HEAD 2>/dev/null"
+                command_git_branch_command     "git rev-parse --abbrev-ref HEAD"
                 command_git_branch_format      "#[bg=#111111,fg=#87ceeb] {stdout}"
                 command_git_branch_interval    "5"
                 command_git_branch_rendermode  "static"
