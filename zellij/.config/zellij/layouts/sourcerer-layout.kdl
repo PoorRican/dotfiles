@@ -7,7 +7,7 @@ layout {
 
                 format_left  "{mode} {tabs}"
                 format_center ""
-                format_right "{command_git_branch}{datetime}"
+                format_right "{command_git_branch}{pipe_zjstatus_hints}{datetime}"
                 format_space "#[bg=#111111]"
                 format_hide_on_overlength "false"
                 format_precedence "lrc"
@@ -48,6 +48,7 @@ layout {
                 command_git_branch_format      "#[bg=#111111,fg=#87ceeb] {stdout}"
                 command_git_branch_interval    "5"
                 command_git_branch_rendermode  "static"
+                pipe_zjstatus_hints_format     "#[bg=#111111,fg=#878787]{output} "
 
                 // Clock (built-in datetime widget)
                 datetime          "#[bg=#111111,fg=#666666]▓░#[bg=#3a3a3a,fg=#efefef] {format} "
