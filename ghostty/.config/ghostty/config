@@ -4,5 +4,6 @@ macos-option-as-alt = true
 keybind = alt+arrow_left=unbind
 keybind = alt+arrow_right=unbind
 keybind = global:super+shift+space=toggle_quick_terminal
+bell-features = system,attention,title,no-audio,no-border
 window-padding-x = 2
 window-padding-y = 2
