@@ -1,5 +1,8 @@
 theme = sourcerer
 font-family = Inconsolata
 macos-option-as-alt = true
+keybind = alt+arrow_left=unbind
+keybind = alt+arrow_right=unbind
+keybind = global:super+shift+space=toggle_quick_terminal
 window-padding-x = 2
 window-padding-y = 2
