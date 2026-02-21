@@ -148,6 +148,8 @@ keybinds clear-defaults=true {
         bind "Alt =" { Resize "Increase"; }
         bind "Alt [" { PreviousSwapLayout; }
         bind "Alt ]" { NextSwapLayout; }
+        bind "Alt ," { PreviousSwapLayout; }
+        bind "Alt ." { NextSwapLayout; }
         bind "Alt f" { ToggleFloatingPanes; }
         bind "Ctrl g" { SwitchToMode "locked"; }
         bind "Alt i" { MoveTab "left"; }
@@ -227,13 +229,14 @@ keybinds clear-defaults=true {
                 "tmux zoom"                "ctrl+b z"
                 "tmux rename tab"          "ctrl+b ,"
                 "tmux scroll mode"         "ctrl+b ["
+                "tmux next layout"         "ctrl+b space"
                 "tmux detach"              "ctrl+b d"
                 "tmux focus h/j/k/l"       "ctrl+b h/j/k/l"
                 // Alt shortcuts (any mode)
                 "new pane (quick)"         "alt+n"
                 "toggle floating (quick)"  "alt+f"
                 "resize increase/decrease" "alt + / alt -"
-                "prev/next swap layout"    "alt+[ / alt+]"
+                "prev/next swap layout"    "alt+[ / alt+] or alt+, / alt+."
                 "move tab left/right"      "alt+i / alt+o"
                 "focus left/down/up/right" "alt+h/j/k/l"
                 floating true
@@ -320,7 +323,7 @@ keybinds clear-defaults=true {
         bind "down" { MoveFocus "down"; SwitchToMode "normal"; }
         bind "up" { MoveFocus "up"; SwitchToMode "normal"; }
         bind "right" { MoveFocus "right"; SwitchToMode "normal"; }
-        bind "space" { NextSwapLayout; }
+        bind "Space" { NextSwapLayout; }
         bind "\"" { NewPane "down"; SwitchToMode "normal"; }
         bind "%" { NewPane "right"; SwitchToMode "normal"; }
         bind "," { SwitchToMode "renametab"; }
