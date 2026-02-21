@@ -1,5 +1,5 @@
 theme = sourcerer
-font-family = Departure Mono
+font-family = Inconsolata
 macos-option-as-alt = true
 window-padding-x = 2
 window-padding-y = 2
