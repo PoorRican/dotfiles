@@ -39,9 +39,9 @@ layout {
                 tab_active_sync         "#[bg=#111111,fg=#87ceeb,bold] █▓░ {index} {name}{fullscreen_indicator}{sync_indicator}{floating_indicator} ░▓█"
                 tab_separator           ""
                 tab_rename              "#[bg=#111111,fg=#ff9800] █▓░ {index} {name}{floating_indicator} ░▓█"
-                tab_fullscreen_indicator " []"
-                tab_sync_indicator       " <>"
-                tab_floating_indicator   " *"
+                tab_fullscreen_indicator " "
+                tab_sync_indicator       " "
+                tab_floating_indicator   " "
 
                 // Git branch
                 command_git_branch_command     "git rev-parse --abbrev-ref HEAD"
