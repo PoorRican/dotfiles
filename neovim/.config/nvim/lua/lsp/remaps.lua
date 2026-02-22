@@ -29,11 +29,15 @@ function X.set_default_on_buffer(client, bufnr)
 	buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
 
 	if cap.definitionProvider then
-		buf_set_keymap("n", "<leader>lD", vim.lsp.buf.definition, "show definition")
+		buf_set_keymap("n", "<leader>lD", function()
+			vim.lsp.buf.definition({ open_in = "vsplit", reuse_win = true })
+		end, "show definition")
 	end
 
 	if cap.declarationProvider then
-		buf_set_keymap("n", "<leader>ld", "<cmd>lua vim.lsp.buf.declaration()<CR>", "show declaration")
+		buf_set_keymap("n", "<leader>ld", function()
+			vim.lsp.buf.declaration({ reuse_win = true })
+		end, "show declaration")
 	end
 
 	if cap.implementationProvider then
