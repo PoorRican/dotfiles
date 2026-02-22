@@ -201,6 +201,9 @@ export PATH="$PATH:/Users/swe/.lmstudio/bin"
 # PyPI publish token (stored in macOS Keychain)
 export UV_PUBLISH_TOKEN=$(security find-generic-password -a "$USER" -s "pypi-token" -w)
 
+# OpenCode API key (stored in macOS Keychain)
+export OPENCODE_API_KEY=$(security find-generic-password -a "$USER" -s "opencode-api-key" -w)
+
 source ~/.zsh/sourcerer.zsh
 
 fpath+=~/.zfunc; autoload -Uz compinit; compinit
