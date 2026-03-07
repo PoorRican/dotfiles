@@ -69,6 +69,9 @@ return {
 				["R"] = "refresh",
 				["H"] = "toggle_hidden",
 				["?"] = "show_help",
+				["<left>"] = "close_node",
+				["<right>"] = "open",
+				["z"] = "close_all_nodes",
 			},
 		},
 		filesystem = {
