@@ -1,16 +1,10 @@
+local f = require("utils.functions")
+
 return {
-	root_markers = { "uv.lock", "pyproject.toml", ".git" },
+	root_markers = { "pyproject.toml", ".git" },
 	settings = {
 		python = {
-			pythonPath = (function()
-				local cwd = vim.fn.getcwd()
-				if vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
-					return cwd .. "/.venv/bin/python"
-				elseif vim.fn.executable(cwd .. "/venv/bin/python") == 1 then
-					return cwd .. "/venv/bin/python"
-				end
-				return vim.fn.exepath("python3") or "python3"
-			end)(),
+			pythonPath = f.get_python_path(),
 		},
 	},
 }
