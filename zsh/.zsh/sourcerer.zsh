@@ -15,7 +15,7 @@
 # ░░░░░░░░░░
 #
 #█▓▒░ tty colors
-if [ "$TERM" = "linux" ]
+if [[ -o interactive ]] && [[ -t 1 ]] && [ "$TERM" = "linux" ]
 then
     echo -en "\e]P0222222" #black
     echo -en "\e]P8272822" #darkgrey

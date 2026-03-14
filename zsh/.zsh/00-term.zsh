@@ -4,6 +4,11 @@
 # Store original TERM for reference (e.g., tmux can check this)
 export TERM_ORIGINAL="${TERM_ORIGINAL:-$TERM}"
 
+# Ensure TERM is set before probing terminfo.
+if [[ -z "$TERM" ]]; then
+    export TERM="xterm-256color"
+fi
+
 # Check if terminfo exists for current TERM
 if ! infocmp "$TERM" >/dev/null 2>&1; then
     # Terminfo missing - fallback to xterm-256color

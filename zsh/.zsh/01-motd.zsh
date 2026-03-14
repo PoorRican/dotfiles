@@ -1,5 +1,9 @@
 # MOTD
 
+[[ -o interactive ]] || return 0
+[[ -t 1 ]] || return 0
+
+
 function show_motd() {
     # ANSI color codes
     local CYAN='\033[0;36m'

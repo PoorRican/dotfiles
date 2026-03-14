@@ -14,6 +14,10 @@
 # ░▓▓▓▓▓▓▓▓▓▓
 # ░░░░░░░░░░
 
+# Skip banner for non-interactive shells or when stdout is not a terminal.
+[[ -o interactive ]] || return 0
+[[ -t 1 ]] || return 0
+
 #█▓▒░ pick a random number
 _RAND=`shuf -i1-2 -n1`
 
