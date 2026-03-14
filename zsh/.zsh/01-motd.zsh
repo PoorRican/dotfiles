@@ -1,4 +1,8 @@
+Warning: Identity file n not accessible: No such file or directory.
 # MOTD
+
+[[ -o interactive ]] || return 0
+[[ -t 1 ]] || return 0
 
 function show_motd() {
     # ANSI color codes
