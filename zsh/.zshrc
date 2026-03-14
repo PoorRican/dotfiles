@@ -12,7 +12,9 @@
 export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 
 # Source home-manager session variables and add to PATH
-for hm_session_vars in   "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"   "$HOME/.local/state/nix/profiles/home-manager/etc/profile.d/hm-session-vars.sh"
+for hm_session_vars in \
+  "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" \
+  "$HOME/.local/state/nix/profiles/home-manager/etc/profile.d/hm-session-vars.sh"
 do
   if [ -e "$hm_session_vars" ]; then
     source "$hm_session_vars"
@@ -216,8 +218,12 @@ fi
 # End of LM Studio CLI section
 
 # PyPI publish token (stored in macOS Keychain)
-export UV_PUBLISH_TOKEN=$(security find-generic-password -a "$USER" -s "pypi-token" -w)
+if [[ "$(uname)" == "Darwin" ]] && command -v security >/dev/null 2>&1; then
+  export UV_PUBLISH_TOKEN=$(security find-generic-password -a "$USER" -s "pypi-token" -w 2>/dev/null || true)
+fi
 
+# OpenCode API key (stored in macOS Keychain)
+# Intentionally not auto-loaded cross-platform; set in a local, machine-specific secret source if needed.
 if [ -f ~/.zsh/sourcerer.zsh ]; then
   source ~/.zsh/sourcerer.zsh
 fi

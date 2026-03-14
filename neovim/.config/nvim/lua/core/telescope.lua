@@ -87,6 +87,23 @@ return {
 		r.noremap("n", "<leader>g", function()
 			lga_shortcuts.grep_word_under_cursor({ postfix = " --hidden " })
 		end, "grep under cursor")
+		r.noremap("v", "<leader>g", function()
+			local s = vim.fn.getcharpos("'<")
+			local e = vim.fn.getcharpos("'>")
+			local lines = vim.api.nvim_buf_get_lines(0, s[2] - 1, e[2], false)
+			local text = table.concat(lines, "\n")
+			if s[2] == e[2] then
+				local start_col = s[3]
+				local end_col = e[3]
+				text = text:sub(start_col, end_col)
+			end
+			text = text:gsub("^%s+", ""):gsub("%s+$", "")
+			telescope.extensions.live_grep_args.live_grep_args({
+				prompt_title = "grep visual",
+				default_text = text,
+				additional_args = "-i",
+			})
+		end, "grep visual selection")
 		r.noremap("n", "<leader>ff", function()
 			telescope.extensions.file_browser.file_browser()
 		end, "browse files")

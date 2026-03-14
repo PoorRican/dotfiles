@@ -1,6 +1,6 @@
 # Dotfiles
 
-This dotfiles repository is managed using [GNU Stow](https://www.gnu.org/software/stow/) for symlinking and [Nix Flakes](https://nixos.wiki/wiki/Flakes) with nix-darwin and home-manager for package management.
+This dotfiles repository is managed using [GNU Stow](https://www.gnu.org/software/stow/) for symlinking and [Nix Flakes](https://nixos.wiki/wiki/Flakes) with nix-darwin and home-manager for package management across macOS and Linux.
 
 ## Managing Symlinks with Stow
 
@@ -65,5 +65,19 @@ stow -nv zsh
 ```
 
 ## Nix Configuration
+
+This repo supports both macOS (`.#swe`) and Linux (`.#swe-linux`) home-manager configurations.
+
+Common Linux apply command:
+
+```bash
+home-manager switch --flake .#swe-linux
+```
+
+If `home-manager` is not installed yet, bootstrap it with:
+
+```bash
+nix run home-manager/release-25.11 -- switch --flake .#swe-linux
+```
 
 See CLAUDE.md for Nix build commands and architecture details.

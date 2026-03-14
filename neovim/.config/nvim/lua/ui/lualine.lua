@@ -6,7 +6,10 @@ return {
 		{
 			"SmiteshP/nvim-navic",
 			opts = {
-				lsp = { auto_attach = true },
+				lsp = {
+					auto_attach = true,
+					preference = { "pyright", "pylsp" },
+				},
 				highlight = true,
 				separator = " > ",
 				depth_limit = 4,

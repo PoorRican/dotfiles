@@ -1,5 +1,9 @@
 theme = sourcerer
-font-family = Departure Mono
+font-family = Inconsolata
 macos-option-as-alt = true
+keybind = alt+arrow_left=unbind
+keybind = alt+arrow_right=unbind
+keybind = global:super+shift+space=toggle_quick_terminal
 window-padding-x = 2
 window-padding-y = 2
+bell-features = system,attention,title,no-audio,no-border

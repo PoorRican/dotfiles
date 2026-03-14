@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a dotfiles repository which manages various configurations and CLI utilities, and supports both macOS and Linux environments.
 
-GNU `stow` is used to sync the configs, and an XDG config layout is used for sanity. For package management on macOS, `home-manager` is used. For Linux environments, package management is out-of-scope for this repository.
+GNU `stow` is used to sync the configs, and an XDG config layout is used for sanity. Package management is handled with `home-manager` on both macOS and Linux, while nix-darwin remains macOS-only.
 
 ### Repository Layout
 
@@ -66,10 +66,16 @@ This is the `home-manager` configuration which is used on macOS.
 
 - **flake.nix**: Main entry point defining inputs (nixpkgs, nix-darwin, home-manager) and outputs for both system and user configurations
 - **darwin-configuration.nix**: System-wide macOS settings managed by nix-darwin (system packages, preferences, user accounts)
-- **home.nix**: User-specific environment managed by home-manager (user packages, program configurations)
+- **home.nix**: Thin hub that imports category-based modules from `nix/`
+- **nix/languages.nix**: Language runtimes & package managers (nodejs, bun, ruby, rustup, luarocks)
+- **nix/cloud.nix**: Cloud & infrastructure CLIs (gcloud, pulumi, awscli, firebase)
+- **nix/dev-tools.nix**: Development tools, LSPs, build tools, libraries
+- **nix/cli.nix**: General-purpose CLI utilities (ripgrep, fd, bat, jq, etc.)
+- **nix/ricing.nix**: Terminal emulators, multiplexers, fonts, shell (kitty, tmux, zellij, helix)
+- **nix/neovim.nix**: Neovim program config (plugins, treesitter parsers)
 
 Other notes:
-- The `home.nix`, and all flakes are currently configured for macOS ONLY. On Linux systems, nix is not implemented, and not used.
+- `home.nix` and the flake now support both macOS and Linux home-manager configurations. `darwin-configuration.nix` remains macOS-only.
 - The flake uses input following for consistency (all inputs use the same nixpkgs)
 - System and user configurations are built separately for better isolation
 - macOS system defaults are configured for development efficiency (faster key repeat, show file extensions, dock autohide)
@@ -94,9 +100,14 @@ nix build '.#darwinConfigurations.swe.system' --print-build-logs
 sudo ./result/bin/darwin-rebuild switch
 ```
 
-**User environment (home.nix changes):**
+**User environment (macOS home-manager):**
 ```bash
 home-manager switch --flake .#swe
+```
+
+**User environment (Linux home-manager):**
+```bash
+home-manager switch --flake .#swe-linux
 ```
 
 #### Maintenance Commands
@@ -108,5 +119,12 @@ nix-collect-garbage -d
 
 **Update flake inputs:**
 ```bash
-nix flake update
+nix flake update          # updates ALL inputs — causes full rebuild on next switch
+nix flake update nixpkgs  # updates only nixpkgs — still causes full rebuild
 ```
+
+#### Update Workflow
+
+- `home-manager switch --flake .#swe` applies config changes using the **current** locked nixpkgs revision. Adding or removing a package only rebuilds what changed — fast and safe.
+- `nix flake update` bumps ALL inputs to latest, which means every package may get a new version and trigger a full rebuild. **Don't run this unless you intentionally want version bumps.**
+- To add a new package without touching versions: edit the relevant `nix/*.nix` module, then run `home-manager switch --flake .#swe`.

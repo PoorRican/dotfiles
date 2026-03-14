@@ -10,7 +10,24 @@ return {
 		"dgagn/diagflow.nvim",
 		"https://git.sr.ht/~whynothugo/lsp_lines.nvim",
 	},
-	event = { "BufReadPre", "BufNewFile" },
+	init = function()
+		local group = vim.api.nvim_create_augroup("LoadLspOnRealFile", { clear = true })
+		vim.api.nvim_create_autocmd({ "BufReadPre", "BufNewFile" }, {
+			group = group,
+			callback = function(args)
+				if not vim.api.nvim_buf_is_valid(args.buf) then return end
+
+				local buftype = vim.bo[args.buf].buftype
+				if buftype ~= "" then return end
+
+				local name = vim.api.nvim_buf_get_name(args.buf)
+				if name == "" or name:match("^fugitive://") then return end
+
+				require("lazy").load({ plugins = { "nvim-lspconfig" } })
+				pcall(vim.api.nvim_del_augroup_by_name, "LoadLspOnRealFile")
+			end,
+		})
+	end,
 	config = function()
 		vim.fn.sign_define("DiagnosticSignError", { text = icons.diagnostics.error, texthl = "DiagnosticSignError" })
 		vim.fn.sign_define("DiagnosticSignWarn", { text = icons.diagnostics.warning, texthl = "DiagnosticSignWarn" })
@@ -101,6 +118,7 @@ return {
 		vim.lsp.config("html", {})
 		vim.lsp.config("jsonls", require("lsp.jsonls"))
 		vim.lsp.config("lua_ls", require("lsp.luals"))
+		vim.lsp.config("mypy", require("lsp.mypy"))
 		vim.lsp.config("pylsp", require("lsp.pylsp"))
 		vim.lsp.config("pyright", require("lsp.pyright"))
 		vim.lsp.config("ruff", require("lsp.ruff"))
@@ -112,9 +130,12 @@ return {
 
 		local server_names = {
 			"bashls", "clangd", "cssls", "dockerls", "html", "jsonls",
-			"lua_ls", "pylsp", "pyright", "ruff", "rust_analyzer",
+			"lua_ls", "mypy", "pylsp", "pyright", "ruff", "rust_analyzer",
 			"tailwindcss", "ts_ls", "yamlls", "powershell_es",
 		}
+		local mason_server_names = vim.tbl_filter(function(server_name)
+			return server_name ~= "mypy"
+		end, server_names)
 
 		local mason_ok, mason = pcall(require, "mason")
 		local mason_lspconfig_ok, mason_lspconfig = pcall(require, "mason-lspconfig")
@@ -122,7 +143,7 @@ return {
 		if mason_ok and mason_lspconfig_ok then
 			mason.setup()
 			mason_lspconfig.setup({
-				ensure_installed = server_names,
+				ensure_installed = mason_server_names,
 			})
 		end
 

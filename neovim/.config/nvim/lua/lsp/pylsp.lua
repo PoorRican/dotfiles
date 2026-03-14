@@ -1,25 +1,7 @@
 -- Enable custom mypy command for venv support
 vim.env.PYLSP_MYPY_ALLOW_DANGEROUS_CODE_EXECUTION = "1"
 
-local function get_python_path()
-	local cwd = vim.fn.getcwd()
-	if vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
-		return cwd .. "/.venv/bin/python"
-	elseif vim.fn.executable(cwd .. "/venv/bin/python") == 1 then
-		return cwd .. "/venv/bin/python"
-	end
-	return vim.fn.exepath("python3") or "python3"
-end
-
-local function get_mypy_command()
-	local cwd = vim.fn.getcwd()
-	if vim.fn.executable(cwd .. "/.venv/bin/mypy") == 1 then
-		return { cwd .. "/.venv/bin/mypy" }
-	elseif vim.fn.executable(cwd .. "/venv/bin/mypy") == 1 then
-		return { cwd .. "/venv/bin/mypy" }
-	end
-	return { "mypy" }
-end
+local f = require("utils.functions")
 
 return {
 	root_markers = { "uv.lock", "pyproject.toml", ".git" },
@@ -34,19 +16,18 @@ return {
 				autopep8 = { enabled = false },
 				yapf = { enabled = false },
 
-				-- Enable mypy from project venv
+				-- Enable mypy from project venv (respects project config)
 				pylsp_mypy = {
 					enabled = true,
 					live_mode = true,
 					dmypy = false,
 					report_progress = true,
-					strict = true,
-					mypy_command = get_mypy_command(),
+					mypy_command = f.get_mypy_command(),
 				},
 			},
 		},
 		python = {
-			pythonPath = get_python_path(),
+			pythonPath = f.get_python_path(),
 		},
 	},
 }

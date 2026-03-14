@@ -12,8 +12,8 @@ This document describes all git-related keybindings configured in Neovim.
 
 | Key | Action | Description |
 |-----|--------|-------------|
-| `]c` | Next hunk | Jump to the next git hunk (change) |
-| `[c` | Previous hunk | Jump to the previous git hunk (change) |
+| `]h` | Next hunk | Jump to the next git hunk (change) |
+| `[h` | Previous hunk | Jump to the previous git hunk (change) |
 
 ## Hunk Actions
 
@@ -85,7 +85,7 @@ In the git status buffer, you can use these keybindings:
 3. `:Git commit` - Commit staged changes
 
 ### Review changes before committing
-1. `]c` / `[c` - Navigate between hunks
+1. `]h` / `[h` - Navigate between hunks
 2. `,hp` - Preview each hunk
 3. `,hs` - Stage hunks you want to commit
 4. `,hc` - Commit staged changes

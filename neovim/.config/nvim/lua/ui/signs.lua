@@ -25,17 +25,25 @@ return {
 		})
 
 		-- Hunk navigation
-		r.noremap("n", "]c", function()
-			if vim.wo.diff then return "]c" end
+		r.noremap("n", "]h", function()
+			if vim.wo.diff then return "]h" end
 			vim.schedule(function() gitsigns.next_hunk() end)
 			return "<Ignore>"
 		end, "next hunk", { expr = true })
 
-		r.noremap("n", "[c", function()
-			if vim.wo.diff then return "[c" end
+		r.noremap("n", "[h", function()
+			if vim.wo.diff then return "[h" end
 			vim.schedule(function() gitsigns.prev_hunk() end)
 			return "<Ignore>"
 		end, "prev hunk", { expr = true })
+
+		r.noremap("n", "]S", function()
+			vim.schedule(function() gitsigns.next_staged_hunk() end)
+		end, "next staged hunk")
+
+		r.noremap("n", "[S", function()
+			vim.schedule(function() gitsigns.prev_staged_hunk() end)
+		end, "prev staged hunk")
 
 		-- Hunk actions
 		r.noremap("n", "<leader>hs", gitsigns.stage_hunk, "stage hunk")
