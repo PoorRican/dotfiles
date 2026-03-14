@@ -1,13 +1,14 @@
 # Terminal emulators, multiplexers, fonts, shell
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   home.packages = with pkgs; [
     kitty
-    iterm2
     tmux
     zellij
     oh-my-zsh
     helix
     jetbrains-mono
+  ] ++ lib.optionals pkgs.stdenv.isDarwin [
+    iterm2
   ];
 }

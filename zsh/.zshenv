@@ -13,4 +13,18 @@ if [[ -z "$XDG_RUNTIME_DIR" ]]; then
 fi
 
 # Cargo/Rust
-. "$HOME/.cargo/env"
+if [ -e "$HOME/.cargo/env" ]; then
+  . "$HOME/.cargo/env"
+fi
+
+# Nix (single-user and multi-user installs)
+for nix_profile in \
+  "$HOME/.nix-profile/etc/profile.d/nix.sh" \
+  "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" \
+  "/etc/profile.d/nix.sh"
+do
+  if [ -e "$nix_profile" ]; then
+    . "$nix_profile"
+    break
+  fi
+done

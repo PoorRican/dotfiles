@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a dotfiles repository which manages various configurations and CLI utilities, and supports both macOS and Linux environments.
 
-GNU `stow` is used to sync the configs, and an XDG config layout is used for sanity. For package management on macOS, `home-manager` is used. For Linux environments, package management is out-of-scope for this repository.
+GNU `stow` is used to sync the configs, and an XDG config layout is used for sanity. Package management is handled with `home-manager` on both macOS and Linux, while nix-darwin remains macOS-only.
 
 ### Repository Layout
 
@@ -75,7 +75,7 @@ This is the `home-manager` configuration which is used on macOS.
 - **nix/neovim.nix**: Neovim program config (plugins, treesitter parsers)
 
 Other notes:
-- The `home.nix`, and all flakes are currently configured for macOS ONLY. On Linux systems, nix is not implemented, and not used.
+- `home.nix` and the flake now support both macOS and Linux home-manager configurations. `darwin-configuration.nix` remains macOS-only.
 - The flake uses input following for consistency (all inputs use the same nixpkgs)
 - System and user configurations are built separately for better isolation
 - macOS system defaults are configured for development efficiency (faster key repeat, show file extensions, dock autohide)
@@ -100,9 +100,14 @@ nix build '.#darwinConfigurations.swe.system' --print-build-logs
 sudo ./result/bin/darwin-rebuild switch
 ```
 
-**User environment (home.nix changes):**
+**User environment (macOS home-manager):**
 ```bash
 home-manager switch --flake .#swe
+```
+
+**User environment (Linux home-manager):**
+```bash
+home-manager switch --flake .#swe-linux
 ```
 
 #### Maintenance Commands

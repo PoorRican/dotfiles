@@ -1,6 +1,6 @@
 # ~/dotfiles/flake.nix
 {
-  description = "macOS nix-darwin + home-manager configuration";
+  description = "Cross-platform dotfiles with nix-darwin and home-manager";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
@@ -12,11 +12,13 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, ... }@inputs:
+  outputs = { nixpkgs, darwin, home-manager, ... }@inputs:
   let
     username = "swe";
-    system = "aarch64-darwin";
-    homeDirectory = "/Users/${username}";
+    darwinSystem = "aarch64-darwin";
+    linuxSystem = "x86_64-linux";
+    darwinHomeDirectory = "/Users/${username}";
+    linuxHomeDirectory = "/home/${username}";
 
     setproctitleOverlay = final: prev: {
       python313 = prev.python313.override {
@@ -26,23 +28,43 @@
       };
     };
 
-    pkgs = import nixpkgs {
+    mkPkgs = system: import nixpkgs {
       inherit system;
       config = { allowUnfree = true; };
       overlays = [ setproctitleOverlay ];
     };
+
+    mkHome = { system, homeDirectory }:
+      let
+        pkgs = mkPkgs system;
+      in
+      home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        extraSpecialArgs = { inherit inputs pkgs username homeDirectory; };
+        modules = [ ./home.nix ];
+      };
+
+    darwinPkgs = mkPkgs darwinSystem;
   in
   {
     darwinConfigurations."${username}" = darwin.lib.darwinSystem {
-      inherit system;
-      specialArgs = { inherit inputs pkgs username homeDirectory; };
+      system = darwinSystem;
+      specialArgs = {
+        inherit inputs username;
+        pkgs = darwinPkgs;
+        homeDirectory = darwinHomeDirectory;
+      };
       modules = [ ./darwin-configuration.nix ];
     };
 
-    homeConfigurations."${username}" = home-manager.lib.homeManagerConfiguration {
-      inherit pkgs;
-      extraSpecialArgs = { inherit inputs pkgs username homeDirectory; };
-      modules = [ ./home.nix ];
+    homeConfigurations."${username}" = mkHome {
+      system = darwinSystem;
+      homeDirectory = darwinHomeDirectory;
+    };
+
+    homeConfigurations."${username}-linux" = mkHome {
+      system = linuxSystem;
+      homeDirectory = linuxHomeDirectory;
     };
   };
 }

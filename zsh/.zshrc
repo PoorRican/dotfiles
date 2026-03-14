@@ -9,12 +9,18 @@
 #
 
 # If you come from bash you might have to change your $PATH.
-export PATH=$HOME/bin:/usr/local/bin:$PATH
+export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
 
 # Source home-manager session variables and add to PATH
-if [ -e ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then
-  source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
-fi
+for hm_session_vars in \
+  "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" \
+  "$HOME/.local/state/nix/profiles/home-manager/etc/profile.d/hm-session-vars.sh"
+do
+  if [ -e "$hm_session_vars" ]; then
+    source "$hm_session_vars"
+    break
+  fi
+done
 
 # Add home-manager profile to PATH
 export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$PATH"
@@ -22,19 +28,18 @@ export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$PATH"
 for config (~/.zsh/*.zsh) source $config
 
 # Path to your oh-my-zsh installation.
-# Detect OS and set path to oh-my-zsh installation accordingly
 case "$(uname)" in
   "Darwin")
-    export ZSH="/Users/swe/.oh-my-zsh"
-    export PATH="$PATH:/Users/swe/.local/bin"
-    export PATH="/Users/swe/.codeium/windsurf/bin:$PATH"
+    export ZSH="$HOME/.oh-my-zsh"
+    if [ -d "$HOME/.codeium/windsurf/bin" ]; then
+      export PATH="$HOME/.codeium/windsurf/bin:$PATH"
+    fi
     ;;
   "Linux")
-    export ZSH="/home/swe/.oh-my-zsh"
-    export PATH="$PATH:/home/swe/.local/bin"
+    export ZSH="$HOME/.oh-my-zsh"
     ;;
   *)
-    echo "Unsupported operating system"
+    export ZSH="$HOME/.oh-my-zsh"
     ;;
 esac
 
@@ -102,9 +107,14 @@ esac
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git pip python brew macos vi-mode colored-man-pages cp extract)
+plugins=(git pip python vi-mode colored-man-pages cp extract)
+if [[ "$(uname)" == "Darwin" ]]; then
+  plugins+=(brew macos)
+fi
 
-source $ZSH/oh-my-zsh.sh
+if [ -r "$ZSH/oh-my-zsh.sh" ]; then
+  source "$ZSH/oh-my-zsh.sh"
+fi
 
 # User configuration
 
@@ -145,7 +155,7 @@ function xpand() {
 export PATH="/usr/local/sbin:$PATH"
 
 # bun completions
-[ -s "/Users/swe/.bun/_bun" ] && source "/Users/swe/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
@@ -195,19 +205,25 @@ fi
 
 
 # Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/swe/.lmstudio/bin"
+if [ -d "$HOME/.lmstudio/bin" ]; then
+  export PATH="$PATH:$HOME/.lmstudio/bin"
+fi
 # End of LM Studio CLI section
 
 # PyPI publish token (stored in macOS Keychain)
-export UV_PUBLISH_TOKEN=$(security find-generic-password -a "$USER" -s "pypi-token" -w)
+# Intentionally not auto-loaded cross-platform; set in a local, machine-specific secret source if needed.
 
 # OpenCode API key (stored in macOS Keychain)
-export OPENCODE_API_KEY=$(security find-generic-password -a "$USER" -s "opencode-api-key" -w)
+# Intentionally not auto-loaded cross-platform; set in a local, machine-specific secret source if needed.
 
-source ~/.zsh/sourcerer.zsh
+if [ -f ~/.zsh/sourcerer.zsh ]; then
+  source ~/.zsh/sourcerer.zsh
+fi
 
 fpath+=~/.zfunc; autoload -Uz compinit; compinit
 
 zstyle ':completion:*' menu select
 
-eval "$(direnv hook zsh)"
+if command -v direnv >/dev/null 2>&1; then
+  eval "$(direnv hook zsh)"
+fi

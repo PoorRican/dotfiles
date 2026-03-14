@@ -16,10 +16,15 @@
   home.username = "${username}";
   home.homeDirectory = "${homeDirectory}";
 
-  home.sessionVariables = {
-    DYLD_FALLBACK_LIBRARY_PATH = "${homeDirectory}/.local/state/nix/profiles/home-manager/home-path/lib";
-  };
+  home.sessionVariables = lib.mkMerge [
+    (lib.mkIf pkgs.stdenv.isDarwin {
+      DYLD_FALLBACK_LIBRARY_PATH = "${homeDirectory}/.local/state/nix/profiles/home-manager/home-path/lib";
+    })
+  ];
 
   programs.home-manager.enable = true;
-  targets.darwin.copyApps.enableChecks = false;
+
+  targets.darwin = lib.mkIf pkgs.stdenv.isDarwin {
+    copyApps.enableChecks = false;
+  };
 }
