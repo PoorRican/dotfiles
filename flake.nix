@@ -10,9 +10,12 @@
 
     home-manager.url = "github:nix-community/home-manager/release-25.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    imsg-overlay.url = "github:PoorRican/imsg-overlay";
+    imsg-overlay.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { nixpkgs, darwin, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, darwin, home-manager, imsg-overlay, ... }@inputs:
   let
     username = "swe";
     darwinSystem = "aarch64-darwin";
@@ -31,7 +34,11 @@
     mkPkgs = system: import nixpkgs {
       inherit system;
       config = { allowUnfree = true; };
-      overlays = [ setproctitleOverlay ];
+      overlays = [
+        setproctitleOverlay
+      ] ++ nixpkgs.lib.optionals (nixpkgs.lib.hasSuffix "-darwin" system) [
+        imsg-overlay.overlays.default
+      ];
     };
 
     mkHome = { system, homeDirectory }:

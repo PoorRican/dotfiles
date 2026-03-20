@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+    echo "Error: not inside a git repository" >&2
+    exit 1
+fi
+
+repo_name=$(basename "$(git rev-parse --show-toplevel)")
+bundle_dir="$HOME/repos/bundles"
+mkdir -p "$bundle_dir"
+
+date_stamp=$(date +%Y%m%d)
+base="${repo_name}_${date_stamp}"
+output="$bundle_dir/${base}.zip"
+
+suffix=1
+while [[ -e "$output" ]]; do
+    output="$bundle_dir/${base}_${suffix}.zip"
+    ((suffix++))
+done
+
+tree=$(git write-tree)
+git archive --format=zip --prefix="${repo_name}/" -o "$output" "$tree"
+
+echo "$output"
