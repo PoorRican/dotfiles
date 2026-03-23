@@ -41,14 +41,14 @@
       ];
     };
 
-    mkHome = { system, homeDirectory }:
+    mkHome = { system, homeDirectory, modules ? [ ./home.nix ] }:
       let
         pkgs = mkPkgs system;
       in
       home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         extraSpecialArgs = { inherit inputs pkgs username homeDirectory; };
-        modules = [ ./home.nix ];
+        inherit modules;
       };
 
     darwinPkgs = mkPkgs darwinSystem;
@@ -72,6 +72,12 @@
     homeConfigurations."${username}-linux" = mkHome {
       system = linuxSystem;
       homeDirectory = linuxHomeDirectory;
+    };
+
+    homeConfigurations."server" = mkHome {
+      system = linuxSystem;
+      homeDirectory = linuxHomeDirectory;
+      modules = [ ./nix/hosts/server.nix ];
     };
   };
 }
