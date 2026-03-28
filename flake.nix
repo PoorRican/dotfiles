@@ -56,7 +56,7 @@
           ./nix/dev-tools.nix
           ./nix/languages.nix
           ./nix/ricing.nix
-          ./nix/neovim.nix
+          ./nix/modules/neovim.nix
           ./nix/hosts/mbp.nix
         ];
       };
