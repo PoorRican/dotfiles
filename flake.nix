@@ -1,18 +1,24 @@
 # ~/dotfiles/flake.nix
 {
-  description = "Cross-platform dotfiles with nix-darwin and home-manager";
+  description = "shared and universal dotfiles";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
 
-    darwin.url = "github:LnL7/nix-darwin";
-    darwin.inputs.nixpkgs.follows = "nixpkgs";
+    darwin = {
+			url = "github:LnL7/nix-darwin";
+			inputs.nixpkgs.follows = "nixpkgs";
+		};
 
-    home-manager.url = "github:nix-community/home-manager/release-25.11";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+		home-manager = {
+			url = "github:nix-community/home-manager/release-25.11";
+    	inputs.nixpkgs.follows = "nixpkgs";
+		};
 
-    imsg-overlay.url = "github:PoorRican/imsg-overlay";
-    imsg-overlay.inputs.nixpkgs.follows = "nixpkgs";
+		imsg-overlay = {
+			url = "github:PoorRican/imsg-overlay";
+    	inputs.nixpkgs.follows = "nixpkgs";
+		};
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, imsg-overlay, ... }@inputs:
