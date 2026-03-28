@@ -70,6 +70,19 @@
           ./nix/hosts/mbp.nix
         ];
       };
+			dgx = mkHome {
+				system = "x86_64-linux"
+				username = "sparky"
+				homeDirectory = "/home/sparky"
+				overlays = [ hermesAgentOverlay ]
+				modules = [
+					./nix/profiles/minimal.nix
+					./nix/profiles/dev-core.nix
+					./nix/profiles/shell.nix
+					./nix/modules/neovim.nix
+					./nix/modules/hermes.nix
+				]
+			}
     };
   };
 }
