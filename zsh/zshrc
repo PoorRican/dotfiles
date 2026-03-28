@@ -25,7 +25,14 @@ done
 # Add home-manager profile to PATH
 export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$PATH"
 
-for config (~/.zsh/*.zsh) source $config
+if [ -f ~/.zsh/00-term.zsh ]; then
+  source ~/.zsh/00-term.zsh
+fi
+
+for config (~/.zsh/*.zsh); do
+  [[ "$config" == "$HOME/.zsh/00-term.zsh" ]] && continue
+  source "$config"
+done
 
 # Path to your oh-my-zsh installation.
 case "$(uname)" in
@@ -211,11 +218,12 @@ fi
 # End of LM Studio CLI section
 
 # PyPI publish token (stored in macOS Keychain)
-# Intentionally not auto-loaded cross-platform; set in a local, machine-specific secret source if needed.
+if [[ "$(uname)" == "Darwin" ]] && command -v security >/dev/null 2>&1; then
+  export UV_PUBLISH_TOKEN=$(security find-generic-password -a "$USER" -s "pypi-token" -w 2>/dev/null || true)
+fi
 
 # OpenCode API key (stored in macOS Keychain)
 # Intentionally not auto-loaded cross-platform; set in a local, machine-specific secret source if needed.
-
 if [ -f ~/.zsh/sourcerer.zsh ]; then
   source ~/.zsh/sourcerer.zsh
 fi
