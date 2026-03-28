@@ -33,6 +33,7 @@ require("lazy").setup({
 		require("core.telescope"),
 		require("core.surround"),
 		require("core.conform"),
+		require("core.lint"),
 		require("core.trouble"),
 		require("ui.whichkey"),
 		require("ui.lualine"),
