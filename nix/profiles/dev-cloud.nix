@@ -7,6 +7,5 @@
     pulumiPackages.pulumi-python
     pulumiPackages.pulumi-nodejs
     awscli2
-    firebase-tools
   ];
 }

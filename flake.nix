@@ -60,13 +60,13 @@
         homeDirectory = "/Users/swe";
         overlays = [ setproctitleOverlay hermesAgentOverlay imsg-overlay.overlays.default ];
         modules = [
-          ./nix/cli.nix
-          ./nix/cloud.nix
-          ./nix/dev-tools.nix
-          ./nix/languages.nix
-          ./nix/ricing.nix
-          ./nix/modules/neovim.nix
+					./nix/profiles/dev-cloud.nix
+					./nix/profiles/dev-extra.nix
+					./nix/profiles/dev-core.nix
+					./nix/profiles/minimal.nix
+					./nix/profiles/shell.nix
           ./nix/modules/hermes.nix
+					./nix/modules/neovim.nix
           ./nix/hosts/mbp.nix
         ];
       };
