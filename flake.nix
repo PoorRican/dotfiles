@@ -71,29 +71,20 @@
         homeDirectory = "/Users/swe";
         overlays = [ setproctitleOverlay hermesAgentOverlay imsg-overlay.overlays.default unstableOverlay ];
         modules = [
-					./nix/profiles/dev-cloud.nix
-					./nix/profiles/dev-extra.nix
-					./nix/profiles/dev-core.nix
-					./nix/profiles/minimal.nix
-					./nix/profiles/shell.nix
-          ./nix/modules/hermes.nix
-					./nix/modules/neovim.nix
+          # ./nix/modules/hermes.nix  # disabled — onnxruntime wheel incompatibility
           ./nix/hosts/mbp.nix
         ];
       };
-			dgx = mkHome {
-				system = "x86_64-linux"
-				username = "sparky"
-				homeDirectory = "/home/sparky"
-				overlays = [ hermesAgentOverlay ]
-				modules = [
-					./nix/profiles/minimal.nix
-					./nix/profiles/dev-core.nix
-					./nix/profiles/shell.nix
-					./nix/modules/neovim.nix
-					./nix/modules/hermes.nix
-				]
-			}
+      dgx = mkHome {
+        system = "x86_64-linux";
+        username = "sparky";
+        homeDirectory = "/home/sparky";
+        overlays = [ hermesAgentOverlay ];
+        modules = [
+          ./nix/modules/hermes.nix
+          ./nix/hosts/dgx.nix
+        ];
+      };
     };
   };
 }

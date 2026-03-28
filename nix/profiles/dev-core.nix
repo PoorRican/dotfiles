@@ -1,23 +1,23 @@
 # Core development tools
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [
-		# git
-		# TODO: setup git config
-    git
-    git-lfs
-    gh
+  imports = [
+    ../modules/git.nix
+    ../modules/helix.nix
+    ../modules/neovim.nix
+  ];
 
+  home.packages = with pkgs; [
     direnv
     cmake
-    pyright  # TODO: might be required for nvim?
+    pyright
 
     nodejs_22
     bun
     rustup
     luarocks
 
-		# databases
+    # databases
     sqlite
     postgresql_17_jit
   ];
