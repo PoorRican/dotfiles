@@ -9,9 +9,14 @@
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    imsg-overlay = {
+      url = "github:PoorRican/imsg-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
+  outputs = { nixpkgs, home-manager, imsg-overlay, ... }:
   let
     setproctitleOverlay = final: prev: {
       python313 = prev.python313.override {
@@ -44,7 +49,7 @@
         system = "aarch64-darwin";
         username = "swe";
         homeDirectory = "/Users/swe";
-        overlays = [ setproctitleOverlay ];
+        overlays = [ setproctitleOverlay imsg-overlay.overlays.default ];
         modules = [
           ./nix/cli.nix
           ./nix/cloud.nix

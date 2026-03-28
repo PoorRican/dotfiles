@@ -1,5 +1,5 @@
 # Terminal emulators, multiplexers, fonts, shell
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 {
   home.packages = with pkgs; [
     kitty
@@ -8,7 +8,5 @@
     oh-my-zsh
     helix
     jetbrains-mono
-  ] ++ lib.optionals pkgs.stdenv.isDarwin [
-    iterm2
   ];
 }

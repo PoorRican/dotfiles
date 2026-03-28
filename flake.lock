@@ -21,6 +21,26 @@
         "type": "github"
       }
     },
+    "imsg-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1773449275,
+        "narHash": "sha256-oM1U0UYAYff4eG5i6zfN9jTthDh+sVqKoS5YRSvwzig=",
+        "owner": "PoorRican",
+        "repo": "imsg-overlay",
+        "rev": "214f7c7a2dc6b7c378dbfb769d6926724e1bb4b6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "PoorRican",
+        "repo": "imsg-overlay",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1768028080,
@@ -40,6 +60,7 @@
     "root": {
       "inputs": {
         "home-manager": "home-manager",
+        "imsg-overlay": "imsg-overlay",
         "nixpkgs": "nixpkgs"
       }
     }
