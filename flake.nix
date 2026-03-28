@@ -4,6 +4,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
@@ -21,8 +22,18 @@
     };
   };
 
-  outputs = { nixpkgs, home-manager, imsg-overlay, hermes-agent, ... }:
+  outputs = { nixpkgs, nixpkgs-unstable, home-manager, imsg-overlay, hermes-agent, ... }:
   let
+    unstableOverlay = final: prev: let
+      unstable = import nixpkgs-unstable {
+        inherit (final) system;
+        config = { allowUnfree = true; };
+      };
+    in {
+      codex = unstable.codex;
+      claude-code = unstable.claude-code;
+    };
+
     setproctitleOverlay = final: prev: {
       python313 = prev.python313.override {
         packageOverrides = pfinal: pprev: {
@@ -58,7 +69,7 @@
         system = "aarch64-darwin";
         username = "swe";
         homeDirectory = "/Users/swe";
-        overlays = [ setproctitleOverlay hermesAgentOverlay imsg-overlay.overlays.default ];
+        overlays = [ setproctitleOverlay hermesAgentOverlay imsg-overlay.overlays.default unstableOverlay ];
         modules = [
 					./nix/profiles/dev-cloud.nix
 					./nix/profiles/dev-extra.nix
