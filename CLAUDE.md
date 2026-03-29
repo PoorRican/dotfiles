@@ -62,33 +62,35 @@ The repository includes configuration directories for:
 - **`nix flake update` risks**: Updating can fix one issue but introduce new build failures. Prefer targeted overlays over broad updates.
 - The `flake.nix` currently has a `setproctitleOverlay` that disables `doInstallCheck` for `python3.13-setproctitle` (segfaults in fork tests on aarch64-darwin).
 
-This is the `home-manager` configuration which is used on macOS.
+### Nix File Structure
 
-- **flake.nix**: Main entry point defining inputs (nixpkgs, nix-darwin, home-manager) and outputs for both system and user configurations
+- **flake.nix**: Main entry point defining inputs (nixpkgs, nix-darwin, home-manager) and per-host homeConfigurations
 - **darwin-configuration.nix**: System-wide macOS settings managed by nix-darwin (system packages, preferences, user accounts)
-- **home.nix**: Thin hub that imports category-based modules from `nix/`
-- **nix/languages.nix**: Language runtimes & package managers (nodejs, bun, ruby, rustup, luarocks)
-- **nix/cloud.nix**: Cloud & infrastructure CLIs (gcloud, pulumi, awscli, firebase)
-- **nix/dev-tools.nix**: Development tools, LSPs, build tools, libraries
-- **nix/cli.nix**: General-purpose CLI utilities (ripgrep, fd, bat, jq, etc.)
-- **nix/ricing.nix**: Terminal emulators, multiplexers, fonts, shell (kitty, tmux, zellij, helix)
-- **nix/neovim.nix**: Neovim program config (plugins, treesitter parsers)
+- **nix/hosts/**: Per-host configurations that compose profiles and modules
+  - `mbp.nix` — macOS (aarch64-darwin, user: swe)
+  - `dgx.nix` — Linux DGX (x86_64-linux, user: sparky)
+  - `server.nix` — Linux server (x86_64-linux, user: swe)
+- **nix/profiles/**: Composable package sets (minimal, dev-core, dev-cloud, dev-extra, server, shell)
+- **nix/modules/**: Individual program/tool configs (ghostty, git, tmux, zellij, helix, zsh, neovim, hermes)
+- **nix/layers/**: Cross-cutting feature layers (knowledge-tools)
 
 Other notes:
-- `home.nix` and the flake now support both macOS and Linux home-manager configurations. `darwin-configuration.nix` remains macOS-only.
+- `darwin-configuration.nix` remains macOS-only
 - The flake uses input following for consistency (all inputs use the same nixpkgs)
 - System and user configurations are built separately for better isolation
-- macOS system defaults are configured for development efficiency (faster key repeat, show file extensions, dock autohide)
 
+### homeConfigurations
+
+| Name     | System           | Username | Description       |
+|----------|------------------|----------|-------------------|
+| `mbp`    | aarch64-darwin   | swe      | macOS MacBook Pro |
+| `dgx`    | x86_64-linux     | sparky   | Linux DGX         |
+| `server` | x86_64-linux     | swe      | Linux server      |
 
 ### Configuration Details
 
-- **System**: Configured for aarch64-darwin (Apple Silicon)
-- **Username**: swe (configured in flake.nix variables)
 - **Nix features**: Experimental features (nix-command, flakes) enabled
-- **Package management**: System packages in darwin-configuration.nix, user packages in home.nix
-- **Development tools**: nodejs_22, bun, awscli2, google-cloud-sdk, pulumi configured in home.nix
-- **CLI tools**: ripgrep, fd, bat, jq, gh, tmux, oh-my-zsh available
+- **Package management**: System packages in darwin-configuration.nix, user packages via profiles/modules
 
 ### Common Commands
 
@@ -100,14 +102,11 @@ nix build '.#darwinConfigurations.swe.system' --print-build-logs
 sudo ./result/bin/darwin-rebuild switch
 ```
 
-**User environment (macOS home-manager):**
+**User environment (home-manager):**
 ```bash
-home-manager switch --flake .#swe
-```
-
-**User environment (Linux home-manager):**
-```bash
-home-manager switch --flake .#swe-linux
+home-manager switch --flake .#mbp      # macOS
+home-manager switch --flake .#dgx      # DGX
+home-manager switch --flake .#server   # Linux server
 ```
 
 #### Maintenance Commands
@@ -125,6 +124,6 @@ nix flake update nixpkgs  # updates only nixpkgs — still causes full rebuild
 
 #### Update Workflow
 
-- `home-manager switch --flake .#swe` applies config changes using the **current** locked nixpkgs revision. Adding or removing a package only rebuilds what changed — fast and safe.
+- `home-manager switch --flake .#<host>` applies config changes using the **current** locked nixpkgs revision. Adding or removing a package only rebuilds what changed — fast and safe.
 - `nix flake update` bumps ALL inputs to latest, which means every package may get a new version and trigger a full rebuild. **Don't run this unless you intentionally want version bumps.**
-- To add a new package without touching versions: edit the relevant `nix/*.nix` module, then run `home-manager switch --flake .#swe`.
+- To add a new package without touching versions: edit the relevant `nix/` module or profile, then run `home-manager switch --flake .#<host>`.
