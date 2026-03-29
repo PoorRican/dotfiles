@@ -1,4 +1,3 @@
-Warning: Identity file n not accessible: No such file or directory.
 # MOTD
 
 [[ -o interactive ]] || return 0

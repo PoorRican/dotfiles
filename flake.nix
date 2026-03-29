@@ -95,5 +95,11 @@
 				]
 			}
     };
+
+    homeConfigurations."server" = mkHome {
+      system = linuxSystem;
+      homeDirectory = linuxHomeDirectory;
+      modules = [ ./nix/hosts/server.nix ];
+    };
   };
 }
