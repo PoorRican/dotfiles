@@ -39,6 +39,7 @@ return {
 				"jq",
 				"json-lsp",
 				"jsonlint",
+				"markdownlint",
 				"lua-language-server",
 				"php-cs-fixer",
 				"powershell-editor-services",

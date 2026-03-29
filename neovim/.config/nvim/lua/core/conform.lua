@@ -18,6 +18,7 @@ return {
 				javascript = prettier,
 				json = prettier,
 				lua = { "stylua" },
+				markdown = { "prettier_markdown" },
 				nix = { "nixpkgs-fmt" },
         -- TODO: update to use ruff
 				python = { "isort", "black" },
@@ -44,6 +45,10 @@ return {
 				prettier = {
 					command = "prettier",
 					prepend_args = { "-w" },
+				},
+				prettier_markdown = {
+					command = "prettier",
+					prepend_args = { "-w", "--prose-wrap", "always", "--print-width", "80" },
 				},
 				shfmt = {
 					command = "shfmt",

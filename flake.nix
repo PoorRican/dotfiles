@@ -1,27 +1,38 @@
 # ~/dotfiles/flake.nix
 {
-  description = "Cross-platform dotfiles with nix-darwin and home-manager";
+  description = "shared and universal dotfiles";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
-    darwin.url = "github:LnL7/nix-darwin";
-    darwin.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager = {
+      url = "github:nix-community/home-manager/release-25.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    home-manager.url = "github:nix-community/home-manager/release-25.11";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    imsg-overlay = {
+      url = "github:PoorRican/imsg-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    imsg-overlay.url = "github:PoorRican/imsg-overlay";
-    imsg-overlay.inputs.nixpkgs.follows = "nixpkgs";
+    hermes-agent = {
+      url = "github:nousresearch/hermes-agent";
+      # No follows — its uv2nix build targets nixos-24.11
+    };
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, imsg-overlay, ... }@inputs:
+  outputs = { nixpkgs, nixpkgs-unstable, home-manager, imsg-overlay, hermes-agent, ... }:
   let
-    username = "swe";
-    darwinSystem = "aarch64-darwin";
-    linuxSystem = "x86_64-linux";
-    darwinHomeDirectory = "/Users/${username}";
-    linuxHomeDirectory = "/home/${username}";
+    unstableOverlay = final: prev: let
+      unstable = import nixpkgs-unstable {
+        inherit (final) system;
+        config = { allowUnfree = true; };
+      };
+    in {
+      codex = unstable.codex;
+      claude-code = unstable.claude-code;
+    };
 
     setproctitleOverlay = final: prev: {
       python313 = prev.python313.override {
@@ -31,47 +42,58 @@
       };
     };
 
-    mkPkgs = system: import nixpkgs {
-      inherit system;
-      config = { allowUnfree = true; };
-      overlays = [
-        setproctitleOverlay
-      ] ++ nixpkgs.lib.optionals (nixpkgs.lib.hasSuffix "-darwin" system) [
-        imsg-overlay.overlays.default
-      ];
+    hermesAgentOverlay = final: prev: {
+      hermes-agent = hermes-agent.packages.${final.system}.default;
     };
 
-    mkHome = { system, homeDirectory, modules ? [ ./home.nix ] }:
-      let
-        pkgs = mkPkgs system;
-      in
+    mkHome = { system, username, homeDirectory, modules, overlays ? [] }:
       home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        extraSpecialArgs = { inherit inputs pkgs username homeDirectory; };
-        inherit modules;
+        pkgs = import nixpkgs {
+          inherit system;
+          config = { allowUnfree = true; };
+          inherit overlays;
+        };
+        modules = modules ++ [
+          {
+            home.username = username;
+            home.homeDirectory = homeDirectory;
+            home.stateVersion = "25.11";
+            programs.home-manager.enable = true;
+          }
+        ];
       };
-
-    darwinPkgs = mkPkgs darwinSystem;
   in
   {
-    darwinConfigurations."${username}" = darwin.lib.darwinSystem {
-      system = darwinSystem;
-      specialArgs = {
-        inherit inputs username;
-        pkgs = darwinPkgs;
-        homeDirectory = darwinHomeDirectory;
+    homeConfigurations = {
+      mbp = mkHome {
+        system = "aarch64-darwin";
+        username = "swe";
+        homeDirectory = "/Users/swe";
+        overlays = [ setproctitleOverlay hermesAgentOverlay imsg-overlay.overlays.default unstableOverlay ];
+        modules = [
+					./nix/profiles/dev-cloud.nix
+					./nix/profiles/dev-extra.nix
+					./nix/profiles/dev-core.nix
+					./nix/profiles/minimal.nix
+					./nix/profiles/shell.nix
+          ./nix/modules/hermes.nix
+					./nix/modules/neovim.nix
+          ./nix/hosts/mbp.nix
+        ];
       };
-      modules = [ ./darwin-configuration.nix ];
-    };
-
-    homeConfigurations."${username}" = mkHome {
-      system = darwinSystem;
-      homeDirectory = darwinHomeDirectory;
-    };
-
-    homeConfigurations."${username}-linux" = mkHome {
-      system = linuxSystem;
-      homeDirectory = linuxHomeDirectory;
+			dgx = mkHome {
+				system = "x86_64-linux"
+				username = "sparky"
+				homeDirectory = "/home/sparky"
+				overlays = [ hermesAgentOverlay ]
+				modules = [
+					./nix/profiles/minimal.nix
+					./nix/profiles/dev-core.nix
+					./nix/profiles/shell.nix
+					./nix/modules/neovim.nix
+					./nix/modules/hermes.nix
+				]
+			}
     };
 
     homeConfigurations."server" = mkHome {

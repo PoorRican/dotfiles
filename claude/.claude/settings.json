@@ -72,5 +72,9 @@
   },
   "alwaysThinkingEnabled": true,
   "skipDangerousModePermissionPrompt": true,
-  "effortLevel": "high"
+  "effortLevel": "high",
+	"attribution": {
+		"commit": "Note: automated commit",
+		"pr": ""
+	}
 }

@@ -187,6 +187,15 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
+-- markdown: auto-wrap prose as you type
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "markdown",
+	callback = function()
+		vim.bo.textwidth = 80
+		vim.opt_local.formatoptions:append("t")
+	end,
+})
+
 -- colorcolumn: dynamic line width per filetype
 local colorcolumn_filetypes = {
 	python = "79",
