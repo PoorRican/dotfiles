@@ -18,7 +18,7 @@ return {
 				javascript = prettier,
 				json = prettier,
 				lua = { "stylua" },
-				markdown = { "prettier_markdown" },
+				markdown = prettier,
 				nix = { "nixpkgs-fmt" },
         -- TODO: update to use ruff
 				python = { "isort", "black" },
@@ -44,11 +44,12 @@ return {
 				},
 				prettier = {
 					command = "prettier",
-					prepend_args = { "-w" },
-				},
-				prettier_markdown = {
-					command = "prettier",
-					prepend_args = { "-w", "--prose-wrap", "always", "--print-width", "80" },
+					prepend_args = function(self, ctx)
+						if vim.bo[ctx.buf].filetype == "markdown" then
+							return { "-w", "--prose-wrap", "always", "--print-width", "80" }
+						end
+						return { "-w" }
+					end,
 				},
 				shfmt = {
 					command = "shfmt",

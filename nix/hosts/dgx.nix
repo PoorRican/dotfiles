@@ -1,7 +1,14 @@
-{ pkgs, ... }
+# DGX GPU server host-specific settings
+{ pkgs, ... }:
 {
-	home.packages = with pkgs; [
-		nvtop
-		nvtopPackages.full
-	]
+  imports = [
+    ../profiles/minimal.nix
+    ../profiles/shell.nix
+    ../profiles/dev-core.nix
+  ];
+
+  home.packages = with pkgs; [
+    nvtop
+    nvtopPackages.full
+  ];
 }

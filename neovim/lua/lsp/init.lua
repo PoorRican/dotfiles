@@ -122,7 +122,8 @@ return {
 		vim.lsp.config("pylsp", require("lsp.pylsp"))
 		vim.lsp.config("pyright", require("lsp.pyright"))
 		vim.lsp.config("ruff", require("lsp.ruff"))
-		vim.lsp.config("rust_analyzer", {})
+		vim.lsp.config("rust_analyzer", require("lsp.rust_analyzer"))
+
 		vim.lsp.config("tailwindcss", require("lsp.tailwindcss"))
 		vim.lsp.config("ts_ls", require("lsp.tsls"))
 		vim.lsp.config("yamlls", {})

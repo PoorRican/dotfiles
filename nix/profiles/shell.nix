@@ -1,10 +1,13 @@
 # Terminal emulators, multiplexers, fonts, shell
 { pkgs, ... }:
-{# TODO: setup configurations
+{
+  imports = [
+    ../modules/tmux.nix
+    ../modules/zellij.nix
+    ../modules/zsh.nix
+  ];
+
   home.packages = with pkgs; [
-    tmux
-    zellij
-    oh-my-zsh
     jetbrains-mono
   ];
 }
