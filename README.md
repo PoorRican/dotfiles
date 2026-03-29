@@ -1,83 +1,47 @@
 # Dotfiles
 
-This dotfiles repository is managed using [GNU Stow](https://www.gnu.org/software/stow/) for symlinking and [Nix Flakes](https://nixos.wiki/wiki/Flakes) with nix-darwin and home-manager for package management across macOS and Linux.
+This dotfiles repository is managed with [Nix Flakes](https://nixos.wiki/wiki/Flakes) using nix-darwin and home-manager for package management across macOS and Linux. Configurations live under `configs/` and are deployed via home-manager modules.
 
-## Managing Symlinks with Stow
+## Building and Activating
 
-Each top-level directory (e.g., `zsh/`, `nvim/`, `tmux/`) is a stow package. Stow creates symlinks from these directories into your home directory.
-
-### Stow a Package
-
-To symlink a package to your home directory:
+### User environment (home-manager)
 
 ```bash
-cd ~/dotfiles
-stow <package>
-```
-
-For example, to stow the zsh configuration:
-
-```bash
-stow zsh
-```
-
-### Unstow a Package
-
-To remove symlinks for a specific package:
-
-```bash
-cd ~/dotfiles
-stow -D <package>
-```
-
-For example, to unstow the claude configuration:
-
-```bash
-stow -D claude
-```
-
-### Available Packages
-
-| Package | Description |
-|---------|-------------|
-| `banners` | Custom banner files |
-| `bin` | User scripts |
-| `claude` | Claude Code configuration |
-| `figlet` | Figlet fonts |
-| `git` | Git configuration |
-| `helix` | Helix editor configuration |
-| `ngrok` | Ngrok configuration |
-| `nvim` | Neovim configuration |
-| `tmux` | Tmux configuration |
-| `zsh` | Zsh shell configuration |
-
-### Useful Flags
-
-- `-n, --no`: Dry run - show what would be done without making changes
-- `-v, --verbose`: Increase verbosity
-- `-D, --delete`: Unstow (remove symlinks)
-- `-R, --restow`: Restow (useful after modifying packages)
-
-Example dry run:
-
-```bash
-stow -nv zsh
-```
-
-## Nix Configuration
-
-This repo supports both macOS (`.#swe`) and Linux (`.#swe-linux`) home-manager configurations.
-
-Common Linux apply command:
-
-```bash
-home-manager switch --flake .#swe-linux
+home-manager switch --flake .#mbp      # macOS
+home-manager switch --flake .#dgx      # DGX (Linux)
+home-manager switch --flake .#server   # Linux server
 ```
 
 If `home-manager` is not installed yet, bootstrap it with:
 
 ```bash
-nix run home-manager/release-25.11 -- switch --flake .#swe-linux
+nix run home-manager/release-25.11 -- switch --flake .#server
 ```
 
-See CLAUDE.md for Nix build commands and architecture details.
+### System configuration (macOS only)
+
+```bash
+nix build '.#darwinConfigurations.swe.system' --print-build-logs
+sudo ./result/bin/darwin-rebuild switch
+```
+
+## Repository Layout
+
+```
+configs/          App configurations (ghostty, git, helix, neovim, tmux, zellij, zsh)
+assets/           Static resources (banners, figlet fonts, imported fonts)
+bin/              Custom scripts
+claude/           Claude Code configuration
+nix/              Nix infrastructure (hosts, modules, profiles, layers)
+docs/             Documentation
+```
+
+## Adding a New Config
+
+1. Create a directory under `configs/` with the target XDG structure
+2. Create `nix/modules/<name>.nix` using `{ dotfiles, ... }:` to receive the repo root
+3. Reference config files with `dotfiles + "/configs/<name>/..."`
+4. Import the module from the appropriate host config in `nix/hosts/`
+5. Rebuild: `home-manager switch --flake .#mbp`
+
+See `CLAUDE.md` for Nix architecture details and gotchas.

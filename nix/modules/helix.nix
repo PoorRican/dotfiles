@@ -1,6 +1,6 @@
 # Helix text editor
-{ pkgs, ... }:
+{ dotfiles, pkgs, ... }:
 {
   home.packages = [ pkgs.helix ];
-  xdg.configFile."helix/languages.toml".source = ../../helix/languages.toml;
+  xdg.configFile."helix/languages.toml".source = dotfiles + "/configs/helix/languages.toml";
 }

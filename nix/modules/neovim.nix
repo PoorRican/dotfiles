@@ -1,8 +1,8 @@
 # Neovim program configuration (plugins, treesitter parsers)
-{ pkgs, config, ... }:
+{ dotfiles, pkgs, config, ... }:
 {
   xdg.configFile."nvim".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dotfiles/neovim";
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dotfiles/configs/neovim";
 
   programs.neovim = {
     enable = true;
