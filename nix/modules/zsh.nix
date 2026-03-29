@@ -1,11 +1,11 @@
 # Zsh shell configuration
-{ pkgs, ... }:
+{ dotfiles, pkgs, ... }:
 {
   home.packages = [ pkgs.oh-my-zsh ];
-  home.file.".zshenv".source = ../../zsh/zshenv;
-  home.file.".zshrc".source = ../../zsh/zshrc;
+  home.file.".zshenv".source = dotfiles + "/configs/zsh/zshenv";
+  home.file.".zshrc".source = dotfiles + "/configs/zsh/zshrc";
   home.file.".zsh" = {
-    source = ../../zsh/modules;
+    source = dotfiles + "/configs/zsh/modules";
     recursive = true;
   };
 }

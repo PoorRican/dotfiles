@@ -53,6 +53,7 @@
           config = { allowUnfree = true; };
           inherit overlays;
         };
+        extraSpecialArgs = { dotfiles = ./.; };
         modules = modules ++ [
           {
             home.username = username;

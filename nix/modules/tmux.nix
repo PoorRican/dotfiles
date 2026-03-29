@@ -1,6 +1,6 @@
 # Tmux terminal multiplexer
-{ pkgs, ... }:
+{ dotfiles, pkgs, ... }:
 {
   home.packages = [ pkgs.tmux ];
-  xdg.configFile."tmux/tmux.conf".source = ../../tmux/tmux.conf;
+  xdg.configFile."tmux/tmux.conf".source = dotfiles + "/configs/tmux/tmux.conf";
 }

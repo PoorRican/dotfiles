@@ -6,40 +6,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a dotfiles repository which manages various configurations and CLI utilities, and supports both macOS and Linux environments.
 
-GNU `stow` is used to sync the configs, and an XDG config layout is used for sanity. Package management is handled with `home-manager` on both macOS and Linux, while nix-darwin remains macOS-only.
+An XDG config layout is used for sanity. Package management is handled with `home-manager` on both macOS and Linux, while nix-darwin remains macOS-only. Configs are deployed via home-manager modules that reference files under `configs/`.
 
 ### Repository Layout
 
 ```
 .
-├── ░▒▓ OLD ▓▒░             # archived, legacy configurations
-├── banners                 # custom banners
-├── bin                     # custom binaries / scripts
-├── claude                  # claude code configuration
-├── DepartureMono-1.500     # imported font
-├── docs                    # helpful documents explaining certain configurations/packages
-├── figlet                  # figlet fonts
-├── ghostty
-├── git
-├── helix                   # helix (text editor) configuration
-├── neovim
-├── tmux
-├── zellij
-└── zsh
+├── configs/                # app configurations (deployed by home-manager)
+│   ├── ghostty/
+│   ├── git/
+│   ├── helix/
+│   ├── neovim/             # see configs/neovim/CLAUDE.md for details
+│   ├── tmux/
+│   ├── zellij/
+│   └── zsh/
+├── assets/                 # static resources
+│   ├── banners/
+│   ├── figlet/
+│   └── fonts/
+├── bin/                    # custom binaries / scripts
+├── claude/                 # claude code configuration
+├── nix/                    # nix infrastructure (hosts, modules, profiles, layers)
+├── docs/                   # helpful documents
+├── .old/                   # archived, legacy configurations
+├── flake.nix               # nix flake entry point
+└── darwin-configuration.nix
 ```
-
-For many of the top-level directories, there is a nested structure (eg: `nvim/.config/nvim`) to mimic XDG config.
-
-The repository includes configuration directories for:
-- **neovim/.config/nvim/**: Neovim configuration with lazy.nvim plugin manager and modular plugin structure (see `neovim/.config/nvim/CLAUDE.md` for details)
-- **zsh/**: Zsh shell configuration 
-- **tmux/**: Terminal multiplexer configuration
-- **git/**: Git configuration files
-
-## Stow Usage
-
-- Re-stow a module: `stow -R <module>` from repo root
-- If a target file already exists (not a symlink), `stow` will refuse. Use `stow --adopt -R <module>` to let stow take ownership — but **`--adopt` overwrites the repo file with the existing target's content**, so restore the desired content afterward.
 
 ## High-level Module Notes
 
@@ -71,7 +63,7 @@ The repository includes configuration directories for:
   - `dgx.nix` — Linux DGX (x86_64-linux, user: sparky)
   - `server.nix` — Linux server (x86_64-linux, user: swe)
 - **nix/profiles/**: Composable package sets (minimal, dev-core, dev-cloud, dev-extra, server, shell)
-- **nix/modules/**: Individual program/tool configs (ghostty, git, tmux, zellij, helix, zsh, neovim, hermes)
+- **nix/modules/**: Individual program/tool configs — receive `dotfiles` via `extraSpecialArgs` to anchor config paths (ghostty, git, tmux, zellij, helix, zsh, neovim, hermes)
 - **nix/layers/**: Cross-cutting feature layers (knowledge-tools)
 
 Other notes:
