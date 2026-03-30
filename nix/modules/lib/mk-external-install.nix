@@ -15,12 +15,13 @@
 , installCmd
 , updateCmd
 , useCurl ? false
+, extraPkgs ? []
 }:
 let
   # POSIX tools that curl|bash install scripts commonly need
-  installPath = lib.makeBinPath (with pkgs; [
+  installPath = lib.makeBinPath ((with pkgs; [
     curl coreutils gnutar gzip gnugrep gnused perl
-  ]);
+  ]) ++ extraPkgs);
   wrapCmd = cmd:
     if useCurl
     then "bash -c 'export PATH=${installPath}:$PATH && ${cmd}'"
