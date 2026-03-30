@@ -67,11 +67,11 @@
           ./nix/hosts/dgx.nix
         ];
       };
-      server = mkHome {
+      emc = mkHome {
         system = "x86_64-linux";
         username = "swe";
         homeDirectory = "/home/swe";
-        modules = [ ./nix/hosts/server.nix ];
+        modules = [ ./nix/hosts/emc.nix ];
       };
     };
   };
