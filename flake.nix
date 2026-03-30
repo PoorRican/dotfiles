@@ -26,6 +26,8 @@
       };
     };
 
+    hermes = import ./nix/modules/hermes.nix;
+
     mkHome = { system, username, homeDirectory, modules, overlays ? [] }:
       home-manager.lib.homeManagerConfiguration {
         pkgs = import nixpkgs {
@@ -52,7 +54,7 @@
         homeDirectory = "/Users/swe";
         overlays = [ setproctitleOverlay imsg-overlay.overlays.default ];
         modules = [
-          ./nix/modules/hermes.nix
+          hermes.default
           ./nix/hosts/mbp.nix
         ];
       };
@@ -61,7 +63,7 @@
         username = "sparky";
         homeDirectory = "/home/sparky";
         modules = [
-          ./nix/modules/hermes.nix
+          hermes.default
           ./nix/hosts/dgx.nix
         ];
       };
