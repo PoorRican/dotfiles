@@ -12,7 +12,7 @@ let
     installCmd = "curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash";
     updateCmd = "hermes update";
     useCurl = true;
-    extraPkgs = [ pkgs.git ];
+    extraPkgs = [ pkgs.git pkgs.awk ];
   };
 in {
   options.programs.hermes = ext.options // {
