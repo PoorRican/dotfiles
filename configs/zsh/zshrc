@@ -114,6 +114,16 @@ COMPLETION_WAITING_DOTS="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
+# Completion paths — must be set before compinit (oh-my-zsh calls it internally)
+fpath=(~/.zfunc $fpath)
+for _hm_comp in \
+  "$HOME/.local/state/nix/profiles/home-manager/home-path/share/zsh/site-functions" \
+  "$HOME/.nix-profile/share/zsh/site-functions"
+do
+  [[ -d "$_hm_comp" ]] && fpath=($_hm_comp $fpath)
+done
+unset _hm_comp
+
 plugins=(git pip python vi-mode colored-man-pages cp extract)
 if [[ "$(uname)" == "Darwin" ]]; then
   plugins+=(brew macos)
@@ -228,7 +238,10 @@ if [ -f ~/.zsh/sourcerer.zsh ]; then
   source ~/.zsh/sourcerer.zsh
 fi
 
-fpath+=~/.zfunc; autoload -Uz compinit; compinit
+# Run compinit for environments without oh-my-zsh
+if [[ ! -r "$ZSH/oh-my-zsh.sh" ]]; then
+  autoload -Uz compinit; compinit
+fi
 
 zstyle ':completion:*' menu select
 
