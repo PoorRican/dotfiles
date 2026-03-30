@@ -5,22 +5,17 @@
 let
   cfg = config.programs.claude-code;
   dotfilesPath = "${config.home.homeDirectory}/dotfiles/configs/claude-code";
-  # Tools that curl|bash install scripts commonly need
-  installPath = lib.makeBinPath (with pkgs; [
-    curl coreutils gnutar gzip gnugrep gnused perl
-  ]);
-  pathPrefix = "PATH=${installPath}:$PATH";
+  ext = import ./lib/mk-external-install.nix { inherit lib pkgs; } {
+    name = "claude-code";
+    binary = "claude";
+    installCmd = "curl -fsSL https://claude.ai/install.sh | bash";
+    updateCmd = "claude update";
+    useCurl = true;
+  };
 in {
   disabledModules = [ "programs/claude-code.nix" ];
 
-  options.programs.claude-code = {
-    enable = lib.mkEnableOption "claude-code";
-    autoUpdate = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Run `claude update` on every home-manager switch.";
-    };
-  };
+  options.programs.claude-code = ext.options;
 
   config = lib.mkIf cfg.enable {
     home.file.".claude/settings.json".source =
@@ -34,15 +29,6 @@ in {
     home.file.".claude/skills".source =
       config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/skills";
 
-    home.activation.installClaudeCode =
-      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        if ! command -v claude &> /dev/null; then
-          run bash -c 'export ${pathPrefix} && curl -fsSL https://claude.ai/install.sh | bash'
-        ${lib.optionalString cfg.autoUpdate ''
-        else
-          run claude update
-        ''}
-        fi
-      '';
+    home.activation.installClaudeCode = ext.mkActivation cfg;
   };
 }

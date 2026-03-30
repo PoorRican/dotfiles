@@ -6,22 +6,19 @@ let
   profileSrc = dotfiles + "/configs/hermes/${cfg.profile}";
   dotfilesPath = "${config.home.homeDirectory}/dotfiles/configs/hermes/${cfg.profile}";
   entries = builtins.readDir profileSrc;
-  installPath = lib.makeBinPath (with pkgs; [
-    curl coreutils gnutar gzip gnugrep gnused perl
-  ]);
-  pathPrefix = "PATH=${installPath}:$PATH";
+  ext = import ./lib/mk-external-install.nix { inherit lib pkgs; } {
+    name = "hermes-agent";
+    binary = "hermes";
+    installCmd = "curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash";
+    updateCmd = "hermes update";
+    useCurl = true;
+  };
 in {
-  options.programs.hermes = {
-    enable = lib.mkEnableOption "hermes-agent";
+  options.programs.hermes = ext.options // {
     profile = lib.mkOption {
       type = lib.types.str;
       default = "default";
       description = "Hermes config profile directory under configs/hermes/.";
-    };
-    autoUpdate = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Run `hermes update` on every home-manager switch.";
     };
   };
 
@@ -32,15 +29,6 @@ in {
       }
     ) entries;
 
-    home.activation.installHermes =
-      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        if ! command -v hermes &> /dev/null; then
-          run bash -c 'export ${pathPrefix} && curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash'
-        ${lib.optionalString cfg.autoUpdate ''
-        else
-          run hermes update
-        ''}
-        fi
-      '';
+    home.activation.installHermes = ext.mkActivation cfg;
   };
 }
