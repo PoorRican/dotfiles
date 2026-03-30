@@ -1,22 +1,42 @@
-# Hermes Agent — config only (installed outside Nix)
+# Hermes Agent — config + installation (installed outside Nix)
 # Symlinks all entries from configs/hermes/<profile>/ into ~/.hermes/
-# Usage: (import ./nix/modules/hermes.nix).dgx
+{ config, lib, dotfiles, ... }:
 let
-  mkProfile = profile:
-    { config, lib, dotfiles, ... }:
-    let
-      profileSrc = dotfiles + "/configs/hermes/${profile}";
-      dotfilesPath = "${config.home.homeDirectory}/dotfiles/configs/hermes/${profile}";
-      entries = builtins.readDir profileSrc;
-    in {
-      home.file = lib.mapAttrs' (name: _type:
-        lib.nameValuePair ".hermes/${name}" {
-          source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/${name}";
-        }
-      ) entries;
-    };
+  cfg = config.programs.hermes;
+  profileSrc = dotfiles + "/configs/hermes/${cfg.profile}";
+  dotfilesPath = "${config.home.homeDirectory}/dotfiles/configs/hermes/${cfg.profile}";
+  entries = builtins.readDir profileSrc;
 in {
-  default = mkProfile "default";
-  dgx = mkProfile "dgx";
-  server = mkProfile "server";
+  options.programs.hermes = {
+    enable = lib.mkEnableOption "hermes-agent";
+    profile = lib.mkOption {
+      type = lib.types.str;
+      default = "default";
+      description = "Hermes config profile directory under configs/hermes/.";
+    };
+    autoUpdate = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Run `hermes update` on every home-manager switch.";
+    };
+  };
+
+  config = lib.mkIf cfg.enable {
+    home.file = lib.mapAttrs' (name: _type:
+      lib.nameValuePair ".hermes/${name}" {
+        source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/${name}";
+      }
+    ) entries;
+
+    home.activation.installHermes =
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        if ! command -v hermes &> /dev/null; then
+          run bash -c 'curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash'
+        ${lib.optionalString cfg.autoUpdate ''
+        else
+          run hermes update
+        ''}
+        fi
+      '';
+  };
 }

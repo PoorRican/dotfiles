@@ -63,8 +63,33 @@ An XDG config layout is used for sanity. Package management is handled with `hom
   - `dgx.nix` — Linux DGX (x86_64-linux, user: sparky)
   - `server.nix` — Linux server (x86_64-linux, user: swe)
 - **nix/profiles/**: Composable package sets (minimal, dev-core, dev-cloud, dev-extra, server, shell)
-- **nix/modules/**: Individual program/tool configs — receive `dotfiles` via `extraSpecialArgs` to anchor config paths (ghostty, git, tmux, zellij, helix, zsh, neovim, hermes)
+- **nix/modules/**: Individual program/tool configs — receive `dotfiles` via `extraSpecialArgs` to anchor config paths (ghostty, git, tmux, zellij, helix, zsh, neovim, hermes, claude-code, codex)
 - **nix/layers/**: Cross-cutting feature layers (knowledge-tools)
+
+### Agent Tools (claude-code, codex, hermes)
+
+These tools are installed outside nixpkgs via their own installers. Each module in `nix/modules/` handles both config symlinks and installation via `home.activation` scripts. All three are imported and enabled by default in `nix/profiles/dev-extra.nix`.
+
+The built-in home-manager modules for `programs.claude-code` and `programs.codex` are disabled (`disabledModules`) because the built-in modules copy files to the nix store, while ours use `mkOutOfStoreSymlink` for live editing from dotfiles.
+
+**Per-host opt-out** — disable a tool in a host file:
+```nix
+# nix/hosts/dgx.nix
+programs.codex.enable = false;
+```
+
+**Per-host hermes profile** — select a hermes config profile (defaults to `"default"`):
+```nix
+# nix/hosts/dgx.nix
+programs.hermes.profile = "dgx";
+```
+
+**Auto-update on switch** — run a tool's own update command on every `home-manager switch`:
+```nix
+programs.claude-code.autoUpdate = true;  # runs `claude update`
+programs.codex.autoUpdate = true;        # runs `npm install -g @openai/codex`
+programs.hermes.autoUpdate = true;       # runs `hermes update`
+```
 
 Other notes:
 - `darwin-configuration.nix` remains macOS-only
