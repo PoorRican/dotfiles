@@ -1,18 +1,19 @@
-# TODO: this should be a module
+# miscellaneous dev tools. Coding agents will expect these
 { pkgs, ... }:
 {
-  home.packages = with pkgs; [
-		codex
-		claude-code
+  imports = [
+    ../modules/claude-code.nix
+  ];
 
-		# cli tools - required by agents above
+  home.packages = with pkgs; [
+		# cli tools
 		ripgrep
 		fd
 		bat
 		jq
 		fzf  # required by neovim. de-dup?
 
-		# LSPs - required by agents above
+		# LSPs
     cmake-format
     cppcheck
     pyright
