@@ -1,10 +1,15 @@
 # Claude Code — config + installation (installed outside Nix)
 # Disables the built-in home-manager module (which copies to nix store)
 # in favor of mkOutOfStoreSymlink for live editing from dotfiles.
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.programs.claude-code;
   dotfilesPath = "${config.home.homeDirectory}/dotfiles/configs/claude-code";
+  # Tools that curl|bash install scripts commonly need
+  installPath = lib.makeBinPath (with pkgs; [
+    curl coreutils gnutar gzip gnugrep gnused perl
+  ]);
+  pathPrefix = "PATH=${installPath}:$PATH";
 in {
   disabledModules = [ "programs/claude-code.nix" ];
 
@@ -32,7 +37,7 @@ in {
     home.activation.installClaudeCode =
       lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         if ! command -v claude &> /dev/null; then
-          run bash -c 'curl -fsSL https://claude.ai/install.sh | bash'
+          run bash -c 'export ${pathPrefix} && curl -fsSL https://claude.ai/install.sh | bash'
         ${lib.optionalString cfg.autoUpdate ''
         else
           run claude update

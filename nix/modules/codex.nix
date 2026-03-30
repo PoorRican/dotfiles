@@ -1,8 +1,9 @@
 # OpenAI Codex CLI — installation only (installed outside Nix)
 # Disables the built-in home-manager module in favor of external install.
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.programs.codex;
+  bun = "${pkgs.bun}/bin/bun";
 in {
   disabledModules = [ "programs/codex.nix" ];
 
@@ -11,7 +12,7 @@ in {
     autoUpdate = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Run `npm install -g @openai/codex` on every home-manager switch.";
+      description = "Run `bun install -g @openai/codex` on every home-manager switch.";
     };
   };
 
@@ -19,10 +20,10 @@ in {
     home.activation.installCodex =
       lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         if ! command -v codex &> /dev/null; then
-          run npm install -g @openai/codex
+          run ${bun} install -g @openai/codex
         ${lib.optionalString cfg.autoUpdate ''
         else
-          run npm install -g @openai/codex
+          run ${bun} install -g @openai/codex
         ''}
         fi
       '';

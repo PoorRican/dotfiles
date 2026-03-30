@@ -87,7 +87,7 @@ programs.hermes.profile = "dgx";
 **Auto-update on switch** — run a tool's own update command on every `home-manager switch`:
 ```nix
 programs.claude-code.autoUpdate = true;  # runs `claude update`
-programs.codex.autoUpdate = true;        # runs `npm install -g @openai/codex`
+programs.codex.autoUpdate = true;        # runs `bun install -g @openai/codex`
 programs.hermes.autoUpdate = true;       # runs `hermes update`
 ```
 
