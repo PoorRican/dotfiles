@@ -4,8 +4,6 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -16,34 +14,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    hermes-agent = {
-      url = "github:nousresearch/hermes-agent";
-      # No follows — its uv2nix build targets nixos-24.11
-    };
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, home-manager, imsg-overlay, hermes-agent, ... }:
+  outputs = { nixpkgs, home-manager, imsg-overlay, ... }:
   let
-    unstableOverlay = final: prev: let
-      unstable = import nixpkgs-unstable {
-        inherit (final) system;
-        config = { allowUnfree = true; };
-      };
-    in {
-      codex = unstable.codex;
-      claude-code = unstable.claude-code;
-    };
-
     setproctitleOverlay = final: prev: {
       python313 = prev.python313.override {
         packageOverrides = pfinal: pprev: {
           setproctitle = pprev.setproctitle.overrideAttrs { doInstallCheck = false; };
         };
       };
-    };
-
-    hermesAgentOverlay = final: prev: {
-      hermes-agent = hermes-agent.packages.${final.system}.default;
     };
 
     mkHome = { system, username, homeDirectory, modules, overlays ? [] }:
@@ -70,9 +50,9 @@
         system = "aarch64-darwin";
         username = "swe";
         homeDirectory = "/Users/swe";
-        overlays = [ setproctitleOverlay hermesAgentOverlay imsg-overlay.overlays.default unstableOverlay ];
+        overlays = [ setproctitleOverlay imsg-overlay.overlays.default ];
         modules = [
-          # ./nix/modules/hermes.nix  # disabled — onnxruntime wheel incompatibility
+          ./nix/modules/hermes.nix
           ./nix/hosts/mbp.nix
         ];
       };
@@ -80,7 +60,6 @@
         system = "x86_64-linux";
         username = "sparky";
         homeDirectory = "/home/sparky";
-        overlays = [ hermesAgentOverlay ];
         modules = [
           ./nix/modules/hermes.nix
           ./nix/hosts/dgx.nix
