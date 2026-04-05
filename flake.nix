@@ -14,9 +14,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    hermes-agent = {
+      url = "github:NousResearch/hermes-agent";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
-  outputs = { nixpkgs, home-manager, imsg-overlay, ... }:
+  outputs = { nixpkgs, home-manager, imsg-overlay, hermes-agent, ... }@inputs:
   let
     setproctitleOverlay = final: prev: {
       python313 = prev.python313.override {
@@ -33,7 +38,10 @@
           config = { allowUnfree = true; };
           inherit overlays;
         };
-        extraSpecialArgs = { dotfiles = ./.; };
+        extraSpecialArgs = {
+          dotfiles = ./.;
+          inherit inputs;
+        };
         modules = modules ++ [
           {
             home.username = username;
