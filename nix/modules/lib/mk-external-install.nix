@@ -22,10 +22,11 @@ let
   installPath = lib.makeBinPath ((with pkgs; [
     curl coreutils gnutar gzip gnugrep gnused perl
   ]) ++ extraPkgs);
+  runtimePathPrefix = ''$HOME/.local/bin:${installPath}:$PATH'';
   wrapCmd = cmd:
     if useCurl
-    then "bash -c 'export PATH=${installPath}:$PATH && ${cmd}'"
-    else cmd;
+    then "bash -c 'export PATH=${runtimePathPrefix} && ${cmd}'"
+    else "bash -c 'export PATH=${runtimePathPrefix} && ${cmd}'";
 in {
   options = {
     enable = lib.mkEnableOption name;
@@ -37,6 +38,7 @@ in {
   };
   mkActivation = cfg:
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      export PATH="${runtimePathPrefix}"
       if ! command -v ${binary} &> /dev/null; then
         run ${wrapCmd installCmd}
       ${lib.optionalString cfg.autoUpdate ''
