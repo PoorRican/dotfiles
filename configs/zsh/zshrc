@@ -35,20 +35,25 @@ for config (~/.zsh/*.zsh); do
 done
 
 # Path to your oh-my-zsh installation.
-case "$(uname)" in
-  "Darwin")
-    export ZSH="$HOME/.oh-my-zsh"
-    if [ -d "$HOME/.codeium/windsurf/bin" ]; then
-      export PATH="$HOME/.codeium/windsurf/bin:$PATH"
-    fi
-    ;;
-  "Linux")
-    export ZSH="$HOME/.oh-my-zsh"
-    ;;
-  *)
-    export ZSH="$HOME/.oh-my-zsh"
-    ;;
-esac
+for _omz in \
+  "$HOME/.local/state/nix/profiles/home-manager/home-path/share/oh-my-zsh" \
+  "$HOME/.nix-profile/share/oh-my-zsh" \
+  "$HOME/.oh-my-zsh"
+ do
+  if [ -r "$_omz/oh-my-zsh.sh" ]; then
+    export ZSH="$_omz"
+    break
+  fi
+done
+unset _omz
+
+if [ -z "$ZSH" ]; then
+  export ZSH="$HOME/.oh-my-zsh"
+fi
+
+if [ "$(uname)" = "Darwin" ] && [ -d "$HOME/.codeium/windsurf/bin" ]; then
+  export PATH="$HOME/.codeium/windsurf/bin:$PATH"
+fi
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
