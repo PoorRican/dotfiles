@@ -6,5 +6,8 @@ packer_compiled.lua
 # nix build
 result
 
+# local Hermes workspace state
+.hermes/
+
 # secrets
 OPENCODE_API_KEY
