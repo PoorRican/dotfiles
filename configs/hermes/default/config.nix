@@ -207,7 +207,7 @@
   skills = {
     external_dirs = [ ];
     creation_nudge_interval = 15;
-    disabled = [ "dogfood" "faiss" "find-nearby" "google-workspace" "llava" "minecraft-modpack-server" "pinecone" "pokemon-player" "powerpoint" ];
+    disabled = [ "apple-notes" "apple-reminders" "ascii-art" "ascii-video" "atlas-history" "dogfood" "excalidraw" "faiss" "find-nearby" "findmy" "gif-search" "godmode" "google-workspace" "heartmula" "hermes-agent-setup" "himalaya" "imessage" "inference-sh-cli" "linear" "llava" "minecraft-modpack-server" "nano-pdf" "notion" "ocr-and-documents" "openhue" "pinecone" "polymarket" "pokemon-player" "powerpoint" "skill-creator" "songsee" "songwriting-and-ai-music" "xitter" "youtube-content" ];
   };
   honcho = {};
   timezone = "";

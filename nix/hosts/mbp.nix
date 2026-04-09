@@ -11,6 +11,8 @@
     ../modules/ghostty.nix
   ];
 
+  programs.hermes.profile = "mbp";
+
   home.packages = with pkgs; [
     imsg
     iterm2

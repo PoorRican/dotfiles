@@ -186,15 +186,40 @@ session_reset:
 skills:
   creation_nudge_interval: 15
   disabled:
+  - apple-notes
+  - apple-reminders
+  - ascii-art
+  - ascii-video
+  - atlas-history
   - dogfood
+  - excalidraw
   - faiss
   - find-nearby
+  - findmy
+  - gif-search
+  - godmode
   - google-workspace
+  - heartmula
+  - hermes-agent-setup
+  - himalaya
+  - imessage
+  - inference-sh-cli
+  - linear
   - llava
   - minecraft-modpack-server
+  - nano-pdf
+  - notion
+  - ocr-and-documents
+  - openhue
   - pinecone
+  - polymarket
   - pokemon-player
   - powerpoint
+  - skill-creator
+  - songsee
+  - songwriting-and-ai-music
+  - xitter
+  - youtube-content
 platform_toolsets:
   cli:
   - browser
@@ -262,3 +287,48 @@ fallback_model:
 #   cheap_model:
 #     provider: openrouter
 #     model: google/gemini-2.5-flash
+
+mcp_servers:
+  motion:
+    command: /Users/swe/.hermes/bin/motion-mcp-hermes
+    args: []
+    timeout: 120
+    connect_timeout: 90
+    tools:
+      include:
+      - motion_list_workspaces
+      - motion_get_workspace
+      - motion_list_tasks
+      - motion_get_task
+      - motion_create_task
+      - motion_update_task
+      - motion_delete_task
+      - motion_move_task
+      - motion_complete_task
+      - motion_uncomplete_task
+      - motion_list_projects
+      - motion_get_project
+      - motion_create_project
+      - motion_update_project
+      - motion_delete_project
+      - motion_get_current_user
+      - motion_get_user
+      - motion_list_users
+      - motion_get_schedule
+      - motion_list_comments
+      - motion_create_comment
+      - motion_get_comment
+      - motion_update_comment
+      - motion_delete_comment
+      - motion_list_custom_fields
+      - motion_create_custom_field
+      - motion_add_custom_field_to_task
+      - motion_add_custom_field_to_project
+      - motion_remove_custom_field_from_task
+      - motion_list_recurring_tasks
+      - motion_create_recurring_task
+      - motion_get_recurring_task
+      - motion_update_recurring_task
+      - motion_delete_recurring_task
+      resources: false
+      prompts: false

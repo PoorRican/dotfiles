@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+env_file="$HOME/.hermes/secrets/motion-mcp.env"
+if [[ -f "$env_file" ]]; then
+  set -a
+  source "$env_file"
+  set +a
+fi
+
+exec npx -y @rf-d/motion-mcp "$@"
