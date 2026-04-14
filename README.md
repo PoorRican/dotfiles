@@ -9,13 +9,14 @@ This dotfiles repository is managed with [Nix Flakes](https://nixos.wiki/wiki/Fl
 ```bash
 home-manager switch --flake .#mbp      # macOS
 home-manager switch --flake .#dgx      # DGX (Linux)
-home-manager switch --flake .#server   # Linux server
+home-manager switch --flake .#emc      # Linux server
 ```
 
 If `home-manager` is not installed yet, bootstrap it with:
 
 ```bash
-nix run home-manager/release-25.11 -- switch --flake .#server
+./bin/bin/bootstrap-dotfiles
+nix run home-manager/release-25.11 -- switch --flake .#emc
 ```
 
 ### System configuration (macOS only)
@@ -23,6 +24,20 @@ nix run home-manager/release-25.11 -- switch --flake .#server
 ```bash
 nix build '.#darwinConfigurations.swe.system' --print-build-logs
 sudo ./result/bin/darwin-rebuild switch
+```
+
+## Updating Flake Inputs
+
+Update a specific input (e.g., hermes-agent):
+
+```bash
+nix flake update hermes-agent
+```
+
+Then rebuild your configuration:
+
+```bash
+home-manager switch --flake .#<host>
 ```
 
 ## Repository Layout
