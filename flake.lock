@@ -73,17 +73,14 @@
         ]
       },
       "locked": {
-        "lastModified": 1773449275,
-        "narHash": "sha256-oM1U0UYAYff4eG5i6zfN9jTthDh+sVqKoS5YRSvwzig=",
-        "owner": "PoorRican",
-        "repo": "imsg-overlay",
-        "rev": "214f7c7a2dc6b7c378dbfb769d6926724e1bb4b6",
-        "type": "github"
+        "lastModified": 1776045092,
+        "narHash": "sha256-x6KZ6H7iNJv4uYGR3xRxD1leMTP2vX2wj2cSJuXq7rI=",
+        "path": "/Users/swe/repos/imsg-overlay",
+        "type": "path"
       },
       "original": {
-        "owner": "PoorRican",
-        "repo": "imsg-overlay",
-        "type": "github"
+        "path": "/Users/swe/repos/imsg-overlay",
+        "type": "path"
       }
     },
     "nixpkgs": {

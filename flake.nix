@@ -10,7 +10,7 @@
     };
 
     imsg-overlay = {
-      url = "github:PoorRican/imsg-overlay";
+      url = "path:/Users/swe/repos/imsg-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -23,11 +23,17 @@
 
   outputs = { nixpkgs, home-manager, imsg-overlay, hermes-agent, ... }@inputs:
   let
-    setproctitleOverlay = final: prev: {
+    darwinTestFixesOverlay = final: prev: {
       python313 = prev.python313.override {
         packageOverrides = pfinal: pprev: {
           setproctitle = pprev.setproctitle.overrideAttrs { doInstallCheck = false; };
         };
+      };
+      direnv = prev.direnv.overrideAttrs { doCheck = false; };
+      # Pin jetbrains-mono to use pre-built fonts from repo, avoiding gftools → ffmpeg-python bloat
+      jetbrains-mono = prev.jetbrains-mono.overrideAttrs {
+        nativeBuildInputs = [ ];
+        buildPhase = "true";
       };
     };
 
@@ -58,7 +64,7 @@
         system = "aarch64-darwin";
         username = "swe";
         homeDirectory = "/Users/swe";
-        overlays = [ setproctitleOverlay imsg-overlay.overlays.default ];
+        overlays = [ darwinTestFixesOverlay imsg-overlay.overlays.default ];
         modules = [
           ./nix/hosts/mbp.nix
         ];
