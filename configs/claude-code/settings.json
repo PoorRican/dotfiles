@@ -4,6 +4,10 @@
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
+  "attribution": {
+    "commit": "Note: automated commit",
+    "pr": ""
+  },
   "permissions": {
     "allow": [
       "WebFetch(domain:docs.astral.sh)",
@@ -71,10 +75,6 @@
     "clangd-lsp@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": true,
-  "skipDangerousModePermissionPrompt": true,
   "effortLevel": "high",
-	"attribution": {
-		"commit": "Note: automated commit",
-		"pr": ""
-	}
+  "skipDangerousModePermissionPrompt": true
 }
