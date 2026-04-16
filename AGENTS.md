@@ -4,7 +4,15 @@ This file provides guidance for agentic coding agents operating in this dotfiles
 
 ## Repository Overview
 
-This is a dotfiles repository managed with **Nix Flakes** (nix-darwin + home-manager) for package management on macOS and Linux. Configurations live under `configs/` and are deployed via home-manager modules.
+This is the user's primary dotfiles and system-configuration repository, managed with **Nix Flakes** (nix-darwin + home-manager) for package management on macOS and Linux. Changes here can affect multiple machines by default. Configurations live under `configs/` and are deployed via home-manager modules.
+
+## Repo-Specific Operating Defaults
+
+- Treat this repo as multi-system-impacting by default; prefer minimal, targeted changes with the smallest practical blast radius.
+- When the user asks to "update a flake input" in this repo, the default action is to update only the named input in `flake.lock`.
+- Do not edit `flake.nix` unless the user explicitly asks to change the input source, URL, follows wiring, or other flake structure.
+- After updating a flake input, verify where that input is consumed in the repo and report the old and new locked revisions.
+- Do not update unrelated flake inputs unless the user explicitly asks for a broader flake update.
 
 ## Build Commands
 
