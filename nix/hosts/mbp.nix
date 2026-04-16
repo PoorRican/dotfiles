@@ -12,6 +12,7 @@
   ];
 
   programs.hermes.profile = "mbp";
+  programs.claude-code.autoUpdate = true;
 
   home.packages = with pkgs; [
     imsg
