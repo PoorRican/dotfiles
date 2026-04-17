@@ -70,7 +70,7 @@
         ];
       };
       dgx = mkHome {
-        system = "x86_64-linux";
+        system = "aarch64-linux";
         username = "sparky";
         homeDirectory = "/home/sparky";
         modules = [
