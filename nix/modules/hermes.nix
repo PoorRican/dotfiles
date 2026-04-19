@@ -7,7 +7,21 @@ let
   profileSrc = dotfiles + "/configs/hermes/${cfg.profile}";
   dotfilesPath = "${config.home.homeDirectory}/dotfiles/configs/hermes/${cfg.profile}";
   entries = builtins.readDir profileSrc;
-  hermesPackage = inputs.hermes-agent.packages.${pkgs.system}.default;
+  upstreamHermesPackage = inputs.hermes-agent.packages.${pkgs.system}.default;
+  defaultExtras = [
+    "dev"
+    "messaging"
+    "cron"
+    "cli"
+    "pty"
+    "honcho"
+    "mcp"
+    "homeassistant"
+    "acp"
+    "feishu"
+    "web"
+    "rl"
+  ];
   profileConfigPath = profileSrc + "/config.nix";
   profileSettings = if builtins.pathExists profileConfigPath then import profileConfigPath { inherit lib; } else {};
   linkedEntries = lib.filterAttrs (name: _type: !(builtins.elem name [ "config.yaml" "config.nix" ])) entries;
@@ -51,10 +65,15 @@ in {
       default = "default";
       description = "Hermes config profile directory under configs/hermes/.";
     };
+    extras = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = defaultExtras;
+      description = "Hermes extras used by the repo-standard custom package build.";
+    };
     package = lib.mkOption {
       type = lib.types.package;
-      default = hermesPackage;
-      description = "Hermes package to install.";
+      default = upstreamHermesPackage;
+      description = "Hermes package to install. Defaults to the repo-standard custom build when enabled.";
     };
     settings = lib.mkOption {
       type = lib.types.attrs;
@@ -64,6 +83,11 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    programs.hermes.package = lib.mkDefault (pkgs.callPackage ../pkgs/hermes-agent-custom.nix {
+      inherit inputs dotfiles;
+      extras = cfg.extras;
+    });
+
     home.packages = [ cfg.package ];
 
     home.file = lib.mapAttrs' (name: _type:
