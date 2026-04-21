@@ -35,6 +35,7 @@ require("lazy").setup({
 		require("core.conform"),
 		require("core.lint"),
 		require("core.trouble"),
+		require("core.agentic"),
 		require("ui.whichkey"),
 		require("ui.lualine"),
 		require("ui.devicons"),

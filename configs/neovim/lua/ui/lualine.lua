@@ -83,7 +83,10 @@ return {
 					inactive = { c = { fg = colors.fg, bg = colors.bg } },
 				},
 				disabled_filetypes = {
-					statusline = { "neo-tree" },
+					statusline = {
+						"neo-tree",
+						"AgenticChat", "AgenticInput", "AgenticCode", "AgenticFiles", "AgenticDiagnostics"
+					}
 				},
 			},
 			sections = {
