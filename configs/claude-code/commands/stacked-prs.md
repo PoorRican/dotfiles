@@ -62,10 +62,22 @@ For each branch in order (bottom of stack first):
 ```
 
 **Description rules:**
-- Describe the final state, NOT the commit history.
-- Do NOT mention commits that were overwritten or reversed within the PR.
-- Sub-sections are allowed but not required.
+
+- A PR body is **not a regurgitation of the diff**. It is a high-level explainer that helps the reviewer understand *what the PR delivers and why*, framed around intent and final state.
+- Describe the final state, NOT the commit history. Do NOT mention commits that were overwritten or reversed within the PR.
+- Top-level bullets carry the high-level outcomes (one bullet per major theme/outcome). Keep them short — a reviewer should be able to skim them and understand the shape of the change.
+- Use **nested bullets sparingly** for low-level details that genuinely help the reviewer (e.g., a non-obvious side effect, a migration adding a column, a behavior change a reviewer might miss). Do not nest details that are self-evident from the top-level bullet or from filenames.
+- For commits/areas with **many line changes**, take extra care: collapse them into a single intent-level bullet rather than enumerating subsystems. If the breadth itself matters (e.g., a rename across many files), say so in one sentence — do not list the files.
+- **Never paste raw identifiers from the codebase that only mean something to the implementer**, including but not limited to: Alembic migration revision hashes, commit SHAs, internal task IDs, randomly-generated names. Reference the artifact by purpose ("a migration adds the column", "a new background task") instead.
+- Sub-sections (`## Foo`) are allowed when the PR genuinely spans distinct concerns (see PR #23 / `[v1][18/n]` in `mycustomai/valido-backend` as the canonical example for a multi-area PR). For a single-theme PR, skip sub-sections.
 - Use an exploration agent (sonnet model) to validate claims and understand changes before writing the description. Read the actual diff, not just commit messages.
+
+**Anti-patterns to avoid (taken from real revisions):**
+
+- Long top-level bullets that pack 4+ subsystems and several class names into one sentence — split or hoist to nested bullets.
+- Including migration revision strings like `f1a2b3c4d5e6` or chain references like "chained off `d7e8f9a0b1c2`". The reviewer does not need these; the migration file does.
+- Restating filenames as if they were features ("Adds `services/analysis/mocks.py`"). Describe the *capability*, mention the path only if it aids navigation.
+- Bullets that read like a changelog of internal symbol moves with no user-visible effect. Either omit, or compress into a single "supporting refactors" line.
 
 ### Step 5: Resolve merge conflicts
 
