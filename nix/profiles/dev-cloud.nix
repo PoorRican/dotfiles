@@ -1,11 +1,14 @@
 # Cloud & infrastructure CLIs
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
+  imports = [
+    ../modules/pulumi.nix
+  ];
+
+  programs.pulumi.enable = lib.mkDefault true;
+
   home.packages = with pkgs; [
     google-cloud-sdk
-    pulumi
-    pulumiPackages.pulumi-python
-    pulumiPackages.pulumi-nodejs
     awscli2
   ];
 }
