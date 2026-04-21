@@ -256,6 +256,16 @@
         prompts = false;
       };
     };
+    rescuetime = {
+      command = "/Users/swe/.hermes/bin/rescuetime-mcp-hermes";
+      args = [ ];
+      timeout = 120;
+      connect_timeout = 90;
+      tools = {
+        resources = false;
+        prompts = false;
+      };
+    };
   };
   honcho = {};
   timezone = "";

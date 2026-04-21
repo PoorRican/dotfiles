@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+env_file="$HOME/.hermes/secrets/rescuetime-mcp.env"
+if [[ -f "$env_file" ]]; then
+  set -a
+  source "$env_file"
+  set +a
+fi
+
+exec uv --directory "$HOME/.local/share/hermes-mcp/rescuetime-mcp" run rescuetime-mcp "$@"
