@@ -5,14 +5,25 @@ return {
   opts = {
     -- Any ACP-compatible provider works. Built-in: "claude-agent-acp" | "gemini-acp" | "codex-acp" | "opencode-acp" | "cursor-acp" | "copilot-acp" | "auggie-acp" | "mistral-vibe-acp" | "cline-acp" | "goose-acp"
     provider = "claude-agent-acp", -- setting the name here is all you need to get started
-		acp_providers = {
-			["claude-agent-acp"] = {
-				command = "bun",
-				args = {
-					"x", "@agentclientprotocol/claude-agent-acp"
-				}
-			}
-		}
+    acp_providers = {
+      ["claude-agent-acp"] = {
+        command = "bun",
+        args = { "x", "@agentclientprotocol/claude-agent-acp" },
+      },
+			["openclaw-main-engineer"] = {
+				name = "OpenClaw Main Engineer",
+				command = "/Users/swe/.bun/bin/openclaw",
+				-- args = {"acp", "--session", "agent:main:general-coding"},
+				args = {"acp", "--session", "agent:main:main"},
+			},
+    },
+    keymaps = {
+      widget = {
+        close = "q",
+        switch_provider = "s",
+        switch_model = "m",
+      },
+    },
   },
 
   -- these are just suggested keymaps; customize as desired
@@ -32,7 +43,7 @@ return {
     {
       "<leader>an",
       function() require("agentic").new_session() end,
-      mode = { "n", "v", "i" },
+      mode = { "n", "v" },
       desc = "New Agentic Session"
     },
     {
@@ -42,7 +53,7 @@ return {
       end,
       desc = "Agentic Restore session",
       silent = true,
-      mode = { "n", "v", "i" },
+      mode = { "n", "v" },
     },
     {
       "<leader>ad", -- ai Diagnostics
@@ -50,7 +61,7 @@ return {
           require("agentic").add_current_line_diagnostics()
       end,
       desc = "Add current line diagnostic to Agentic",
-      mode = { "n" },
+      mode = { "n", "v" },
     },
     {
       "<leader>aD", -- ai all Diagnostics
@@ -58,7 +69,7 @@ return {
           require("agentic").add_buffer_diagnostics()
       end,
       desc = "Add all buffer diagnostics to Agentic",
-      mode = { "n" },
+      mode = { "n", "v" },
     },
   },
 }
