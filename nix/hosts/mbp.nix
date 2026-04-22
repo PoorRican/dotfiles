@@ -9,6 +9,7 @@
     ../profiles/dev-extra.nix
 		#../profiles/server.nix
     ../modules/ghostty.nix
+		../modules/taskwarrior.nix
   ];
 
   programs.hermes.profile = "mbp";
