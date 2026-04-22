@@ -1,48 +1,50 @@
 ---
-allowed-tools: Bash(git *), Bash(gh *), Read, Glob, Grep, Agent
+name: stacked-prs
 description: Push local branches and create stacked PRs. Analyzes branch topology, pushes, creates PRs with correct base branches, and resolves merge conflicts. Use when you have a chain of local branches to turn into stacked PRs.
+allowed-tools: Bash(git *), Bash(gh *), Read, Glob, Grep, Agent
 ---
 
-## Context
+# Stacked PRs
 
-- Current branch: !`git branch --show-current`
-- All local branches: !`git branch --list`
-- Recent log (all branches): !`git log --oneline --graph --all --decorate -30`
-- Remote branches: !`git branch -r`
-- Repo: !`gh repo view --json nameWithOwner -q '.nameWithOwner' 2>/dev/null`
+Create stacked PRs for a chain of local branches. Follow the steps below precisely.
 
 ## Arguments
 
-$ARGUMENTS
+If arguments are passed via `args`, interpret them as:
 
-If arguments are provided, interpret them as:
 - Branch names or glob patterns to include
 - A qualifier prefix (e.g., `nix-refactor`) to use in PR titles
 - A stack letter override (default: `n`)
 
 If no arguments are given, infer the branch stack from the current branch's ancestry.
 
-## Your task
+## Step 0: Gather context
 
-Create stacked PRs for a chain of local branches. Follow these steps precisely.
+Before anything else, run these to understand repo state:
 
-### Step 1: Determine the branch stack
+- `git branch --show-current` — current branch
+- `git branch --list` — all local branches
+- `git log --oneline --graph --all --decorate -30` — recent log across branches
+- `git branch -r` — remote branches
+- `gh repo view --json nameWithOwner -q '.nameWithOwner'` — owner/repo
+
+## Step 1: Determine the branch stack
 
 Identify the linear chain of branches from the main branch (usually `master` or `main`) to the current or specified branch tip. Use `git merge-base` to confirm parent-child relationships. Exclude branches with no unique commits vs their parent.
 
 Output the stack as an ordered list before proceeding.
 
-### Step 2: Determine the qualifier and stack letter
+## Step 2: Determine the qualifier and stack letter
 
 - If the branch names share a common prefix (e.g., `nix-refactor/1-...`, `nix-refactor/2-...`), extract it as the qualifier.
 - If no common prefix exists, ask the user for a qualifier or skip it.
 - Default stack letter is `n`. If the user specifies a letter, use that instead.
 
-### Step 3: Push all branches
+## Step 3: Push all branches
 
 Push all branches in the stack to `origin` with `-u` in a single command.
 
-### Step 4: Create PRs
+## Step 4: Create PRs
 
 For each branch in order (bottom of stack first):
 
@@ -79,7 +81,7 @@ For each branch in order (bottom of stack first):
 - Restating filenames as if they were features ("Adds `services/analysis/mocks.py`"). Describe the *capability*, mention the path only if it aids navigation.
 - Bullets that read like a changelog of internal symbol moves with no user-visible effect. Either omit, or compress into a single "supporting refactors" line.
 
-### Step 5: Resolve merge conflicts
+## Step 5: Resolve merge conflicts
 
 After creating PRs, check each PR's mergeable status via `gh pr view N --json mergeable`. If any PR is `CONFLICTING`:
 
@@ -91,7 +93,7 @@ After creating PRs, check each PR's mergeable status via `gh pr view N --json me
 6. Cascade: merge the updated branch into any downstream branches in the stack, commit, and push each.
 7. Re-check all PRs for mergeable status.
 
-### Step 6: Report
+## Step 6: Report
 
 Output a summary table:
 
