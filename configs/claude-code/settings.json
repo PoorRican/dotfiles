@@ -77,5 +77,9 @@
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,
+  "editorMode": "vim",
+  "verbose": true,
+  "preferredNotifChannel": "terminal_bell",
+  "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true
 }
