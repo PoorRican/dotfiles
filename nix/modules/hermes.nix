@@ -11,7 +11,9 @@ let
   defaultExtras = [
     "dev"
     "messaging"
-    "cron"
+    # Hermes 0.12 makes croniter a core dependency and leaves the cron extra empty.
+    # uv2nix/pyproject-nix omit empty extras from uv.lock, so requesting "cron"
+    # makes virtualenv resolution fail even though runtime cron support is present.
     "cli"
     "pty"
     "honcho"

@@ -113,7 +113,7 @@ let
       pname = "hermes-tui";
       src = hermesTuiSrc;
       version = hermesTuiPackageJson.version;
-      npmDepsHash = "sha256-zsUPmbC6oMUO10EhS3ptvDjwlfpCSEmrkjyeORw7fac=";
+      npmDepsHash = "sha256-LrcprwDhx2AmGakwu1ipVfkBTrK5dhFfBYuUIWFI3zQ=";
 
       doCheck = false;
 
