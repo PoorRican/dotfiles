@@ -9,11 +9,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    imsg-overlay = {
-      url = "path:/Users/swe/repos/imsg-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     hermes-agent = {
       url = "github:NousResearch/hermes-agent";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -21,8 +16,10 @@
 
   };
 
-  outputs = { nixpkgs, home-manager, imsg-overlay, hermes-agent, ... }@inputs:
+  outputs = { nixpkgs, home-manager, hermes-agent, ... }@inputs:
   let
+    imsgOverlay = (builtins.getFlake "path:/Users/swe/repos/imsg-overlay").overlays.default;
+
     darwinTestFixesOverlay = final: prev: {
       python313 = prev.python313.override {
         packageOverrides = pfinal: pprev: {
@@ -64,7 +61,7 @@
         system = "aarch64-darwin";
         username = "swe";
         homeDirectory = "/Users/swe";
-        overlays = [ darwinTestFixesOverlay imsg-overlay.overlays.default ];
+        overlays = [ darwinTestFixesOverlay imsgOverlay ];
         modules = [
           ./nix/hosts/mbp.nix
         ];

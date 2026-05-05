@@ -67,23 +67,6 @@
         "type": "github"
       }
     },
-    "imsg-overlay": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1776045092,
-        "narHash": "sha256-x6KZ6H7iNJv4uYGR3xRxD1leMTP2vX2wj2cSJuXq7rI=",
-        "path": "/Users/swe/repos/imsg-overlay",
-        "type": "path"
-      },
-      "original": {
-        "path": "/Users/swe/repos/imsg-overlay",
-        "type": "path"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1777428379,
@@ -213,7 +196,6 @@
       "inputs": {
         "hermes-agent": "hermes-agent",
         "home-manager": "home-manager",
-        "imsg-overlay": "imsg-overlay",
         "nixpkgs": "nixpkgs"
       }
     },
