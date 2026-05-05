@@ -81,5 +81,6 @@
   "verbose": true,
   "preferredNotifChannel": "terminal_bell",
   "agentPushNotifEnabled": true,
+  "teammateMode": "auto",
   "skipAutoPermissionPrompt": true
 }
