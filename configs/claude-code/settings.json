@@ -47,6 +47,9 @@
     "ask": [],
     "defaultMode": "plan"
   },
+  "worktree": {
+    "baseRef": "head"
+  },
   "statusLine": {
     "type": "command",
     "command": "input=$(cat); dir=$(echo \"$input\" | jq -r '.workspace.current_dir'); branch=$(cd \"$dir\" 2>/dev/null && git branch --show-current 2>/dev/null); printf '%s@%s:%s' \"$(whoami)\" \"$(hostname -s)\" \"$(basename \"$dir\")\"; [ -n \"$branch\" ] && printf ' (%s)' \"$branch\""
@@ -97,7 +100,7 @@
   "editorMode": "vim",
   "verbose": true,
   "preferredNotifChannel": "terminal_bell",
-  "agentPushNotifEnabled": true,
   "teammateMode": "auto",
+  "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true
 }
