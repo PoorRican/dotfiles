@@ -7,22 +7,23 @@ let
   profileSrc = dotfiles + "/configs/hermes/${cfg.profile}";
   dotfilesPath = "${config.home.homeDirectory}/dotfiles/configs/hermes/${cfg.profile}";
   entries = builtins.readDir profileSrc;
-  upstreamHermesPackage = inputs.hermes-agent.packages.${pkgs.system}.default;
+  upstreamHermesPackage = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
   defaultExtras = [
     "dev"
+    # Discord gateway support is enabled in config, and Nix-managed installs can't
+    # rely on Hermes lazy-installing Python deps at first use.
     "messaging"
     # Hermes 0.12 makes croniter a core dependency and leaves the cron extra empty.
     # uv2nix/pyproject-nix omit empty extras from uv.lock, so requesting "cron"
     # makes virtualenv resolution fail even though runtime cron support is present.
     "cli"
     "pty"
-    "honcho"
+    # `dev` already pulls `mcp`, but keep it explicit because local MCP servers are
+    # a core part of this repo's Hermes workflow.
     "mcp"
     "homeassistant"
     "acp"
-    "feishu"
     "web"
-    "rl"
   ];
   profileConfigPath = profileSrc + "/config.nix";
   profileSettings = if builtins.pathExists profileConfigPath then import profileConfigPath { inherit lib; } else {};
@@ -70,7 +71,7 @@ in {
     extras = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = defaultExtras;
-      description = "Hermes extras used by the repo-standard custom package build.";
+      description = "Hermes extras preinstalled via the upstream package override.";
     };
     package = lib.mkOption {
       type = lib.types.package;
@@ -85,9 +86,8 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    programs.hermes.package = lib.mkDefault (pkgs.callPackage ../pkgs/hermes-agent-custom.nix {
-      inherit inputs dotfiles;
-      extras = cfg.extras;
+    programs.hermes.package = lib.mkDefault (upstreamHermesPackage.override {
+      extraDependencyGroups = cfg.extras;
     });
 
     home.packages = [ cfg.package ];
