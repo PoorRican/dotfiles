@@ -16,7 +16,6 @@
   programs.claude-code.autoUpdate = true;
 
   home.packages = with pkgs; [
-    imsg
     iterm2
 
     # dev - misc

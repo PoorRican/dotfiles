@@ -18,8 +18,6 @@
 
   outputs = { nixpkgs, home-manager, hermes-agent, ... }@inputs:
   let
-    imsgOverlay = (builtins.getFlake "path:/Users/swe/repos/imsg-overlay").overlays.default;
-
     darwinTestFixesOverlay = final: prev: {
       python313 = prev.python313.override {
         packageOverrides = pfinal: pprev: {
@@ -61,7 +59,7 @@
         system = "aarch64-darwin";
         username = "swe";
         homeDirectory = "/Users/swe";
-        overlays = [ darwinTestFixesOverlay imsgOverlay ];
+        overlays = [ darwinTestFixesOverlay ];
         modules = [
           ./nix/hosts/mbp.nix
         ];
