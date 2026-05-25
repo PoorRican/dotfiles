@@ -102,5 +102,6 @@
   "preferredNotifChannel": "terminal_bell",
   "teammateMode": "auto",
   "agentPushNotifEnabled": true,
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "inputNeededNotifEnabled": true
 }
