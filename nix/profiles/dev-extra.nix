@@ -18,6 +18,7 @@
 		bat
 		jq
 		fzf  # required by neovim. de-dup?
+		lefthook
 
 		# LSPs
     cmake-format

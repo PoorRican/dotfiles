@@ -10,6 +10,8 @@
   home.packages = with pkgs; [
     google-cloud-sdk
     awscli2
+    ngrok
+
 		ssm-session-manager-plugin
   ];
 }

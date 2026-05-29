@@ -2,10 +2,12 @@
 { dotfiles, pkgs, config, ... }:
 {
   xdg.configFile."nvim".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dotfiles/configs/neovim";
+    config.lib.file.mkOutOfStoreSymlink (dotfiles + "/configs/neovim");
 
   programs.neovim = {
     enable = true;
+    withRuby = true;
+    withPython3 = true;
     plugins = with pkgs.vimPlugins; [
       lazy-nvim
       nvim-lspconfig
