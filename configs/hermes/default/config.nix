@@ -1,7 +1,7 @@
 { lib, ... }:
 {
   model = {
-    default = "gpt-5.4";
+    default = "gpt-5.5";
     provider = "openai-codex";
     base_url = "https://chatgpt.com/backend-api/codex";
   };
@@ -12,7 +12,8 @@
     max_turns = 75;
     tool_use_enforcement = "auto";
     verbose = false;
-    reasoning_effort = "medium";
+    reasoning_effort = "xhigh";
+    disabled_toolsets = [ "yuanbao" ];
     personalities = {
       helpful = "You are a helpful, friendly AI assistant.";
       concise = "You are a concise assistant. Keep responses brief and to the point.";
