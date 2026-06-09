@@ -1,0 +1,80 @@
+* {
+  bg: #2B2C2B;
+  bg-alt: #353836;
+  fg: #FDF6E3;
+  fg-alt: #EEE8D5;
+  accent: #16A085;
+  urgent: #E5201D;
+  muted: #595B5B;
+
+  background-color: transparent;
+  text-color: @fg;
+  font: "JetBrainsMono Nerd Font 12";
+}
+
+window {
+  location: center;
+  anchor: center;
+  width: 42%;
+  border: 2px;
+  border-color: @accent;
+  background-color: @bg;
+}
+
+mainbox {
+  spacing: 0;
+  padding: 0;
+  background-color: @bg;
+}
+
+inputbar {
+  padding: 12px 14px;
+  spacing: 8px;
+  background-color: @bg-alt;
+  children: [ prompt, entry ];
+}
+
+prompt {
+  text-color: @accent;
+  font: "JetBrainsMono Nerd Font Bold 12";
+}
+
+entry {
+  placeholder: "type to launch";
+  placeholder-color: @muted;
+}
+
+listview {
+  lines: 10;
+  columns: 1;
+  fixed-height: false;
+  padding: 8px;
+  spacing: 4px;
+  background-color: @bg;
+}
+
+element {
+  padding: 8px 10px;
+  spacing: 10px;
+  background-color: @bg;
+  text-color: @fg-alt;
+}
+
+element selected {
+  background-color: @accent;
+  text-color: @bg;
+}
+
+element-icon {
+  size: 1.2em;
+}
+
+element-text {
+  vertical-align: 0.5;
+}
+
+message {
+  padding: 8px 14px;
+  background-color: @urgent;
+  text-color: @fg;
+}

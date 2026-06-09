@@ -1,0 +1,12 @@
+configuration {
+  modi: "drun,run,window";
+  show-icons: true;
+  drun-display-format: "{icon} {name}";
+  display-drun: "░▒▓ apps ▓▒░";
+  display-run: "░▒▓ run ▓▒░";
+  display-window: "░▒▓ windows ▓▒░";
+  terminal: "alacritty";
+  combi-modi: "drun,run,window";
+}
+
+@theme "sourcerer"
