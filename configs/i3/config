@@ -4,7 +4,7 @@
 
 set $mod Mod4
 set $terminal ghostty
-set $launcher rofi -show drun -show-icons
+set $launcher rofi -show combi -show-icons
 set $run_launcher rofi -show run
 
 # Borders / appearance
@@ -36,6 +36,11 @@ client.background       #2B2C2B
 bindsym $mod+Return exec --no-startup-id $terminal
 bindsym $mod+Shift+Return exec --no-startup-id $run_launcher
 bindsym $mod+d exec --no-startup-id $launcher
+bindsym $mod+b exec --no-startup-id i3-vivaldi
+bindsym $mod+grave exec --no-startup-id i3-quake-terminal
+bindsym $mod+Ctrl+v exec --no-startup-id i3-clipboard-menu
+bindsym $mod+Ctrl+space exec --no-startup-id i3-symbol-picker
+bindsym $mod+question exec --no-startup-id i3-keybindings-menu
 bindsym $mod+Shift+q kill
 bindsym $mod+Ctrl+x exec --no-startup-id xkill
 bindsym $mod+Ctrl+m exec --no-startup-id pavucontrol
@@ -48,9 +53,13 @@ bindsym $mod+m exec --no-startup-id polybar-msg cmd toggle
 
 # Notifications / compositor / tray applets
 exec --no-startup-id dunst
+# Bridge StatusNotifier/AppIndicator tray icons into Polybar's XEmbed tray.
+exec --no-startup-id snixembed
 exec --no-startup-id nm-applet
 exec --no-startup-id blueman-applet
 exec --no-startup-id picom
+exec --no-startup-id i3-start-clipmenud
+exec_always --no-startup-id i3-natural-scroll
 bindsym $mod+t exec --no-startup-id pkill picom; notify-send 'picom: OFF'
 bindsym $mod+Ctrl+t exec --no-startup-id picom; notify-send 'picom: ON'
 bindsym $mod+Shift+d --release exec --no-startup-id "pkill dunst; dunst; notify-send 'dunst: restarted'"
@@ -85,16 +94,10 @@ bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
 bindsym $mod+Shift+space floating toggle
-bindsym $mod+space focus mode_toggle
+bindsym $mod+space exec --no-startup-id $launcher
 bindsym $mod+Shift+s sticky toggle; exec --no-startup-id notify-send 'sticky toggled'
 bindsym $mod+a focus parent
 bindsym $mod+c focus child
-
-# Scratchpad
-bindsym $mod+Shift+minus move scratchpad
-bindsym $mod+Shift+grave move scratchpad
-bindsym $mod+minus scratchpad show
-bindsym $mod+grave scratchpad show
 
 # Workspace names from the legacy config.
 set $ws1 " 1  "
@@ -164,6 +167,7 @@ for_window [title="File Transfer*"] floating enable
 for_window [class="Pavucontrol"] floating enable
 for_window [class="(?i)virtualbox"] floating enable border normal
 for_window [class="nvidia-settings"] floating enable border normal
+for_window [class="ghostty-quake"] floating enable, sticky enable, border pixel 2, resize set width 96 ppt height 45 ppt, move position 2 ppt 2 ppt, move scratchpad
 for_window [urgent=latest] focus
 
 # Reload/restart/exit

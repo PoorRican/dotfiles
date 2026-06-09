@@ -1,12 +1,16 @@
 configuration {
-  modi: "drun,run,window";
+  modi: "combi,drun,run,window,ssh";
   show-icons: true;
   drun-display-format: "{icon} {name}";
+  display-combi: "░▒▓ spotlight ▓▒░";
   display-drun: "░▒▓ apps ▓▒░";
   display-run: "░▒▓ run ▓▒░";
   display-window: "░▒▓ windows ▓▒░";
-  terminal: "alacritty";
-  combi-modi: "drun,run,window";
+  display-ssh: "░▒▓ ssh ▓▒░";
+  terminal: "ghostty";
+  combi-modi: "drun,run,window,ssh";
+  matching: "fuzzy";
+  sorting-method: "fzf";
 }
 
 @theme "sourcerer"

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Enable macOS-style "natural" scrolling for every XInput device that exposes
+# libinput's Natural Scrolling property. Safe to run repeatedly on i3 reload.
+if ! command -v xinput >/dev/null 2>&1 || [ -z "${DISPLAY:-}" ]; then
+  exit 0
+fi
+
+while IFS= read -r id; do
+  props="$(xinput list-props "$id" 2>/dev/null || true)"
+  prop_id="$(printf '%s\n' "$props" | awk -F'[()]' '/libinput Natural Scrolling Enabled \(/ { print $2; exit }')"
+  if [ -n "$prop_id" ]; then
+    xinput set-prop "$id" "$prop_id" 1 >/dev/null 2>&1 || true
+  fi
+done < <(xinput list --id-only 2>/dev/null || true)

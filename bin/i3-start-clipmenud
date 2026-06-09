@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Start clipmenu's clipboard collector once per user session.
+# i3 calls this on startup; repeated calls are no-ops.
+if pgrep -u "$(id -u)" -x clipmenud >/dev/null 2>&1; then
+  exit 0
+fi
+
+export CM_SELECTIONS="${CM_SELECTIONS:-clipboard}"
+export CM_MAX_CLIPS="${CM_MAX_CLIPS:-1000}"
+exec clipmenud

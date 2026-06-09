@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Combined emoji + special-symbol picker. The emoji DB comes from the
+# rofi-emoji package; local math/special keys live in ~/.config/rofi/symbols.tsv.
+find_emoji_db() {
+  local dir
+  local data_dirs="${XDG_DATA_DIRS:-$HOME/.local/state/nix/profiles/home-manager/home-path/share:$HOME/.nix-profile/share:/usr/local/share:/usr/share}"
+  IFS=':' read -r -a dirs <<< "$data_dirs"
+  for dir in "${dirs[@]}" "$HOME/.local/state/nix/profiles/home-manager/home-path/share" "$HOME/.nix-profile/share"; do
+    if [ -f "$dir/rofi-emoji/all_emojis.txt" ]; then
+      printf '%s\n' "$dir/rofi-emoji/all_emojis.txt"
+      return 0
+    fi
+  done
+  return 1
+}
+
+symbols_file="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/symbols.tsv"
+emoji_db="$(find_emoji_db || true)"
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+
+if [ -f "$symbols_file" ]; then
+  awk -F '\t' 'NF >= 2 { print $1 "\t" $2 "\t" (NF >= 3 ? $3 : "") }' "$symbols_file" >> "$tmp"
+fi
+
+if [ -n "$emoji_db" ]; then
+  awk -F '\t' 'NF >= 4 { print $1 "\t" $4 "\t" (NF >= 5 ? $5 : "") }' "$emoji_db" >> "$tmp"
+fi
+
+if [ ! -s "$tmp" ]; then
+  notify-send -t 3000 "emoji/symbol" "No emoji or symbol database found"
+  exit 1
+fi
+
+selection="$(rofi -dmenu -i -p "emoji/symbol" < "$tmp" || true)"
+if [ -z "$selection" ]; then
+  exit 0
+fi
+
+char="${selection%%$'\t'*}"
+printf '%s' "$char" | xclip -selection clipboard
+notify-send -t 1000 "emoji/symbol" "copied $char"
+
+sleep 0.08
+if command -v xdotool >/dev/null 2>&1; then
+  xdotool key --clearmodifiers ctrl+v >/dev/null 2>&1 || true
+fi

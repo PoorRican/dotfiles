@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Pick a previous clipboard entry using rofi, copy it back to the clipboard,
+# then paste it into the focused window when possible.
+if ! command -v clipmenu >/dev/null 2>&1; then
+  notify-send -t 3000 "clipboard" "clipmenu is not installed"
+  exit 1
+fi
+
+selection="$(CM_LAUNCHER=rofi CM_OUTPUT_CLIP=1 clipmenu -dmenu -i -p "clipboard" || true)"
+if [ -z "$selection" ]; then
+  exit 0
+fi
+
+printf '%s' "$selection" | xclip -selection clipboard
+notify-send -t 1000 "clipboard" "selected clip copied"
+
+# Rofi usually returns focus to the previous window quickly; give it a beat.
+sleep 0.08
+if command -v xdotool >/dev/null 2>&1; then
+  xdotool key --clearmodifiers ctrl+v >/dev/null 2>&1 || true
+fi

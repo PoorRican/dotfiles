@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Toggle a dedicated Ghostty scratch terminal. Generic scratchpad bindings are
+# intentionally not exposed; i3's scratchpad is just the mechanism underneath.
+criteria='[class="ghostty-quake"]'
+
+if i3-msg "$criteria scratchpad show" >/dev/null 2>&1; then
+  exit 0
+fi
+
+ghostty --class=ghostty-quake --x11-instance-name=ghostty-quake --title="Quake Terminal" &
+
+for _ in $(seq 1 30); do
+  sleep 0.1
+  if i3-msg "$criteria scratchpad show" >/dev/null 2>&1; then
+    exit 0
+  fi
+done
+
+notify-send -t 3000 "quake terminal" "Ghostty did not appear in time"

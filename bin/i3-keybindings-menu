@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Searchable i3 keybinding cheat sheet. Selecting a row copies it so it can be
+# pasted into chat/docs while relearning the desktop.
+config="${1:-${XDG_CONFIG_HOME:-$HOME/.config}/i3/config}"
+if [ ! -f "$config" ]; then
+  notify-send -t 3000 "i3 keys" "No i3 config found at $config"
+  exit 1
+fi
+
+entries="$(
+  awk '
+    BEGIN { section = "" }
+    /^[[:space:]]*#/ {
+      comment = $0
+      sub(/^[[:space:]]*#[[:space:]]*/, "", comment)
+      if (comment !~ /^(i3 config|Ported|Original|class[[:space:]]|Legacy color|Theme colors|Home Manager owns)/ && comment != "") {
+        section = comment
+      }
+      next
+    }
+    /^[[:space:]]*bindsym[[:space:]]+/ {
+      key = $2
+      sub(/^[[:space:]]*bindsym[[:space:]]+[^[:space:]]+[[:space:]]+/, "")
+      cmd = $0
+      gsub(/\$mod/, "Super", key)
+      gsub(/Return/, "Enter", key)
+      gsub(/grave/, "`", key)
+      gsub(/minus/, "-", key)
+      gsub(/semicolon/, ";", key)
+      gsub(/slash/, "/", key)
+      gsub(/question/, "?", key)
+      gsub(/space/, "Space", key)
+      gsub(/--no-startup-id[[:space:]]+/, "", cmd)
+      gsub(/^exec[[:space:]]+/, "launch ", cmd)
+      if (section != "") {
+        printf "%-28s %s — %s\n", key, cmd, section
+      } else {
+        printf "%-28s %s\n", key, cmd
+      }
+    }
+  ' "$config"
+)"
+# shellcheck disable=SC2086
+entries="$(printf '%s\n' "$entries" | sed '/^[[:space:]]*$/d')"
+selection="$(printf '%s\n' "$entries" | rofi -dmenu -i -p "i3 keys" || true)"
+if [ -z "$selection" ]; then
+  exit 0
+fi
+
+printf '%s' "$selection" | xclip -selection clipboard
+notify-send -t 1500 "i3 keys" "copied selected binding"

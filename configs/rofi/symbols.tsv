@@ -1,0 +1,66 @@
+∴	therefore	logic proof conclusion implies
+∵	because	logic proof reason cause
+⇒	implies	logic arrow if then
+⇔	if and only if	logic iff equivalent
+→	right arrow	arrow next maps to
+←	left arrow	arrow previous
+↔	left right arrow	arrow bidirectional
+↦	maps to	function arrow mapsto
+∀	for all	logic quantifier forall
+∃	exists	logic quantifier existential
+∄	does not exist	logic quantifier
+∈	element of	set membership in
+∉	not element of	set membership notin
+⊂	subset	set proper subset
+⊆	subset or equal	set subseteq
+⊃	superset	set proper superset
+⊇	superset or equal	set superseteq
+∪	union	set cup
+∩	intersection	set cap
+∅	empty set	set null empty
+≈	almost equal	math approximately
+≠	not equal	math inequality
+≤	less than or equal	math lte
+≥	greater than or equal	math gte
+±	plus minus	math
+×	multiply	math times
+÷	divide	math division
+√	square root	math sqrt radical
+∞	infinity	math infinite
+λ	lambda	greek calculus function
+μ	mu	greek micro mean
+π	pi	greek circle
+τ	tau	greek circle
+Δ	delta uppercase	greek change difference
+δ	delta lowercase	greek change difference
+Σ	sigma uppercase	greek sum
+σ	sigma lowercase	greek stddev
+Ω	omega uppercase	greek ohm
+ω	omega lowercase	greek
+✓	check mark	ok done yes
+✗	cross mark	no fail x
+—	em dash	punctuation dash
+–	en dash	punctuation dash
+…	ellipsis	punctuation dots
+“	left double quote	punctuation smart quote
+”	right double quote	punctuation smart quote
+‘	left single quote	punctuation smart quote
+’	right single quote	punctuation smart quote
+§	section sign	legal section
+¶	pilcrow	paragraph
+°	degree	temperature angle
+•	bullet	list dot
+·	middle dot	punctuation center dot
+⌘	command key	mac command cmd super
+⌥	option key	mac option alt
+⌃	control key	mac ctrl control
+⇧	shift key	mac shift
+⎋	escape key	keyboard esc
+⏎	return key	keyboard enter return
+⌫	delete backwards	keyboard backspace
+⌦	delete forwards	keyboard delete
+⇥	tab key	keyboard tab
+↑	up arrow	keyboard arrow
+↓	down arrow	keyboard arrow
+←	left arrow key	keyboard arrow
+→	right arrow key	keyboard arrow
