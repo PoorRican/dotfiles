@@ -1,0 +1,69 @@
+#!/usr/bin/bash
+set -uo pipefail
+
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
+icon_on=""
+icon_off=""
+muted="#595B5B"
+urgent="#E5201D"
+
+color() {
+  local fg="$1"
+  local text="$2"
+  printf '%%{F%s}%s%%{F-}\n' "$fg" "$text"
+}
+
+string_property() {
+  local object_path="$1"
+  local iface="$2"
+  local prop="$3"
+  busctl --system get-property org.bluez "$object_path" "$iface" "$prop" 2>/dev/null \
+    | sed -E 's/^s "(.*)"$/\1/; s/\\"/"/g'
+}
+
+bool_property() {
+  local object_path="$1"
+  local iface="$2"
+  local prop="$3"
+  busctl --system get-property org.bluez "$object_path" "$iface" "$prop" 2>/dev/null \
+    | awk '{ print $2 }'
+}
+
+if ! busctl --system status org.bluez >/dev/null 2>&1; then
+  color "$muted" "$icon_off no bt"
+  exit 0
+fi
+
+adapter="$(busctl --system tree org.bluez --list 2>/dev/null | awk '/\/org\/bluez\/hci[0-9]+$/ { print; exit }')"
+if [ -z "$adapter" ]; then
+  color "$muted" "$icon_off no bt"
+  exit 0
+fi
+
+powered="$(bool_property "$adapter" org.bluez.Adapter1 Powered)"
+if [ "$powered" != "true" ]; then
+  color "$muted" "$icon_off off"
+  exit 0
+fi
+
+names=()
+while IFS= read -r device; do
+  [ -n "$device" ] || continue
+  if [ "$(bool_property "$device" org.bluez.Device1 Connected)" = "true" ]; then
+    alias="$(string_property "$device" org.bluez.Device1 Alias)"
+    [ -n "$alias" ] || alias="$(string_property "$device" org.bluez.Device1 Name)"
+    [ -n "$alias" ] || alias="connected"
+    names+=("$alias")
+  fi
+done < <(busctl --system tree org.bluez --list 2>/dev/null | awk -v prefix="$adapter/dev_" 'index($0, prefix) == 1 { print }')
+
+if [ "${#names[@]}" -gt 0 ]; then
+  joined="$(IFS=, ; printf '%s' "${names[*]}")"
+  if [ "${#joined}" -gt 24 ]; then
+    joined="${joined:0:21}…"
+  fi
+  printf '%s %s\n' "$icon_on" "$joined"
+else
+  printf '%s on\n' "$icon_on"
+fi
