@@ -7,7 +7,7 @@ configuration {
   display-run: "░▒▓ run ▓▒░";
   display-window: "░▒▓ windows ▓▒░";
   display-ssh: "░▒▓ ssh ▓▒░";
-  terminal: "ghostty";
+  terminal: "/usr/bin/ghostty";
   combi-modi: "drun,run,window,ssh";
   matching: "fuzzy";
   sorting-method: "fzf";
