@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:$PATH"
+
 # Focus an existing Vivaldi window if one exists; otherwise launch Vivaldi.
 if i3-msg '[class="Vivaldi"] focus' >/dev/null 2>&1; then
   exit 0
