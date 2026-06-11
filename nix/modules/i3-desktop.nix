@@ -11,7 +11,10 @@ in
 
   home.packages = with pkgs; [
     i3
-    i3lock
+    i3lock-color
+    betterlockscreen
+    xss-lock
+    imagemagick
     alacritty
     rofi
     rofi-emoji
@@ -26,6 +29,7 @@ in
     xclip
     xdotool
     xinput
+    jq
     bluez
     blueman
     feh
@@ -58,12 +62,32 @@ in
     source = dotfiles + "/bin/i3-keybindings-menu";
     executable = true;
   };
+  home.file.".local/bin/i3-lock" = {
+    source = dotfiles + "/bin/i3-lock";
+    executable = true;
+  };
   home.file.".local/bin/i3-vivaldi" = {
     source = dotfiles + "/bin/i3-vivaldi";
     executable = true;
   };
   home.file.".local/bin/i3-quake-terminal" = {
     source = dotfiles + "/bin/i3-quake-terminal";
+    executable = true;
+  };
+  home.file.".local/bin/i3-toolbox" = {
+    source = dotfiles + "/bin/i3-toolbox";
+    executable = true;
+  };
+  home.file.".local/bin/i3-toolbox-autohide" = {
+    source = dotfiles + "/bin/i3-toolbox-autohide";
+    executable = true;
+  };
+  home.file.".local/bin/i3-bluetooth-keyboard" = {
+    source = dotfiles + "/bin/i3-bluetooth-keyboard";
+    executable = true;
+  };
+  home.file.".local/bin/polybar-bluetooth" = {
+    source = dotfiles + "/bin/polybar-bluetooth";
     executable = true;
   };
 
