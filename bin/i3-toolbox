@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
+criteria='[class="jetbrains-toolbox"]'
+
+# If the Toolbox window is visible, focus it. Otherwise ask the already-running
+# Toolbox process to show its widget; this starts only a secondary instance when
+# the daemon is already alive.
+if i3-msg "$criteria focus" >/dev/null 2>&1; then
+  exit 0
+fi
+
+/usr/bin/jetbrains-toolbox >/dev/null 2>&1 &
+
+for _ in $(seq 1 40); do
+  sleep 0.1
+  if i3-msg "$criteria focus" >/dev/null 2>&1; then
+    exit 0
+  fi
+done
+
+notify-send -t 3000 "Toolbox" "JetBrains Toolbox did not appear in time"
