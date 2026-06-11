@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:$PATH"
+
 # Enable macOS-style "natural" scrolling for every XInput device that exposes
 # libinput's Natural Scrolling property. Safe to run repeatedly on i3 reload.
 if ! command -v xinput >/dev/null 2>&1 || [ -z "${DISPLAY:-}" ]; then
