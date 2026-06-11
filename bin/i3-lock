@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:$PATH"
+
+# Single lock entrypoint for i3 manual keybindings and xss-lock idle/suspend hooks.
+# betterlockscreen is an i3lock-color wrapper, so keep this command centralized.
+effect="${BETTERLOCKSCREEN_EFFECT:-dimblur}"
+off_seconds="${BETTERLOCKSCREEN_OFF_SECONDS:-15}"
+
+if ! command -v betterlockscreen >/dev/null 2>&1; then
+  notify-send 'Lock skipped' 'betterlockscreen is not available on PATH' 2>/dev/null || true
+  exit 127
+fi
+
+exec betterlockscreen --quiet --lock "$effect" --show-layout --off "$off_seconds" "$@"
