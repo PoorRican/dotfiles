@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:$PATH"
+
 # Pick a previous clipboard entry using rofi, copy it back to the clipboard,
 # then paste it into the focused window when possible.
 if ! command -v clipmenu >/dev/null 2>&1; then
