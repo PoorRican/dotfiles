@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
+lock="${XDG_RUNTIME_DIR:-/tmp}/i3-toolbox-autohide.lock"
+criteria='[class="jetbrains-toolbox"]'
+
+exec 9>"$lock"
+flock -n 9 || exit 0
+
+close_toolbox_widget() {
+  # i3 has no native minimize. For JetBrains Toolbox, WM_DELETE closes only the
+  # widget window; the background Toolbox process/daemon keeps running and the
+  # widget can be reopened by launching jetbrains-toolbox again.
+  i3-msg "$criteria kill" >/dev/null 2>&1 || true
+}
+
+i3-msg -t subscribe -m '["window"]' \
+  | jq -r --unbuffered 'select(.change == "focus") | (.container.window_properties.class // "")' \
+  | while IFS= read -r focused_class; do
+      if [ "$focused_class" != "jetbrains-toolbox" ]; then
+        close_toolbox_widget
+      fi
+    done
