@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:$PATH"
+
 # Toggle a dedicated Ghostty scratch terminal. Generic scratchpad bindings are
 # intentionally not exposed; i3's scratchpad is just the mechanism underneath.
 criteria='[class="ghostty-quake"]'
