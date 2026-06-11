@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:$PATH"
+
 # Start clipmenu's clipboard collector once per user session.
 # i3 calls this on startup; repeated calls are no-ops.
 if pgrep -u "$(id -u)" -x clipmenud >/dev/null 2>&1; then
