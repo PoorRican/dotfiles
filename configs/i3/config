@@ -3,9 +3,14 @@
 # Original legacy source: .old/i3config / historical "░▒▓ OLD ▓▒░/i3config".
 
 set $mod Mod4
-set $terminal ghostty
-set $launcher rofi -show combi -show-icons
-set $run_launcher rofi -show run
+set $hm_bin /home/swe/.local/state/nix/profiles/home-manager/home-path/bin
+set $local_bin /home/swe/.local/bin
+set $terminal /usr/bin/ghostty
+# i3 variable expansion is not recursive: variables used inside another `set`
+# value remain literal when the outer variable is expanded. Keep these absolute.
+set $launcher /home/swe/.local/state/nix/profiles/home-manager/home-path/bin/rofi -show combi -show-icons
+set $run_launcher /home/swe/.local/state/nix/profiles/home-manager/home-path/bin/rofi -show run
+set $locker /home/swe/.local/bin/i3-lock
 
 # Borders / appearance
 new_window pixel 2
@@ -35,34 +40,44 @@ client.background       #2B2C2B
 # Core launches
 bindsym $mod+Return exec --no-startup-id $terminal
 bindsym $mod+Shift+Return exec --no-startup-id $run_launcher
-bindsym $mod+d exec --no-startup-id $launcher
-bindsym $mod+b exec --no-startup-id i3-vivaldi
-bindsym $mod+grave exec --no-startup-id i3-quake-terminal
-bindsym $mod+Ctrl+v exec --no-startup-id i3-clipboard-menu
-bindsym $mod+Ctrl+space exec --no-startup-id i3-symbol-picker
-bindsym $mod+question exec --no-startup-id i3-keybindings-menu
+# Use bindcode for Super+Space: on this Kinesis/X11 setup the symbolic
+# bindsym form can fail even though the launcher command itself works.
+bindcode $mod+65 exec --no-startup-id $launcher
+# Browser launch
+bindsym $mod+b exec --no-startup-id $local_bin/i3-vivaldi
+# JetBrains Toolbox widget: closing the window only dismisses it; this reopens it.
+bindsym $mod+Ctrl+j exec --no-startup-id $local_bin/i3-toolbox
+# Quake terminal
+bindsym $mod+grave exec --no-startup-id $local_bin/i3-quake-terminal
+bindsym $mod+Ctrl+v exec --no-startup-id $local_bin/i3-clipboard-menu
+bindsym $mod+Ctrl+space exec --no-startup-id $local_bin/i3-symbol-picker
+bindsym $mod+question exec --no-startup-id $local_bin/i3-keybindings-menu
 bindsym $mod+Shift+q kill
-bindsym $mod+Ctrl+x exec --no-startup-id xkill
-bindsym $mod+Ctrl+m exec --no-startup-id pavucontrol
+bindsym $mod+Ctrl+x exec --no-startup-id $hm_bin/xkill
+bindsym $mod+Ctrl+m exec --no-startup-id $hm_bin/pavucontrol
 
 # Polybar replaces the legacy i3bar/i3status block.
 # Home Manager owns polybar.service; i3 just restarts it when the session reloads.
 exec_always --no-startup-id systemctl --user import-environment DISPLAY XAUTHORITY XDG_CURRENT_DESKTOP
 exec_always --no-startup-id systemctl --user restart polybar.service
-bindsym $mod+m exec --no-startup-id polybar-msg cmd toggle
+bindsym $mod+m exec --no-startup-id $hm_bin/polybar-msg cmd toggle
 
 # Notifications / compositor / tray applets
-exec --no-startup-id dunst
+exec --no-startup-id $hm_bin/dunst
 # Bridge StatusNotifier/AppIndicator tray icons into Polybar's XEmbed tray.
-exec --no-startup-id snixembed
-exec --no-startup-id nm-applet
-exec --no-startup-id blueman-applet
-exec --no-startup-id picom
-exec --no-startup-id i3-start-clipmenud
-exec_always --no-startup-id i3-natural-scroll
-bindsym $mod+t exec --no-startup-id pkill picom; notify-send 'picom: OFF'
-bindsym $mod+Ctrl+t exec --no-startup-id picom; notify-send 'picom: ON'
-bindsym $mod+Shift+d --release exec --no-startup-id "pkill dunst; dunst; notify-send 'dunst: restarted'"
+exec --no-startup-id $hm_bin/snixembed
+exec --no-startup-id $hm_bin/nm-applet
+# Do not autostart blueman-applet: for flaky BLE HID reconnect loops it can
+# create one popup window per connect/disconnect transition. Keep Blueman
+# installed for manual fallback, but use i3-bluetooth-keyboard for Adv360.
+exec --no-startup-id $hm_bin/picom
+exec --no-startup-id $local_bin/i3-start-clipmenud
+exec_always --no-startup-id /bin/sh -lc 'exec /home/swe/.local/bin/i3-toolbox-autohide'
+exec --no-startup-id $hm_bin/xss-lock --transfer-sleep-lock -- $locker
+exec_always --no-startup-id $local_bin/i3-natural-scroll
+bindsym $mod+t exec --no-startup-id /bin/sh -lc 'pkill picom; /home/swe/.local/state/nix/profiles/home-manager/home-path/bin/notify-send "picom: OFF"'
+bindsym $mod+Ctrl+t exec --no-startup-id /bin/sh -lc '/home/swe/.local/state/nix/profiles/home-manager/home-path/bin/picom; /home/swe/.local/state/nix/profiles/home-manager/home-path/bin/notify-send "picom: ON"'
+bindsym $mod+Shift+d --release exec --no-startup-id "pkill dunst; $hm_bin/dunst; $hm_bin/notify-send 'dunst: restarted'"
 
 # Focus
 bindsym $mod+j focus left
@@ -85,8 +100,8 @@ bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
 # Layout
-bindsym $mod+h split h; exec --no-startup-id notify-send 'tile horizontally'
-bindsym $mod+v split v; exec --no-startup-id notify-send 'tile vertically'
+bindsym $mod+h split h; exec --no-startup-id $hm_bin/notify-send 'tile horizontally'
+bindsym $mod+v split v; exec --no-startup-id $hm_bin/notify-send 'tile vertically'
 bindsym $mod+BackSpace split toggle
 bindsym $mod+f fullscreen toggle
 bindsym $mod+slash fullscreen toggle
@@ -94,8 +109,7 @@ bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
 bindsym $mod+Shift+space floating toggle
-bindsym $mod+space exec --no-startup-id $launcher
-bindsym $mod+Shift+s sticky toggle; exec --no-startup-id notify-send 'sticky toggled'
+bindsym $mod+Shift+s sticky toggle; exec --no-startup-id $hm_bin/notify-send 'sticky toggled'
 bindsym $mod+a focus parent
 bindsym $mod+c focus child
 
@@ -165,27 +179,28 @@ for_window [class="Galculator"] floating enable border pixel 1
 for_window [class="GParted"] floating enable border normal
 for_window [title="File Transfer*"] floating enable
 for_window [class="Pavucontrol"] floating enable
+for_window [class="jetbrains-toolbox"] floating enable, border pixel 2
 for_window [class="(?i)virtualbox"] floating enable border normal
 for_window [class="nvidia-settings"] floating enable border normal
 for_window [class="ghostty-quake"] floating enable, sticky enable, border pixel 2, resize set width 96 ppt height 45 ppt, move position 2 ppt 2 ppt, move scratchpad
 for_window [urgent=latest] focus
 
 # Reload/restart/exit
-bindsym $mod+Shift+c reload
-bindsym $mod+Shift+r restart
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'Exit i3?' -b 'Yes, exit i3' 'i3-msg exit'"
+bindsym $mod+Shift+r reload
+bindsym $mod+Ctrl+Shift+r restart
+bindsym $mod+Shift+e exec "$hm_bin/i3-nagbar -t warning -m 'Exit i3?' -b 'Yes, exit i3' '$hm_bin/i3-msg exit'"
 
 # System mode
-bindsym $mod+backslash mode "$mode_system"; exec --no-startup-id notify-send 'MODE: system'
+bindsym $mod+backslash mode "$mode_system"; exec --no-startup-id $hm_bin/notify-send 'MODE: system'
 set $mode_system (l)ock, (e)xit, (s)uspend, (r)eboot, (Shift+s)hutdown
 mode "$mode_system" {
-        bindsym l exec --no-startup-id i3lock, mode "default"
-        bindsym e exec --no-startup-id i3-msg exit, mode "default"
+        bindsym l exec --no-startup-id $locker, mode "default"
+        bindsym e exec --no-startup-id $hm_bin/i3-msg exit, mode "default"
         bindsym s exec --no-startup-id systemctl suspend, mode "default"
         bindsym r exec --no-startup-id systemctl reboot, mode "default"
         bindsym Shift+s exec --no-startup-id systemctl poweroff, mode "default"
-        bindsym Return mode "default"; exec --no-startup-id notify-send 'MODE: regular'
-        bindsym Escape mode "default"; exec --no-startup-id notify-send 'MODE: regular'
+        bindsym Return mode "default"; exec --no-startup-id $hm_bin/notify-send 'MODE: regular'
+        bindsym Escape mode "default"; exec --no-startup-id $hm_bin/notify-send 'MODE: regular'
 }
 
 # Resize mode; h/t/n/s layout is from the legacy Dvorak setup.
@@ -203,8 +218,8 @@ mode "resize" {
         bindsym Shift+Down resize grow width 20 px or 20 ppt
         bindsym Shift+Up resize shrink height 20 px or 20 ppt
         bindsym Shift+Right resize grow height 20 px or 20 ppt
-        bindsym Return mode "default"; exec --no-startup-id notify-send 'MODE: regular'
-        bindsym Escape mode "default"; exec --no-startup-id notify-send 'MODE: regular'
+        bindsym Return mode "default"; exec --no-startup-id $hm_bin/notify-send 'MODE: regular'
+        bindsym Escape mode "default"; exec --no-startup-id $hm_bin/notify-send 'MODE: regular'
 }
 
 # i3-gaps settings from legacy config.
