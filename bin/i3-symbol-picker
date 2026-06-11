@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:$PATH"
+
 # Combined emoji + special-symbol picker. The emoji DB comes from the
 # rofi-emoji package; local math/special keys live in ~/.config/rofi/symbols.tsv.
 find_emoji_db() {
