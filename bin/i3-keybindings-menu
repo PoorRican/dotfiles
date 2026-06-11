@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:$PATH"
+
 # Searchable i3 keybinding cheat sheet. Selecting a row copies it so it can be
 # pasted into chat/docs while relearning the desktop.
 config="${1:-${XDG_CONFIG_HOME:-$HOME/.config}/i3/config}"
