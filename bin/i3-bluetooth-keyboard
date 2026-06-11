@@ -1,0 +1,176 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
+name_pattern="${BT_KEYBOARD_NAME_PATTERN:-Adv360 Pro}"
+action="${1:-connect}"
+scan_timeout="${BT_SCAN_TIMEOUT:-10}"
+
+notify() {
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send -t "${3:-5000}" "${1:-Bluetooth}" "${2:-}"
+  fi
+}
+
+blueman_quiet() {
+  # Blueman is useful as a manual manager, but its applet can create one GTK
+  # notification window per connect/disconnect transition for flaky BLE HID
+  # devices. Keep bluetoothd running; only stop the noisy UI layer.
+  pkill -f 'blueman-applet|blueman-tray|blueman-manager' >/dev/null 2>&1 || true
+  if command -v i3-msg >/dev/null 2>&1; then
+    i3-msg '[class=".blueman-applet-wrapped"] kill' >/dev/null 2>&1 || true
+    i3-msg '[class="Blueman-manager"] kill' >/dev/null 2>&1 || true
+  fi
+}
+
+known_devices() {
+  bluetoothctl devices 2>/dev/null \
+    | awk -v pat="$name_pattern" 'BEGIN { IGNORECASE = 1 } /^Device / && $0 ~ pat { print $2 }'
+}
+
+scan_for_device() {
+  bluetoothctl --timeout "$scan_timeout" scan on >/tmp/i3-bluetooth-keyboard-scan.log 2>&1 || true
+  known_devices | head -n1
+}
+
+find_device() {
+  local mac
+  mac="$(known_devices | head -n1 || true)"
+  if [ -n "$mac" ]; then
+    printf '%s\n' "$mac"
+    return 0
+  fi
+  scan_for_device
+}
+
+info_value() {
+  local mac="$1" key="$2"
+  bluetoothctl info "$mac" 2>/dev/null | awk -F': ' -v key="$key" '$1 ~ "^[[:space:]]*" key "$" { print $2; exit }'
+}
+
+rssi_value() {
+  local mac="$1"
+  local rssi
+  rssi="$(info_value "$mac" RSSI || true)"
+  if [[ "$rssi" =~ \((-?[0-9]+)\) ]]; then
+    printf '%s\n' "${BASH_REMATCH[1]}"
+  fi
+}
+
+print_status() {
+  local mac="${1:-$(find_device || true)}"
+  if [ -z "$mac" ]; then
+    printf 'No %s device seen. Put the keyboard profile into pairing/advertising mode and retry.\n' "$name_pattern"
+    return 1
+  fi
+  bluetoothctl info "$mac"
+  local rssi
+  rssi="$(rssi_value "$mac" || true)"
+  if [ -n "$rssi" ] && [ "$rssi" -lt -90 ]; then
+    printf '\nWARNING: RSSI %s dBm is very weak for a desk keyboard. Check antenna/distance/battery before blaming BlueZ.\n' "$rssi"
+  fi
+}
+
+connect_keyboard() {
+  blueman_quiet
+  bluetoothctl power on >/dev/null || true
+  bluetoothctl pairable on >/dev/null || true
+
+  local mac paired bonded connected rssi
+  mac="$(find_device || true)"
+  if [ -z "$mac" ]; then
+    notify "Bluetooth" "$name_pattern not seen; put that keyboard profile in pairing mode" 7000
+    exit 1
+  fi
+
+  paired="$(info_value "$mac" Paired || true)"
+  bonded="$(info_value "$mac" Bonded || true)"
+  connected="$(info_value "$mac" Connected || true)"
+  rssi="$(rssi_value "$mac" || true)"
+
+  if [ "$connected" = "yes" ]; then
+    notify "Bluetooth" "$name_pattern is already connected"
+    exit 0
+  fi
+
+  if [ -n "$rssi" ] && [ "$rssi" -lt -90 ]; then
+    notify "Bluetooth" "$name_pattern signal is weak (${rssi} dBm); check antenna/distance/battery" 8000
+  fi
+
+  if [ "$paired" != "yes" ] || [ "$bonded" != "yes" ]; then
+    notify "Bluetooth" "$name_pattern is visible but not paired; right-click Bluetooth for pairing terminal" 9000
+    printf '%s is visible at %s but not paired/bonded.\n' "$name_pattern" "$mac"
+    printf 'Run: %s pair\n' "$0"
+    print_status "$mac" || true
+    exit 2
+  fi
+
+  bluetoothctl trust "$mac" >/dev/null || true
+  if bluetoothctl --timeout 15 connect "$mac"; then
+    notify "Bluetooth" "$name_pattern connected"
+  else
+    notify "Bluetooth" "$name_pattern connect failed; run status/pair and check RSSI" 8000
+    exit 1
+  fi
+}
+
+pair_terminal() {
+  blueman_quiet
+  local init
+  init="$(mktemp /tmp/i3-bluetoothctl-init.XXXXXX)"
+  cat >"$init" <<EOF
+power on
+pairable on
+agent KeyboardDisplay
+default-agent
+scan on
+EOF
+  exec /usr/bin/ghostty -e bash -lc "
+    printf '%s\\n' 'Adv360 Pro pairing via bluetoothctl (quiet path, no Blueman applet).'
+    printf '%s\\n' ''
+    printf '%s\\n' '1. Put the desired Adv360 profile into Bluetooth pairing mode.'
+    printf '%s\\n' '2. Wait for a Device line named Adv360 Pro.'
+    printf '%s\\n' '3. Run: pair <MAC>'
+    printf '%s\\n' '4. If a passkey appears, type it on the keyboard and press Enter on the keyboard.'
+    printf '%s\\n' '5. Then run: trust <MAC>'
+    printf '%s\\n' '6. Then run: connect <MAC>'
+    printf '%s\\n' ''
+    bluetoothctl --agent KeyboardDisplay --init-script '$init'
+  "
+}
+
+forget_keyboard() {
+  blueman_quiet
+  local macs mac
+  macs="$(known_devices || true)"
+  if [ -z "$macs" ]; then
+    printf 'No known %s devices to remove.\n' "$name_pattern"
+    exit 0
+  fi
+  while IFS= read -r mac; do
+    [ -n "$mac" ] || continue
+    printf 'Removing stale %s entry %s\n' "$name_pattern" "$mac"
+    bluetoothctl remove "$mac" || true
+  done <<<"$macs"
+}
+
+case "$action" in
+  connect) connect_keyboard ;;
+  pair) pair_terminal ;;
+  forget|remove|reset) forget_keyboard ;;
+  status) print_status ;;
+  quiet|clean-ui) blueman_quiet ;;
+  *)
+    cat <<EOF
+Usage: $0 [connect|pair|status|forget|clean-ui]
+
+connect  Quietly connect a paired $name_pattern through BlueZ/bluetoothctl.
+pair     Open an interactive bluetoothctl pairing terminal with KeyboardDisplay agent.
+status   Print BlueZ state and warn on weak RSSI.
+forget   Remove known $name_pattern entries so the profile can be paired cleanly.
+clean-ui Stop Blueman applet/manager popup spam without stopping bluetoothd.
+EOF
+    exit 64
+    ;;
+esac
