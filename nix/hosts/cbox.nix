@@ -1,5 +1,5 @@
 # cbox server
-{ lib, pkgs, ... }:
+{ lib, ... }:
 
 {
   imports = [
@@ -14,11 +14,9 @@
     #../layers/knowledge-tools.nix
   ];
 
-  # The shared Neovim module manages the full ~/.config/nvim tree and also
-  # enables Home Manager's Neovim program module. On this 26.05 cbox switch,
-  # that program module generates ~/.config/nvim/init.lua and collides with
-  # the symlinked config tree. Keep upstream's shared module intact and make
-  # cbox package-only for now.
+  # The shared Neovim module manages the full ~/.config/nvim tree and installs
+  # the Neovim binary package directly. Keep Home Manager's program module off
+  # here so it does not generate ~/.config/nvim/init.lua alongside the symlinked
+  # config tree.
   programs.neovim.enable = lib.mkForce false;
-  home.packages = [ pkgs.neovim ];
 }
