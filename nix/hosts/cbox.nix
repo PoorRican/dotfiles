@@ -7,6 +7,7 @@
     ../profiles/shell.nix
     ../profiles/server.nix
     ../profiles/i3-desktop.nix
+    ../profiles/hyprland-desktop.nix
     ../profiles/dev-core.nix
     ../profiles/dev-extra.nix
     # not used at this moment

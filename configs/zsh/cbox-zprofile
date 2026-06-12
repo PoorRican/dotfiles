@@ -1,0 +1,6 @@
+# cbox login profile.
+# Hyprland startup is owned by the OS-level LightDM session, not by zprofile.
+
+if [ -r "$HOME/.profile" ]; then
+  source "$HOME/.profile"
+fi

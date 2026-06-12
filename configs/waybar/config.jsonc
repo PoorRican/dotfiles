@@ -1,0 +1,162 @@
+// cbox Hyprland Waybar config — dark rounded bar with Polybar-ish density.
+{
+  "layer": "top",
+  "position": "top",
+  "height": 34,
+  "spacing": 8,
+  "margin-top": 8,
+  "margin-left": 10,
+  "margin-right": 10,
+  "reload_style_on_change": true,
+
+  "modules-left": [
+    "custom/launcher",
+    "hyprland/workspaces",
+    "hyprland/submap"
+  ],
+  "modules-center": [
+    "hyprland/window"
+  ],
+  "modules-right": [
+    "idle_inhibitor",
+    "pulseaudio",
+    "bluetooth",
+    "network",
+    "cpu",
+    "memory",
+    "disk",
+    "clock",
+    "tray",
+    "custom/power"
+  ],
+
+  "custom/launcher": {
+    "format": "░▒▓ 󰣇 ▓▒░",
+    "tooltip": "Launch apps with Rofi",
+    "on-click": "/home/swe/.local/state/nix/profiles/home-manager/home-path/bin/rofi -show drun -show-icons"
+  },
+
+  "hyprland/workspaces": {
+    "format": "{icon}",
+    "on-click": "activate",
+    "sort-by-number": true,
+    "persistent-workspaces": {
+      "*": [1, 2, 3, 4, 5, 6, 7, 8]
+    },
+    "format-icons": {
+      "1": "",
+      "2": "",
+      "3": "",
+      "4": "",
+      "5": "",
+      "6": "",
+      "7": "󰊴",
+      "8": "",
+      "9": "",
+      "10": "",
+      "active": "",
+      "urgent": "",
+      "default": ""
+    }
+  },
+
+  "hyprland/submap": {
+    "format": "MODE: {}",
+    "max-length": 24,
+    "tooltip": false
+  },
+
+  "hyprland/window": {
+    "format": "{}",
+    "separate-outputs": true,
+    "max-length": 90,
+    "rewrite": {
+      "(.*) - Vivaldi": "  $1",
+      "(.*) — Mozilla Firefox": "  $1",
+      "(.*) - Ghostty": "  $1",
+      "": "░▒▓ Hyprland ▓▒░"
+    }
+  },
+
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "",
+      "deactivated": ""
+    },
+    "tooltip": true
+  },
+
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": "󰖁 muted",
+    "format-bluetooth": "{icon} {volume}%",
+    "format-icons": {
+      "headphone": "",
+      "hands-free": "󰋎",
+      "headset": "󰋎",
+      "phone": "",
+      "portable": "",
+      "car": "",
+      "default": ["", "", ""]
+    },
+    "scroll-step": 2,
+    "on-click": "/home/swe/.local/state/nix/profiles/home-manager/home-path/bin/pavucontrol",
+    "tooltip-format": "{desc}"
+  },
+
+  "bluetooth": {
+    "format": " {status}",
+    "format-disabled": " off",
+    "format-off": " off",
+    "format-no-controller": "",
+    "format-connected": " {device_alias}",
+    "format-connected-battery": " {device_alias} {device_battery_percentage}%",
+    "on-click": "/usr/bin/blueman-manager",
+    "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected"
+  },
+
+  "network": {
+    "format-wifi": " {essid}",
+    "format-ethernet": " {ipaddr}",
+    "format-linked": " {ifname}",
+    "format-disconnected": "󰖪 offline",
+    "format-alt": "{ifname}: {ipaddr}/{cidr}",
+    "tooltip-format": "{ifname} via {gwaddr}"
+  },
+
+  "cpu": {
+    "interval": 2,
+    "format": " {usage}%",
+    "tooltip": false
+  },
+
+  "memory": {
+    "interval": 2,
+    "format": "󰍛 {}%"
+  },
+
+  "disk": {
+    "interval": 30,
+    "path": "/",
+    "format": " {free}"
+  },
+
+  "clock": {
+    "interval": 30,
+    "format": "░▒▓ {:%a %Y-%m-%d  %H:%M} ▓▒░",
+    "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>",
+    "format-alt": "{:%H:%M}"
+  },
+
+  "tray": {
+    "icon-size": 18,
+    "spacing": 8
+  },
+
+  "custom/power": {
+    "format": "⏻",
+    "tooltip": "Exit Hyprland",
+    "on-click": "hyprctl dispatch exit"
+  }
+}

@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Configure cbox's OS-level login stack to start Hyprland through LightDM.
+# Home Manager owns ~/.config/hypr and ~/.config/waybar; this script owns /etc.
+
+if [[ "${EUID}" -ne 0 ]]; then
+  exec sudo "$0" "$@"
+fi
+
+user_name="${CBOX_HYPRLAND_USER:-swe}"
+conf_dir="/etc/lightdm/lightdm.conf.d"
+conf_file="$conf_dir/50-cbox-hyprland.conf"
+session_file="/usr/share/wayland-sessions/cbox-hyprland.desktop"
+starter="/usr/local/bin/cbox-start-hyprland"
+smoke_zprofile="/home/${user_name}/.zprofile"
+stamp="$(date +%Y%m%d-%H%M%S)"
+restart=0
+autologin=0
+
+for arg in "$@"; do
+  case "$arg" in
+    --restart) restart=1 ;;
+    --autologin) autologin=1 ;;
+    *)
+      printf 'Unknown argument: %s\n' "$arg" >&2
+      printf 'Usage: %s [--restart] [--autologin]\n' "$0" >&2
+      exit 64
+      ;;
+  esac
+done
+
+printf '==> Ensuring required Arch packages are present\n'
+pacman -S --needed --noconfirm \
+  hyprland \
+  waybar \
+  rofi \
+  network-manager-applet \
+  xdg-desktop-portal \
+  xdg-desktop-portal-hyprland \
+  lightdm \
+  lightdm-gtk-greeter
+
+if [[ "$autologin" -eq 1 ]]; then
+  printf '==> Ensuring LightDM autologin group contains %s\n' "$user_name"
+  if ! getent group autologin >/dev/null; then
+    groupadd -r autologin
+  fi
+  usermod -aG autologin "$user_name"
+else
+  printf '==> Leaving LightDM autologin disabled; greeter login screen will be shown\n'
+fi
+
+printf '==> Writing %s\n' "$starter"
+cat >"$starter" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+# LightDM runs user shells/profiles before execing the selected session. On this
+# non-NixOS Arch host that can put Home Manager's Nix profile before /usr/bin,
+# and Arch's start-hyprland refuses to launch a Nix-built Hyprland without
+# nixGL. Keep the compositor itself on the OS side and let Home Manager own only
+# user config and helper apps.
+export PATH=/usr/local/bin:/usr/bin:/bin
+export XDG_CURRENT_DESKTOP=Hyprland
+export XDG_SESSION_DESKTOP=Hyprland
+export XDG_SESSION_TYPE=wayland
+
+mkdir -p "$HOME/.cache"
+log="$HOME/.cache/cbox-hyprland-session.log"
+exec >>"$log" 2>&1
+
+printf '\n==> cbox-start-hyprland %s\n' "$(date -Is)"
+printf 'PATH=%s\n' "$PATH"
+printf 'Hyprland=%s\n' "$(command -v Hyprland || true)"
+printf 'start-hyprland=%s\n' "$(command -v start-hyprland || true)"
+
+exec /usr/bin/start-hyprland -- --config "$HOME/.config/hypr/hyprland.lua"
+EOF
+chmod 0755 "$starter"
+
+printf '==> Writing %s\n' "$session_file"
+cat >"$session_file" <<EOF
+[Desktop Entry]
+Name=cbox Hyprland
+Comment=Hyprland with cbox OS-owned compositor wrapper
+Exec=$starter
+Type=Application
+DesktopNames=Hyprland
+Keywords=tiling;wayland;compositor;
+EOF
+
+printf '==> Writing %s\n' "$conf_file"
+install -d -m 0755 "$conf_dir"
+if [[ -e "$conf_file" ]]; then
+  cp -a "$conf_file" "$conf_file.bak-$stamp"
+fi
+cat >"$conf_file" <<EOF
+# cbox Hyprland real-switch config.
+# Managed by ~/dotfiles/bin/cbox-switch-to-hyprland-os.
+
+[LightDM]
+sessions-directory=/usr/share/lightdm/sessions:/usr/share/xsessions:/usr/share/wayland-sessions
+
+[Seat:*]
+greeter-session=lightdm-gtk-greeter
+user-session=cbox-hyprland
+EOF
+
+if [[ "$autologin" -eq 1 ]]; then
+  cat >>"$conf_file" <<EOF
+autologin-user=$user_name
+autologin-user-timeout=0
+autologin-session=cbox-hyprland
+EOF
+fi
+
+# The earlier smoke test used ~/.zprofile to launch Hyprland from tty1. Once
+# LightDM owns startup, remove that fallback only if it is clearly our generated
+# block; Home Manager may replace it later with a neutral profile.
+if [[ -f "$smoke_zprofile" ]] && grep -q 'cbox Hyprland smoke-test autostart' "$smoke_zprofile"; then
+  printf '==> Moving old smoke-test zprofile aside\n'
+  mv "$smoke_zprofile" "$smoke_zprofile.bak-hyprland-os-$stamp"
+fi
+
+printf '==> Enabling graphical LightDM startup\n'
+systemctl set-default graphical.target
+systemctl enable lightdm.service
+
+printf '\nOS-level Hyprland switch is installed.\n'
+printf 'Next step: reboot, or run this script with --restart to restart LightDM now.\n'
+printf 'WARNING: --restart ends the current graphical session.\n'
+
+if [[ "$restart" -eq 1 ]]; then
+  printf '==> Restarting LightDM now\n'
+  systemctl restart lightdm.service
+fi
