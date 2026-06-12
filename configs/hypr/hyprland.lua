@@ -197,6 +197,16 @@ hl.animation({ leaf = "zoomFactor",    enabled = true,  speed = 7,    bezier = "
 --     rounding    = 0,
 -- })
 
+-- Workspace 4 is a scrolling-layout playground: windows form a horizontal tape
+-- of columns instead of a fixed BSP tree.
+hl.workspace_rule({
+    workspace = "4",
+    layout = "scrolling",
+    layout_opts = {
+        direction = "right",
+    },
+})
+
 -- See https://wiki.hypr.land/Configuring/Layouts/Dwindle-Layout/ for more
 hl.config({
     dwindle = {
@@ -284,8 +294,19 @@ hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
+hl.bind(mainMod .. " + slash", hl.dsp.window.fullscreen()) -- i3 muscle memory
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
+
+-- Groups are Hyprland's tabbed/stacked container primitive. They work inside
+-- scrolling columns too, so a column can become a stable tab stack.
+hl.bind(mainMod .. " + G",              hl.dsp.group.toggle())
+hl.bind(mainMod .. " + Tab",            hl.dsp.group.next())
+hl.bind(mainMod .. " + SHIFT + Tab",    hl.dsp.group.prev())
+hl.bind(mainMod .. " + SHIFT + G",      hl.dsp.group.move_window())
+hl.bind(mainMod .. " + CTRL + G",       hl.dsp.group.lock_active({ action = "toggle" }))
+hl.bind(mainMod .. " + CTRL + SHIFT + G", hl.dsp.group.lock({ action = "toggle" }))
 
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
@@ -304,6 +325,16 @@ hl.bind(mainMod .. " + CTRL + left",  hl.dsp.window.resize({ x = -resizeStep, y 
 hl.bind(mainMod .. " + CTRL + right", hl.dsp.window.resize({ x = resizeStep,  y = 0,           relative = true }))
 hl.bind(mainMod .. " + CTRL + up",    hl.dsp.window.resize({ x = 0,           y = -resizeStep, relative = true }))
 hl.bind(mainMod .. " + CTRL + down",  hl.dsp.window.resize({ x = 0,           y = resizeStep,  relative = true }))
+
+-- Scrolling layout controls (especially useful on workspace 4)
+hl.bind(mainMod .. " + comma",        hl.dsp.layout("move -col"))
+hl.bind(mainMod .. " + period",       hl.dsp.layout("move +col"))
+hl.bind(mainMod .. " + CTRL + comma", hl.dsp.layout("focus l"))
+hl.bind(mainMod .. " + CTRL + period",hl.dsp.layout("focus r"))
+hl.bind(mainMod .. " + SHIFT + comma",hl.dsp.layout("swapcol l"))
+hl.bind(mainMod .. " + SHIFT + period",hl.dsp.layout("swapcol r"))
+hl.bind(mainMod .. " + CTRL + I",     hl.dsp.layout("consume"))
+hl.bind(mainMod .. " + CTRL + O",     hl.dsp.layout("expel"))
 
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
