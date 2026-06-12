@@ -272,6 +272,7 @@ hl.device({
 ---------------------
 
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
+local resizeStep = 40
 
 -- cbox muscle-memory binds. Keep these sparse until the Hyprland setup settles.
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
@@ -291,6 +292,18 @@ hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
+
+-- Move/swap the active window with mainMod + SHIFT + arrow keys
+hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.move({ direction = "left" }))
+hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
+hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.move({ direction = "up" }))
+hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.move({ direction = "down" }))
+
+-- Resize the active window with mainMod + CTRL + arrow keys
+hl.bind(mainMod .. " + CTRL + left",  hl.dsp.window.resize({ x = -resizeStep, y = 0,           relative = true }))
+hl.bind(mainMod .. " + CTRL + right", hl.dsp.window.resize({ x = resizeStep,  y = 0,           relative = true }))
+hl.bind(mainMod .. " + CTRL + up",    hl.dsp.window.resize({ x = 0,           y = -resizeStep, relative = true }))
+hl.bind(mainMod .. " + CTRL + down",  hl.dsp.window.resize({ x = 0,           y = resizeStep,  relative = true }))
 
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
