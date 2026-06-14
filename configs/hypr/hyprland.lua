@@ -37,7 +37,8 @@ hl.monitor({
 
 -- Set programs that you use
 local home        = os.getenv("HOME") or "/home/swe"
-local hmBin       = home .. "/.local/state/nix/profiles/home-manager/home-path/bin"
+local hmProfile   = home .. "/.local/state/nix/profiles/home-manager/home-path"
+local hmBin       = hmProfile .. "/bin"
 local terminal    = "/usr/bin/ghostty"
 local browser     = "/usr/bin/vivaldi-stable"
 local fileManager = "ranger"
@@ -55,6 +56,15 @@ local menu        = hmBin .. "/rofi -show drun -show-icons"
 --
 hl.on("hyprland.start", function ()
 --   hl.exec_cmd(terminal)
+	-- Keep the Wayland session bus and systemd user environment in sync so
+	-- xdg-desktop-portal and D-Bus-activated helpers see the same desktop.
+	hl.exec_cmd("/usr/bin/dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE XDG_DATA_DIRS PATH")
+
+	-- Dunst is Wayland-aware and registers org.freedesktop.Notifications on
+	-- the current session bus. Without a live notification daemon, Chromium /
+	-- Vivaldi can fall back to app-owned notification windows that Hyprland
+	-- treats like normal tiled windows.
+	hl.exec_cmd(hmBin .. "/dunst")
 	hl.exec_cmd(hmBin .. "/nm-applet")
 	hl.exec_cmd("/usr/bin/waybar")
 end)
@@ -69,6 +79,7 @@ end)
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("PATH", hmBin .. ":/usr/local/bin:/usr/bin:/bin")
+hl.env("XDG_DATA_DIRS", hmProfile .. "/share:/usr/local/share:/usr/share")
 hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
 hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 hl.env("XDG_SESSION_TYPE", "wayland")
