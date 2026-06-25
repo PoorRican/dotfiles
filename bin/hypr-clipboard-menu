@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
+notify() {
+  notify-send -t "${2:-1500}" "clipboard" "$1" 2>/dev/null || true
+}
+
+paste_into_active_window() {
+  # Rofi usually hands focus back to the previous window quickly; give the
+  # compositor a beat before injecting Ctrl+V into the focused Wayland client.
+  sleep 0.08
+
+  if command -v wtype >/dev/null 2>&1; then
+    wtype -M ctrl -k v -m ctrl >/dev/null 2>&1 || true
+  fi
+}
+
+for cmd in cliphist rofi wl-copy; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    notify "$cmd is not installed" 3000
+    exit 1
+  fi
+done
+
+selection="$(cliphist list | rofi -dmenu -i -p "clipboard" || true)"
+if [ -z "$selection" ]; then
+  exit 0
+fi
+
+printf '%s' "$selection" | cliphist decode | wl-copy
+notify "selected clip copied"
+paste_into_active_window

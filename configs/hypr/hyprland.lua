@@ -43,6 +43,9 @@ local terminal    = "/usr/bin/ghostty"
 local browser     = "/usr/bin/vivaldi-stable"
 local fileManager = "ranger"
 local menu        = hmBin .. "/rofi -show drun -show-icons"
+local cliphist    = home .. "/.local/bin/hypr-start-cliphist"
+local clipMenu    = home .. "/.local/bin/hypr-clipboard-menu"
+local symbolMenu  = home .. "/.local/bin/hypr-symbol-picker"
 
 
 -------------------
@@ -60,11 +63,20 @@ hl.on("hyprland.start", function ()
 	-- xdg-desktop-portal and D-Bus-activated helpers see the same desktop.
 	hl.exec_cmd("/usr/bin/dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE XDG_DATA_DIRS PATH")
 
+	-- Native Wayland clipboard history for Ghostty and other non-XWayland apps.
+	hl.exec_cmd(cliphist)
+
 	-- Dunst is Wayland-aware and registers org.freedesktop.Notifications on
 	-- the current session bus. Without a live notification daemon, Chromium /
 	-- Vivaldi can fall back to app-owned notification windows that Hyprland
 	-- treats like normal tiled windows.
 	hl.exec_cmd(hmBin .. "/dunst")
+
+	-- Desktop applets/agents expected by GUI control panels. Blueman's applet
+	-- provides tray/agent integration for pairing flows; lxqt-policykit-agent
+	-- provides a Wayland-friendly Polkit prompt for privileged desktop actions.
+	hl.exec_cmd(hmBin .. "/blueman-applet")
+	hl.exec_cmd(hmBin .. "/lxqt-policykit-agent")
 	hl.exec_cmd(hmBin .. "/nm-applet")
 	hl.exec_cmd("/usr/bin/waybar")
 end)
@@ -304,6 +316,8 @@ hl.bind(mainMod .. " + SHIFT + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
+hl.bind(mainMod .. " + CTRL + V", hl.dsp.exec_cmd(clipMenu))
+hl.bind(mainMod .. " + CTRL + Space", hl.dsp.exec_cmd(symbolMenu))
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + slash", hl.dsp.window.fullscreen()) -- i3 muscle memory

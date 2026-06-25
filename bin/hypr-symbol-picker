@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
+notify() {
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send -t "${2:-1500}" "math symbol" "$1" 2>/dev/null || true
+  fi
+}
+
+paste_into_active_window() {
+  if command -v wtype >/dev/null 2>&1; then
+    # Let rofi release focus, then ask the active client to paste the clipboard.
+    sleep 0.08
+    wtype -M ctrl v -m ctrl >/dev/null 2>&1 || true
+  fi
+}
+
+for cmd in rofi wl-copy; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    notify "$cmd is not installed" 3000
+    exit 1
+  fi
+done
+
+symbols_file="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/symbols.tsv"
+if [ ! -r "$symbols_file" ]; then
+  notify "No math symbol database at $symbols_file" 3000
+  exit 1
+fi
+
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+
+awk -F '\t' '
+  NF >= 2 && $1 !~ /^#/ && $1 != "" {
+    print $1 "\t" $2 "\t" (NF >= 3 ? $3 : "")
+  }
+' "$symbols_file" > "$tmp"
+
+if [ ! -s "$tmp" ]; then
+  notify "Math symbol database is empty" 3000
+  exit 1
+fi
+
+selection="$(rofi -dmenu -i -p "math symbol" -mesg "Enter copies + pastes; Esc cancels" < "$tmp" || true)"
+if [ -z "$selection" ]; then
+  exit 0
+fi
+
+char="${selection%%$'\t'*}"
+if printf '%s' "$char" | wl-copy --type text/plain; then
+  notify "copied $char"
+  paste_into_active_window
+else
+  notify "failed to copy $char" 3000
+  exit 1
+fi

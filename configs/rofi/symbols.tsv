@@ -1,66 +1,155 @@
-∴	therefore	logic proof conclusion implies
-∵	because	logic proof reason cause
-⇒	implies	logic arrow if then
+∴	therefore	logic proof conclusion hence
+∵	because	logic proof reason since
+¬	not	logic negation
+∧	and	logic conjunction wedge
+∨	or	logic disjunction vee
+⊕	exclusive or	logic xor direct sum
+⊻	xor	logic exclusive or
+⇒	implies	logic implication if then
+⇐	implied by	logic reverse implication
 ⇔	if and only if	logic iff equivalent
-→	right arrow	arrow next maps to
-←	left arrow	arrow previous
-↔	left right arrow	arrow bidirectional
-↦	maps to	function arrow mapsto
+⊢	turnstile	logic proves entails syntactic
+⊨	double turnstile	logic models entails semantic
+⊥	bottom	logic false contradiction perpendicular
+⊤	top	logic true tautology
 ∀	for all	logic quantifier forall
 ∃	exists	logic quantifier existential
 ∄	does not exist	logic quantifier
+∎	end of proof	qed tombstone proof
 ∈	element of	set membership in
 ∉	not element of	set membership notin
-⊂	subset	set proper subset
+∋	contains as member	set such that contains
+∌	does not contain as member	set membership
+⊂	proper subset	set subset
+⊄	not proper subset	set subset
 ⊆	subset or equal	set subseteq
-⊃	superset	set proper superset
+⊈	not subset or equal	set subseteq
+⊊	subset not equal	set proper subset
+⊃	proper superset	set superset
+⊅	not proper superset	set superset
 ⊇	superset or equal	set superseteq
+⊉	not superset or equal	set superseteq
+⊋	superset not equal	set proper superset
 ∪	union	set cup
 ∩	intersection	set cap
+⋃	big union	set union indexed
+⋂	big intersection	set intersection indexed
+⊎	disjoint union	set multiset union
 ∅	empty set	set null empty
-≈	almost equal	math approximately
-≠	not equal	math inequality
-≤	less than or equal	math lte
-≥	greater than or equal	math gte
-±	plus minus	math
-×	multiply	math times
-÷	divide	math division
-√	square root	math sqrt radical
+∖	set difference	set minus complement
+∆	symmetric difference	set delta difference
+ℕ	natural numbers	number set naturals
+ℤ	integers	number set integers
+ℚ	rationals	number set rationals
+ℝ	real numbers	number set reals
+ℂ	complex numbers	number set complex
+ℙ	primes or probability	number set primes probability
+=	equals	relation equality
+≠	not equal	relation inequality
+≡	identical to	relation congruent equivalence
+≢	not identical to	relation not congruent
+≈	almost equal	relation approximate approx
+≉	not almost equal	relation approximate
+≃	asymptotically equal	relation similar asymptotic
+≅	congruent to	relation isomorphic congruent
+∼	similar to	relation tilde distributed as
+∝	proportional to	relation proportional
+<	less than	relation lt
+>	greater than	relation gt
+≤	less than or equal	relation lte leq
+≥	greater than or equal	relation gte geq
+≪	much less than	relation asymptotic
+≫	much greater than	relation asymptotic
+≮	not less than	relation not lt
+≯	not greater than	relation not gt
+≰	not less than or equal	relation not leq
+≱	not greater than or equal	relation not geq
+±	plus minus	operator plusminus uncertainty
+∓	minus plus	operator minusplus
+×	multiplication sign	operator times multiply
+÷	division sign	operator divide
+⋅	dot product	operator multiplication dot
+∘	composition	operator circle compose
+∗	asterisk operator	operator convolution star
+√	square root	operator radical sqrt
+∛	cube root	operator radical
+∜	fourth root	operator radical
 ∞	infinity	math infinite
-λ	lambda	greek calculus function
-μ	mu	greek micro mean
-π	pi	greek circle
-τ	tau	greek circle
-Δ	delta uppercase	greek change difference
-δ	delta lowercase	greek change difference
-Σ	sigma uppercase	greek sum
+∑	summation	operator sum sigma
+∏	product	operator pi product
+∐	coproduct	operator coproduct
+∫	integral	calculus integral
+∬	double integral	calculus integral
+∭	triple integral	calculus integral
+∮	contour integral	calculus integral closed
+∯	surface integral	calculus integral
+∰	volume integral	calculus integral
+∂	partial derivative	calculus partial
+∇	nabla	calculus gradient divergence curl
+′	prime	calculus derivative feet
+″	double prime	calculus second derivative inches
+‴	triple prime	calculus third derivative
+→	right arrow	arrow function maps to tends to
+←	left arrow	arrow reverse
+↔	left right arrow	arrow bidirectional
+↦	maps to	function arrow mapsto
+↤	mapped from	function arrow
+↗	northeast arrow	arrow increasing
+↘	southeast arrow	arrow decreasing
+⇀	right harpoon	arrow vector weak convergence
+↼	left harpoon	arrow vector
+⇌	right left harpoons	arrow equilibrium reversible
+⇄	right left arrows	arrow exchange reversible
+α	alpha	greek variable
+β	beta	greek variable
+γ	gamma	greek variable
+Γ	Gamma uppercase	greek variable distribution
+δ	delta lowercase	greek change variation
+Δ	Delta uppercase	greek change difference laplacian
+ε	epsilon	greek small positive
+ϵ	lunate epsilon	greek epsilon variant
+ζ	zeta	greek variable
+η	eta	greek variable
+θ	theta	greek angle variable
+Θ	Theta uppercase	greek angle complexity
+ι	iota	greek variable
+κ	kappa	greek variable
+λ	lambda	greek eigenvalue function calculus
+Λ	Lambda uppercase	greek variable
+μ	mu	greek mean micro
+ν	nu	greek frequency variable
+ξ	xi	greek variable
+Ξ	Xi uppercase	greek variable
+π	pi	greek circle constant
+Π	Pi uppercase	greek product
+ρ	rho	greek density correlation
 σ	sigma lowercase	greek stddev
-Ω	omega uppercase	greek ohm
-ω	omega lowercase	greek
-✓	check mark	ok done yes
-✗	cross mark	no fail x
-—	em dash	punctuation dash
-–	en dash	punctuation dash
-…	ellipsis	punctuation dots
-“	left double quote	punctuation smart quote
-”	right double quote	punctuation smart quote
-‘	left single quote	punctuation smart quote
-’	right single quote	punctuation smart quote
-§	section sign	legal section
-¶	pilcrow	paragraph
-°	degree	temperature angle
-•	bullet	list dot
-·	middle dot	punctuation center dot
-⌘	command key	mac command cmd super
-⌥	option key	mac option alt
-⌃	control key	mac ctrl control
-⇧	shift key	mac shift
-⎋	escape key	keyboard esc
-⏎	return key	keyboard enter return
-⌫	delete backwards	keyboard backspace
-⌦	delete forwards	keyboard delete
-⇥	tab key	keyboard tab
-↑	up arrow	keyboard arrow
-↓	down arrow	keyboard arrow
-←	left arrow key	keyboard arrow
-→	right arrow key	keyboard arrow
+Σ	Sigma uppercase	greek sum
+τ	tau	greek time circle
+υ	upsilon	greek variable
+φ	phi	greek angle golden ratio
+Φ	Phi uppercase	greek distribution
+χ	chi	greek chi square
+ψ	psi	greek wavefunction
+Ψ	Psi uppercase	greek wavefunction
+ω	omega lowercase	greek angular frequency
+Ω	Omega uppercase	greek ohm sample space
+∥	parallel	geometry norm parallel
+∦	not parallel	geometry
+∠	angle	geometry
+∟	right angle	geometry
+⊾	right angle with arc	geometry
+°	degree	geometry angle temperature
+⌈	left ceiling	math ceiling bracket
+⌉	right ceiling	math ceiling bracket
+⌊	left floor	math floor bracket
+⌋	right floor	math floor bracket
+⟨	left angle bracket	math inner product bra
+⟩	right angle bracket	math inner product ket
+²	superscript two	exponent square
+³	superscript three	exponent cube
+ⁿ	superscript n	exponent power
+₀	subscript zero	index subscript
+₁	subscript one	index subscript
+₂	subscript two	index subscript
+ₙ	subscript n	index subscript

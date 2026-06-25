@@ -112,7 +112,7 @@
     "format-no-controller": "",
     "format-connected": " {device_alias}",
     "format-connected-battery": " {device_alias} {device_battery_percentage}%",
-    "on-click": "/usr/bin/blueman-manager",
+    "on-click": "/home/swe/.local/state/nix/profiles/home-manager/home-path/bin/blueman-manager",
     "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected"
   },
 

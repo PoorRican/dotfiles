@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
+# Start cliphist collectors once per Hyprland user session. The text watcher
+# captures normal terminal/editor/browser copies; the image watcher keeps image
+# clipboard entries available too. Re-running this script after a reload is a
+# no-op when the watchers are already alive.
+start_watcher() {
+  local clip_type="$1"
+  local pattern="wl-paste.*--type ${clip_type}.*--watch.*cliphist store"
+
+  if pgrep -u "$(id -u)" -f "$pattern" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  (wl-paste --type "$clip_type" --watch cliphist store >/dev/null 2>&1 &)
+}
+
+if ! command -v wl-paste >/dev/null 2>&1 || ! command -v cliphist >/dev/null 2>&1; then
+  notify-send -t 3000 "clipboard" "wl-clipboard/cliphist is not installed" 2>/dev/null || true
+  exit 1
+fi
+
+start_watcher text
+start_watcher image

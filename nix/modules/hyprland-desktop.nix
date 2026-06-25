@@ -10,12 +10,14 @@
     rofi-emoji
     wl-clipboard
     cliphist
+    wtype
     dunst
     libnotify
     pavucontrol
     networkmanagerapplet
     bluez
     blueman
+    lxqt.lxqt-policykit
     jq
     font-awesome
     nerd-fonts.jetbrains-mono
@@ -53,6 +55,18 @@
 
   home.file.".local/bin/cbox-switch-to-hyprland-os" = {
     source = dotfiles + "/bin/cbox-switch-to-hyprland-os";
+    executable = true;
+  };
+  home.file.".local/bin/hypr-start-cliphist" = {
+    source = dotfiles + "/bin/hypr-start-cliphist";
+    executable = true;
+  };
+  home.file.".local/bin/hypr-clipboard-menu" = {
+    source = dotfiles + "/bin/hypr-clipboard-menu";
+    executable = true;
+  };
+  home.file.".local/bin/hypr-symbol-picker" = {
+    source = dotfiles + "/bin/hypr-symbol-picker";
     executable = true;
   };
 
