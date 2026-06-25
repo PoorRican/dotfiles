@@ -122,7 +122,7 @@ keybinds clear-defaults=true {
             SwitchToMode "normal"
         }
         bind "g" {
-            LaunchOrFocusPlugin "https://github.com/dam4rus/zj-git-branch/releases/latest/download/zellij-git-branch.wasm" {
+            LaunchOrFocusPlugin "https://github.com/dam4rus/zj-git-branch/releases/download/v0.6.0/zellij-git-branch.wasm" {
                 floating true
                 move_to_focused_tab true
             }
@@ -159,7 +159,7 @@ keybinds clear-defaults=true {
         bind "Alt o" { MoveTab "right"; }
         bind "Ctrl q" { Quit; }
         bind "Ctrl y" {
-            LaunchOrFocusPlugin "https://github.com/karimould/zellij-forgot/releases/latest/download/zellij_forgot.wasm" {
+            LaunchOrFocusPlugin "https://github.com/karimould/zellij-forgot/releases/download/0.4.2/zellij_forgot.wasm" {
                 floating true
                 ">> move mode" "ctrl+h"
                 ">> pane mode" "ctrl+p"
@@ -468,7 +468,7 @@ plugins {
     welcome-screen location="zellij:session-manager" {
         welcome_screen false
     }
-    zjstatus-hints location="https://github.com/b0o/zjstatus-hints/releases/latest/download/zjstatus-hints.wasm" {
+    zjstatus-hints location="https://github.com/b0o/zjstatus-hints/releases/download/v0.1.4/zjstatus-hints.wasm" {
         hide_in_base_mode true
         max_length "0"
         overflow_str "..."
