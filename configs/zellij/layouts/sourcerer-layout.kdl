@@ -3,7 +3,10 @@ layout {
         children
         pane size=1 borderless=true {
             plugin location="https://github.com/dj95/zjstatus/releases/download/v0.23.0/zjstatus.wasm" {
-                hide_frame_for_single_pane "true"
+                // Disabled for Zellij 0.44.x: upstream regression makes zjstatus' frame-toggle
+                // implementation flicker/break split panes. Global `pane_frames false` hides
+                // Zellij pane frames, so this zjstatus option stays disabled for now.
+                // hide_frame_for_single_pane "true"
 
                 format_left  "{mode} {tabs}"
                 format_center ""
