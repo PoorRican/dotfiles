@@ -39,6 +39,7 @@ return {
 				"jq",
 				"json-lsp",
 				"jsonlint",
+				"markdown-oxide",
 				"markdownlint",
 				"lua-language-server",
 				"php-cs-fixer",

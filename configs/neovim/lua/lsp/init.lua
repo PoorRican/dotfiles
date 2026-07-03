@@ -33,7 +33,11 @@ return {
 		vim.fn.sign_define("DiagnosticSignWarn", { text = icons.diagnostics.warning, texthl = "DiagnosticSignWarn" })
 		vim.fn.sign_define("DiagnosticSignHint", { text = icons.diagnostics.hint, texthl = "DiagnosticSignHint" })
 		vim.fn.sign_define("DiagnosticSignInfo", { text = icons.diagnostics.information, texthl = "DiagnosticSignInfo" })
-		vim.lsp.set_log_level("error")
+		if vim.lsp.log and vim.lsp.log.set_level then
+			vim.lsp.log.set_level("error")
+		else
+			vim.lsp.set_log_level("error")
+		end
 
 		local config = {
 			virtual_text = false,
@@ -63,8 +67,14 @@ return {
 		vim.diagnostic.config(config)
 
 		local border = { border = "shadow" }
-		vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.hover, border)
-		vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, border)
+		local function with_lsp_window_options(handler)
+			return function(err, result, ctx, handler_config)
+				handler_config = vim.tbl_deep_extend("force", {}, border, handler_config or {})
+				return handler(err, result, ctx, handler_config)
+			end
+		end
+		vim.lsp.handlers["textDocument/signatureHelp"] = with_lsp_window_options(vim.lsp.handlers.signature_help)
+		vim.lsp.handlers["textDocument/hover"] = with_lsp_window_options(vim.lsp.handlers.hover)
 
 		-- Global LspAttach autocmd replaces per-server on_attach
 		vim.api.nvim_create_autocmd("LspAttach", {
@@ -118,6 +128,7 @@ return {
 		vim.lsp.config("html", {})
 		vim.lsp.config("jsonls", require("lsp.jsonls"))
 		vim.lsp.config("lua_ls", require("lsp.luals"))
+		vim.lsp.config("markdown_oxide", {})
 		vim.lsp.config("mypy", require("lsp.mypy"))
 		vim.lsp.config("pylsp", require("lsp.pylsp"))
 		vim.lsp.config("pyright", require("lsp.pyright"))
@@ -131,7 +142,7 @@ return {
 
 		local server_names = {
 			"bashls", "clangd", "cssls", "dockerls", "html", "jsonls",
-			"lua_ls", "mypy", "pylsp", "pyright", "ruff", "rust_analyzer",
+			"lua_ls", "markdown_oxide", "mypy", "pylsp", "pyright", "ruff", "rust_analyzer",
 			"tailwindcss", "ts_ls", "yamlls", "powershell_es",
 		}
 		local mason_server_names = vim.tbl_filter(function(server_name)
@@ -145,6 +156,7 @@ return {
 			mason.setup()
 			mason_lspconfig.setup({
 				ensure_installed = mason_server_names,
+				automatic_enable = mason_server_names,
 			})
 		end
 

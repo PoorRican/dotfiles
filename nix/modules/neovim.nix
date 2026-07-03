@@ -26,5 +26,7 @@
       withPerl = true;
       withNodeJs = false;
     })
+    pkgs.markdown-oxide
+    pkgs.tree-sitter
   ];
 }
