@@ -1,0 +1,9 @@
+{
+  "last_report_path": "/home/swe/.hermes/logs/curator/20260630-215546",
+  "last_run_at": "2026-06-30T21:55:46.461924+00:00",
+  "last_run_duration_seconds": 176.971652,
+  "last_run_summary": "auto: no changes; llm: Completed the umbrella-building pass for the 5 agent-created skills.\n\nProcessed clusters:\n\n- **Linux debugging cluster**\n  - Created new umbrella skill: `linux-system-debugging`\n  - Absorbed:\n    - `linux-authentication-debugging`\n    - `li…\narchived 3 skill(s):\n  • linux-authentication-debugging — pruned (stale)\n  • linux-desktop-hardware-debugging — pruned (stale)\n  • linux-resource-debugging — pruned (stale)\nfull report: hermes curator status",
+  "last_run_summary_shown_at": null,
+  "paused": false,
+  "run_count": 1
+}
