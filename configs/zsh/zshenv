@@ -22,9 +22,22 @@ export PI_LENS_LOG_RETENTION_DAYS=1095   # 3 years
 export PI_LENS_MAX_LOG_SIZE_MB=1024      # 1 GiB
 
 # Nix (single-user and multi-user installs)
+# Some desktop/session launchers sanitize PATH after sourcing Nix but leave the
+# exported __ETC_PROFILE_NIX_SOURCED guard behind. If that guard is inherited by
+# a new shell, nix-daemon.sh returns early and `nix` disappears. When the default
+# Nix binary exists but is missing from PATH, clear the guard so the profile
+# script can repair the environment.
+_nix_default_profile="/nix/var/nix/profiles/default"
+if [ -x "$_nix_default_profile/bin/nix" ]; then
+  case ":$PATH:" in
+    *":$_nix_default_profile/bin:"*) ;;
+    *) unset __ETC_PROFILE_NIX_SOURCED ;;
+  esac
+fi
+
 for nix_profile in \
   "$HOME/.nix-profile/etc/profile.d/nix.sh" \
-  "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" \
+  "$_nix_default_profile/etc/profile.d/nix-daemon.sh" \
   "/etc/profile.d/nix.sh"
 do
   if [ -e "$nix_profile" ]; then
@@ -32,3 +45,11 @@ do
     break
   fi
 done
+
+if [ -x "$_nix_default_profile/bin/nix" ]; then
+  case ":$PATH:" in
+    *":$_nix_default_profile/bin:"*) ;;
+    *) export PATH="$_nix_default_profile/bin:$PATH" ;;
+  esac
+fi
+unset _nix_default_profile

@@ -17,7 +17,8 @@ let
     # uv2nix/pyproject-nix omit empty extras from uv.lock, so requesting "cron"
     # makes virtualenv resolution fail even though runtime cron support is present.
     "cli"
-    "pty"
+    # Hermes no longer exposes a separate `pty` extra; PTY support is covered by
+    # the core/CLI install now. Requesting the stale extra breaks uv2nix eval.
     # `dev` already pulls `mcp`, but keep it explicit because local MCP servers are
     # a core part of this repo's Hermes workflow.
     "mcp"

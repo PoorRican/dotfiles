@@ -39,6 +39,8 @@ hl.monitor({
 local home        = os.getenv("HOME") or "/home/swe"
 local hmProfile   = home .. "/.local/state/nix/profiles/home-manager/home-path"
 local hmBin       = hmProfile .. "/bin"
+local nixProfile  = "/nix/var/nix/profiles/default"
+local nixBin      = nixProfile .. "/bin"
 local terminal    = "/usr/bin/ghostty"
 local browser     = "/usr/bin/vivaldi-stable"
 local fileManager = "ranger"
@@ -106,8 +108,8 @@ end)
 
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
-hl.env("PATH", hmBin .. ":/usr/local/bin:/usr/bin:/bin")
-hl.env("XDG_DATA_DIRS", hmProfile .. "/share:/usr/local/share:/usr/share")
+hl.env("PATH", hmBin .. ":" .. nixBin .. ":/usr/local/bin:/usr/bin:/bin")
+hl.env("XDG_DATA_DIRS", hmProfile .. "/share:" .. nixProfile .. "/share:/usr/local/share:/usr/share")
 hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
 hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 hl.env("XDG_SESSION_TYPE", "wayland")
