@@ -47,6 +47,7 @@
     "ask": [],
     "defaultMode": "plan"
   },
+  "model": "claude-fable-5[1m]",
   "worktree": {
     "baseRef": "head"
   },
@@ -96,6 +97,7 @@
   },
   "alwaysThinkingEnabled": true,
   "effortLevel": "xhigh",
+  "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
   "editorMode": "vim",
