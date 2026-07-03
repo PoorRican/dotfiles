@@ -22,7 +22,10 @@ let
   installPath = lib.makeBinPath ((with pkgs; [
     curl coreutils gnutar gzip gnugrep gnused perl
   ]) ++ extraPkgs);
-  runtimePathPrefix = ''$HOME/.local/bin:${installPath}:$PATH'';
+  # Bun global installs, such as `bun install -g @oh-my-pi/pi-coding-agent`,
+  # place binaries in ~/.bun/bin. Include it both for the `command -v` check and
+  # for installers that shell out to an already-installed global binary.
+  runtimePathPrefix = ''$HOME/.bun/bin:$HOME/.local/bin:${installPath}:$PATH'';
   wrapCmd = cmd:
     if useCurl
     then "bash -c 'export PATH=${runtimePathPrefix} && ${cmd}'"
