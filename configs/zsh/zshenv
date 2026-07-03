@@ -17,6 +17,10 @@ if [ -e "$HOME/.cargo/env" ]; then
   . "$HOME/.cargo/env"
 fi
 
+# pi-lens log retention and rotation
+export PI_LENS_LOG_RETENTION_DAYS=1095   # 3 years
+export PI_LENS_MAX_LOG_SIZE_MB=1024      # 1 GiB
+
 # Nix (single-user and multi-user installs)
 for nix_profile in \
   "$HOME/.nix-profile/etc/profile.d/nix.sh" \
