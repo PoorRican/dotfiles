@@ -46,6 +46,14 @@ local menu        = hmBin .. "/rofi -show drun -show-icons"
 local cliphist    = home .. "/.local/bin/hypr-start-cliphist"
 local clipMenu    = home .. "/.local/bin/hypr-clipboard-menu"
 local symbolMenu  = home .. "/.local/bin/hypr-symbol-picker"
+local pkWiki      = home .. "/.local/bin/pk-wiki"
+
+local function startPkWikiBindWatcher()
+    -- Hyprland 0.55's Lua config loader drops the grave key when registered
+    -- inline, but the same bind works through `hyprctl eval` after reload. Keep
+    -- a tiny watcher around so SUPER+` survives config reloads too.
+    hl.exec_cmd("/bin/sh -lc '" .. pkWiki .. " --watch-binds'")
+end
 
 
 -------------------
@@ -79,6 +87,14 @@ hl.on("hyprland.start", function ()
 	hl.exec_cmd(hmBin .. "/lxqt-policykit-agent")
 	hl.exec_cmd(hmBin .. "/nm-applet")
 	hl.exec_cmd("/usr/bin/waybar")
+	startPkWikiBindWatcher()
+end)
+
+hl.on("config.reloaded", function ()
+	-- If the watcher was not started yet (for example right after editing this
+	-- config in an already-running session), start it now. The script takes a
+	-- runtime lock, so duplicate starts are harmless.
+	startPkWikiBindWatcher()
 end)
 
 
@@ -318,6 +334,9 @@ hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + CTRL + V", hl.dsp.exec_cmd(clipMenu))
 hl.bind(mainMod .. " + CTRL + Space", hl.dsp.exec_cmd(symbolMenu))
+-- The Project Kairos grave/backtick hotkey is maintained by the tiny watcher
+-- started from the autostart/reload hooks above because Hyprland 0.55 drops
+-- this key when it is bound inline.
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + slash", hl.dsp.window.fullscreen()) -- i3 muscle memory
@@ -404,6 +423,15 @@ hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = tr
 -- and https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
 
 -- Example window rules that are useful
+
+hl.window_rule({
+    name  = "project-kairos-wiki-terminal",
+    match = { title = "^pk-wiki" },
+
+    float  = true,
+    size   = "85% 85%",
+    center = true,
+})
 
 local suppressMaximizeRule = hl.window_rule({
     -- Ignore maximize requests from all apps. You'll probably like this.

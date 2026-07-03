@@ -1,7 +1,7 @@
 # Hyprland desktop environment bits for cbox.
 # OS-level login/display-manager configuration is installed by
 # bin/cbox-switch-to-hyprland-os; Home Manager owns user config and tools.
-{ dotfiles, lib, pkgs, ... }:
+{ config, dotfiles, lib, pkgs, ... }:
 {
   fonts.fontconfig.enable = true;
 
@@ -69,6 +69,23 @@
     source = dotfiles + "/bin/hypr-symbol-picker";
     executable = true;
   };
+  home.file.".local/bin/pk-wiki" = {
+    source = dotfiles + "/bin/pk-wiki";
+    executable = true;
+  };
+
+  xdg.dataFile."applications/project-kairos-wiki.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Project Kairos Wiki
+    GenericName=Wiki workspace
+    Comment=Open the Project Kairos wiki Zellij session
+    Exec=${config.home.homeDirectory}/.local/bin/pk-wiki --show
+    Terminal=false
+    Categories=Utility;
+    StartupWMClass=com.projectkairos.wiki
+    Keywords=Kairos;Wiki;Zellij;Neovim;pi;
+  '';
 
   xdg.configFile."mimeapps.list" = {
     force = true;

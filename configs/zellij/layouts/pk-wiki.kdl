@@ -1,0 +1,75 @@
+layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="https://github.com/dj95/zjstatus/releases/download/v0.23.0/zjstatus.wasm" {
+                // Disabled for Zellij 0.44.x: upstream regression makes zjstatus' frame-toggle
+                // implementation flicker/break split panes. Global `pane_frames false` hides
+                // Zellij pane frames, so this zjstatus option stays disabled for now.
+                // hide_frame_for_single_pane "true"
+
+                format_left  "{mode} {tabs}"
+                format_center ""
+                format_right "{command_git_branch}{pipe_zjstatus_hints}{datetime}"
+                format_space "#[bg=#111111]"
+                format_hide_on_overlength "true"
+                format_precedence "lrc"
+
+                border_enabled "false"
+
+                // Mode indicators
+                mode_normal        "#[bg=#111111,fg=#719611,bold] NORMAL "
+                mode_locked        "#[bg=#111111,fg=#aa4450,bold] LOCKED "
+                mode_resize        "#[bg=#111111,fg=#6688aa,bold] RESIZE "
+                mode_pane          "#[bg=#111111,fg=#528b8b,bold] PANE "
+                mode_tab           "#[bg=#111111,fg=#ff9800,bold] TAB "
+                mode_scroll        "#[bg=#111111,fg=#8f6f8f,bold] SCROLL "
+                mode_search        "#[bg=#111111,fg=#87ceeb,bold] SEARCH "
+                mode_session       "#[bg=#111111,fg=#87875f,bold] SESSION "
+                mode_move          "#[bg=#111111,fg=#b1d631,bold] MOVE "
+                mode_enter_search  "#[bg=#111111,fg=#87ceeb,bold] SEARCH "
+                mode_rename_tab    "#[bg=#111111,fg=#ff9800,bold] RENAME "
+                mode_rename_pane   "#[bg=#111111,fg=#ff9800,bold] RENAME "
+                mode_tmux          "#[bg=#111111,fg=#ff9800,bold] TMUX "
+                mode_default_to_mode "normal"
+
+                // Tab styling - █▓░ name ░▓█
+                tab_normal              "#[bg=#111111,fg=#949494] █▓░ {index} {name}{fullscreen_indicator}{sync_indicator}{floating_indicator} ░▓█"
+                tab_normal_fullscreen   "#[bg=#111111,fg=#949494] █▓░ {index} {name}{fullscreen_indicator}{sync_indicator}{floating_indicator} ░▓█"
+                tab_normal_sync         "#[bg=#111111,fg=#949494] █▓░ {index} {name}{fullscreen_indicator}{sync_indicator}{floating_indicator} ░▓█"
+                tab_active              "#[bg=#111111,fg=#87ceeb,bold] █▓░ {index} {name}{fullscreen_indicator}{sync_indicator}{floating_indicator} ░▓█"
+                tab_active_fullscreen   "#[bg=#111111,fg=#87ceeb,bold] █▓░ {index} {name}{fullscreen_indicator}{sync_indicator}{floating_indicator} ░▓█"
+                tab_active_sync         "#[bg=#111111,fg=#87ceeb,bold] █▓░ {index} {name}{fullscreen_indicator}{sync_indicator}{floating_indicator} ░▓█"
+                tab_separator           ""
+                tab_rename              "#[bg=#111111,fg=#ff9800] █▓░ {index} {name}{floating_indicator} ░▓█"
+                tab_fullscreen_indicator " "
+                tab_sync_indicator       " "
+                tab_floating_indicator   " "
+
+                // Git branch
+                command_git_branch_command     "git rev-parse --abbrev-ref HEAD"
+                command_git_branch_format      "#[bg=#111111,fg=#87ceeb] {stdout}"
+                command_git_branch_interval    "5"
+                command_git_branch_rendermode  "static"
+                pipe_zjstatus_hints_format     "#[bg=#111111,fg=#878787]{output} "
+
+                // Clock (built-in datetime widget)
+                datetime          "#[bg=#111111,fg=#666666]▓░#[bg=#3a3a3a,fg=#efefef] {format} "
+                datetime_format   "%H:%M %Y-%m-%d"
+                datetime_timezone "America/New_York"
+            }
+        }
+    }
+
+    tab name="nvim" focus=true {
+        pane command="bash" {
+            args "-lc" "exec nvim ."
+        }
+    }
+
+    tab name="pi" {
+        pane command="bash" {
+            args "-lc" "command -v pi >/dev/null 2>&1 && exec pi; echo 'pi not found on PATH; dropping to shell'; exec bash"
+        }
+    }
+}

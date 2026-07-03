@@ -1,0 +1,498 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Dedicated Project Kairos wiki launcher for Hyprland/Ghostty/Zellij.
+# Default mode toggles focus between the pinned floating terminal and the
+# previously-focused pane/window. Hidden state is parked on a named special
+# workspace; shown state is pinned so it can remain visible while another window
+# has focus.
+
+export PATH="$HOME/.bun/bin:$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
+session_name="pk-wiki"
+special_workspace="pk-wiki"
+app_class="com.projectkairos.wiki"
+app_title="pk-wiki"
+wiki_dir="$HOME/wikis/project-kairos/project-kairos"
+terminal_bin="${PK_WIKI_TERMINAL:-/usr/bin/ghostty}"
+state_dir="${XDG_RUNTIME_DIR:-/tmp}/pk-wiki"
+last_focus_file="$state_dir/last-focus"
+geometry_file="$state_dir/geometry"
+
+notify() {
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send -t "${2:-2500}" "Project Kairos wiki" "$1" 2>/dev/null || true
+  fi
+}
+
+zellij_session_exists() {
+  zellij list-sessions --short --no-formatting 2>/dev/null \
+    | awk -v session="$session_name" '$0 == session { found = 1 } END { exit found ? 0 : 1 }'
+}
+
+run_zellij() {
+  if [ ! -d "$wiki_dir" ]; then
+    printf 'Project Kairos wiki directory not found: %s\n' "$wiki_dir" >&2
+    exec "${SHELL:-/bin/bash}"
+  fi
+
+  cd "$wiki_dir"
+
+  if ! command -v zellij >/dev/null 2>&1; then
+    printf 'zellij is not available on PATH.\n' >&2
+    exec "${SHELL:-/bin/bash}"
+  fi
+
+  if zellij_session_exists; then
+    exec zellij attach --force-run-commands "$session_name"
+  fi
+
+  exec zellij --session "$session_name" --new-session-with-layout pk-wiki
+}
+
+hypr_available() {
+  command -v hyprctl >/dev/null 2>&1 \
+    && command -v jq >/dev/null 2>&1 \
+    && hyprctl -j monitors >/dev/null 2>&1
+}
+
+pk_window_filter='select(.class == $class or ((.title // "") | startswith($title)))'
+pk_window_query="[.[] | $pk_window_filter] | sort_by(if .class == \$class then 0 else 1 end) | .[0]"
+
+pk_window_address() {
+  hyprctl -j clients 2>/dev/null \
+    | jq -r --arg class "$app_class" --arg title "$app_title" "$pk_window_query | .address // empty" \
+    | head -n 1
+}
+
+pk_window_workspace() {
+  hyprctl -j clients 2>/dev/null \
+    | jq -r --arg class "$app_class" --arg title "$app_title" "$pk_window_query | .workspace.name // empty" \
+    | head -n 1
+}
+
+pk_window_pinned() {
+  hyprctl -j clients 2>/dev/null \
+    | jq -r --arg class "$app_class" --arg title "$app_title" "$pk_window_query | .pinned // false" \
+    | head -n 1
+}
+
+pk_window_geometry() {
+  hyprctl -j clients 2>/dev/null \
+    | jq -r --arg class "$app_class" --arg title "$app_title" "
+      $pk_window_query
+      | select(.at and .size)
+      | [.at[0], .at[1], .size[0], .size[1]]
+      | @tsv
+    " \
+    | head -n 1
+}
+
+active_window_address() {
+  hyprctl -j activewindow 2>/dev/null \
+    | jq -r 'if (.address // "") == "0x0" then empty else .address // empty end'
+}
+
+valid_window_address() {
+  [ -n "${1:-}" ] && [ "${1:-}" != "0x0" ] && [ "${1:-}" != "null" ]
+}
+
+active_workspace_name() {
+  hyprctl -j monitors 2>/dev/null \
+    | jq -r '([.[] | select(.focused == true)][0] // .[0]).activeWorkspace.name // empty' \
+    | head -n 1
+}
+
+client_exists() {
+  [ -n "$(pk_window_address)" ]
+}
+
+special_visible() {
+  hyprctl -j monitors 2>/dev/null \
+    | jq -e --arg workspace "special:$special_workspace" '.[] | select(.specialWorkspace.name == $workspace)' >/dev/null
+}
+
+show_special() {
+  if ! special_visible; then
+    hyprctl dispatch "hl.dsp.workspace.toggle_special(\"$special_workspace\")" >/dev/null 2>&1 || true
+  fi
+}
+
+hide_special() {
+  if special_visible; then
+    hyprctl dispatch "hl.dsp.workspace.toggle_special(\"$special_workspace\")" >/dev/null 2>&1 || true
+  fi
+}
+
+lua_quote() {
+  local value="$1"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  value="${value//$'\n'/\\n}"
+  printf '"%s"' "$value"
+}
+
+hypr_exec() {
+  local command="$1"
+  hyprctl dispatch "hl.dsp.exec_cmd($(lua_quote "$command"))" >/dev/null 2>&1
+}
+
+focus_window() {
+  local address="$1"
+  valid_window_address "$address" || return 1
+  hyprctl dispatch "hl.dsp.focus({ window = hl.get_window(\"address:$address\") })" >/dev/null 2>&1
+}
+
+remember_focus_address() {
+  local address="${1:-}" workspace="${2:-}" pk_address
+  valid_window_address "$address" || return 0
+
+  pk_address="$(pk_window_address)"
+  if valid_window_address "$pk_address" && [ "$address" = "$pk_address" ]; then
+    return 0
+  fi
+
+  [ -n "$workspace" ] || workspace="$(active_workspace_name)"
+  mkdir -p "$state_dir" 2>/dev/null || return 0
+  printf '%s\t%s\n' "$address" "$workspace" > "$last_focus_file" 2>/dev/null || true
+}
+
+remember_active_non_pk() {
+  remember_focus_address "$(active_window_address)" "$(active_workspace_name)"
+}
+
+focus_remembered_or_recent() {
+  local pk_address target_workspace saved_address saved_workspace target_address
+  pk_address="$(pk_window_address)"
+  target_workspace="${1:-$(active_workspace_name)}"
+  [ -n "$target_workspace" ] || target_workspace="1"
+
+  if [ -r "$last_focus_file" ]; then
+    IFS=$'\t' read -r saved_address saved_workspace < "$last_focus_file" || true
+    if valid_window_address "${saved_address:-}" \
+      && { [ -z "${saved_workspace:-}" ] || [ "$saved_workspace" = "$target_workspace" ]; } \
+      && hyprctl -j clients 2>/dev/null \
+        | jq -e --arg address "$saved_address" --arg workspace "$target_workspace" '
+          .[] | select(.address == $address and .mapped == true and .workspace.name == $workspace)
+        ' >/dev/null; then
+      focus_window "$saved_address" || true
+      return 0
+    fi
+  fi
+
+  target_address="$(hyprctl -j clients 2>/dev/null \
+    | jq -r --arg pk "$pk_address" --arg workspace "$target_workspace" '
+      [.[] | select(.address != $pk and .mapped == true and .workspace.name == $workspace)]
+      | sort_by(.focusHistoryID)
+      | .[0].address // empty
+    ')"
+
+  if valid_window_address "$target_address"; then
+    focus_window "$target_address" || true
+  fi
+}
+
+pin_focused_if_needed() {
+  if [ "$(pk_window_pinned)" != "true" ]; then
+    hyprctl dispatch "hl.dsp.window.pin()" >/dev/null 2>&1 || true
+  fi
+}
+
+unpin_focused_if_needed() {
+  if [ "$(pk_window_pinned)" = "true" ]; then
+    hyprctl dispatch "hl.dsp.window.pin()" >/dev/null 2>&1 || true
+  fi
+}
+
+is_int() {
+  case "${1:-}" in
+    ''|'-') return 1 ;;
+    -*)
+      local value="${1#-}"
+      case "$value" in
+        ''|*[!0-9]*) return 1 ;;
+        *) return 0 ;;
+      esac
+      ;;
+    *[!0-9]*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+save_pk_geometry() {
+  local x y w h
+  IFS=$'\t' read -r x y w h < <(pk_window_geometry) || return 0
+  is_int "$x" && is_int "$y" && is_int "$w" && is_int "$h" || return 0
+
+  mkdir -p "$state_dir" 2>/dev/null || return 0
+  printf '%s\t%s\t%s\t%s\n' "$x" "$y" "$w" "$h" > "$geometry_file" 2>/dev/null || true
+}
+
+restore_pk_geometry() {
+  local x y w h
+  [ -r "$geometry_file" ] || return 1
+  IFS=$'\t' read -r x y w h < "$geometry_file" || return 1
+  is_int "$x" && is_int "$y" && is_int "$w" && is_int "$h" || return 1
+
+  # Use exact geometry so show/toggle does not recenter or accumulate relative
+  # movement after the user manually places the floating sticky panel.
+  hyprctl dispatch "hl.dsp.window.resize({ x = $w, y = $h, exact = true })" >/dev/null 2>&1 || true
+  hyprctl dispatch "hl.dsp.window.move({ x = $x, y = $y, exact = true })" >/dev/null 2>&1 || true
+}
+
+show_pk_window() {
+  local address previous_active target_workspace workspace
+  address="$(pk_window_address)"
+  valid_window_address "$address" || return 1
+
+  previous_active="$(active_window_address)"
+  target_workspace="$(active_workspace_name)"
+  [ -n "$target_workspace" ] || target_workspace="1"
+  remember_focus_address "$previous_active" "$target_workspace"
+
+  workspace="$(pk_window_workspace)"
+  if [ "$workspace" = "special:$special_workspace" ]; then
+    show_special
+  else
+    # If the sticky window is already visible, its current geometry is the
+    # user's latest placement. Save it before focusing/moving, otherwise an old
+    # stored value can snap a manually-moved panel back to a stale location.
+    save_pk_geometry
+  fi
+
+  focus_window "$address" || true
+  hyprctl dispatch "hl.dsp.window.move({ workspace = \"$target_workspace\" })" >/dev/null 2>&1 || true
+  pin_focused_if_needed
+  restore_pk_geometry || true
+  hyprctl dispatch "hl.dsp.window.bring_to_top()" >/dev/null 2>&1 || true
+  hide_special
+}
+
+hide_pk_window() {
+  local address target_workspace
+  address="$(pk_window_address)"
+  valid_window_address "$address" || return 0
+  target_workspace="$(active_workspace_name)"
+  [ -n "$target_workspace" ] || target_workspace="1"
+
+  save_pk_geometry
+  focus_window "$address" || true
+  unpin_focused_if_needed
+  hyprctl dispatch "hl.dsp.window.move({ workspace = \"special:$special_workspace\" })" >/dev/null 2>&1 || true
+  hide_special
+  focus_remembered_or_recent "$target_workspace"
+}
+
+unfocus_pk_window() {
+  local pk_address target_workspace workspace
+  pk_address="$(pk_window_address)"
+  valid_window_address "$pk_address" || return 0
+
+  workspace="$(pk_window_workspace)"
+  if [ "$workspace" = "special:$special_workspace" ]; then
+    show_pk_window || true
+  else
+    save_pk_geometry
+  fi
+
+  target_workspace="$(active_workspace_name)"
+  [ -n "$target_workspace" ] || target_workspace="1"
+  focus_remembered_or_recent "$target_workspace"
+}
+
+resolve_terminal() {
+  if [ -x "$terminal_bin" ]; then
+    printf '%s\n' "$terminal_bin"
+    return 0
+  fi
+
+  command -v ghostty 2>/dev/null && return 0
+  return 1
+}
+
+launch_terminal_direct() {
+  local terminal working_dir script_path
+  terminal="$(resolve_terminal)" || {
+    notify "ghostty is not installed" 4000
+    return 1
+  }
+
+  working_dir="$wiki_dir"
+  if [ ! -d "$working_dir" ]; then
+    working_dir="$HOME"
+  fi
+
+  script_path="$HOME/.local/bin/pk-wiki"
+  if [ ! -x "$script_path" ]; then
+    script_path="${BASH_SOURCE[0]}"
+  fi
+
+  "$terminal" \
+    --class="$app_class" \
+    --title="$app_title" \
+    --gtk-single-instance=false \
+    --working-directory="$working_dir" \
+    -e "$script_path" --zellij \
+    >/dev/null 2>&1 &
+}
+
+launch_terminal_hypr() {
+  local terminal working_dir script_path launch_cmd
+  terminal="$(resolve_terminal)" || {
+    notify "ghostty is not installed" 4000
+    return 1
+  }
+
+  working_dir="$wiki_dir"
+  if [ ! -d "$working_dir" ]; then
+    working_dir="$HOME"
+  fi
+
+  script_path="$HOME/.local/bin/pk-wiki"
+  if [ ! -x "$script_path" ]; then
+    script_path="${BASH_SOURCE[0]}"
+  fi
+
+  printf -v launch_cmd '%q ' \
+    "$terminal" \
+    "--class=$app_class" \
+    "--title=$app_title" \
+    "--gtk-single-instance=false" \
+    "--working-directory=$working_dir" \
+    -e "$script_path" --zellij
+
+  # Inline rules make the first window a pinned floating reference panel. Hidden
+  # state is handled later by moving the already-created window to the named
+  # special workspace.
+  hypr_exec "[float; pin; size 85% 85%; center] $launch_cmd" \
+    || launch_terminal_direct
+}
+
+open_pk_wiki() {
+  if hypr_available; then
+    remember_active_non_pk
+    if ! client_exists; then
+      launch_terminal_hypr
+    else
+      show_pk_window
+    fi
+  else
+    launch_terminal_direct
+  fi
+}
+
+toggle_pk_wiki() {
+  local address active workspace
+
+  if hypr_available; then
+    address="$(pk_window_address)"
+    if valid_window_address "$address"; then
+      active="$(active_window_address)"
+      workspace="$(pk_window_workspace)"
+
+      if [ "$workspace" = "special:$special_workspace" ]; then
+        show_pk_window
+      elif [ "$active" = "$address" ]; then
+        unfocus_pk_window
+      else
+        show_pk_window
+      fi
+    else
+      remember_active_non_pk
+      launch_terminal_hypr
+    fi
+  else
+    launch_terminal_direct
+  fi
+}
+
+hide_pk_wiki() {
+  if hypr_available; then
+    hide_pk_window
+  else
+    notify "hide is only available inside Hyprland" 3000
+  fi
+}
+
+unfocus_pk_wiki() {
+  if hypr_available; then
+    unfocus_pk_window
+  else
+    notify "unfocus is only available inside Hyprland" 3000
+  fi
+}
+
+install_grave_binds() {
+  local script_path toggle_cmd hide_cmd lua=""
+  script_path="$HOME/.local/bin/pk-wiki"
+  if [ ! -x "$script_path" ]; then
+    script_path="${BASH_SOURCE[0]}"
+  fi
+
+  toggle_cmd="$script_path --toggle"
+  hide_cmd="$script_path --hide"
+
+  if ! hyprctl -j binds 2>/dev/null \
+    | jq -e '.[] | select(.key == "grave" and .modmask == 64)' >/dev/null; then
+    lua="${lua}hl.bind(\"SUPER + grave\", hl.dsp.exec_cmd($(lua_quote "$toggle_cmd"))); "
+  fi
+
+  if ! hyprctl -j binds 2>/dev/null \
+    | jq -e '.[] | select(.key == "grave" and .modmask == 65)' >/dev/null; then
+    lua="${lua}hl.bind(\"SUPER + SHIFT + grave\", hl.dsp.exec_cmd($(lua_quote "$hide_cmd"))); "
+  fi
+
+  [ -n "$lua" ] || return 0
+
+  for _ in 1 2 3 4 5; do
+    if command -v hyprctl >/dev/null 2>&1 && hyprctl -j monitors >/dev/null 2>&1; then
+      hyprctl eval "$lua" >/dev/null 2>&1 && return 0
+    fi
+    sleep 0.2
+  done
+
+  return 0
+}
+
+watch_grave_binds() {
+  local lock_dir
+  lock_dir="$state_dir/bind-watch.lock"
+  mkdir -p "$state_dir" 2>/dev/null || return 0
+  if ! mkdir "$lock_dir" 2>/dev/null; then
+    return 0
+  fi
+  trap 'rmdir "$lock_dir" 2>/dev/null || true' EXIT
+
+  while command -v hyprctl >/dev/null 2>&1 && hyprctl -j monitors >/dev/null 2>&1; do
+    install_grave_binds
+    sleep 3
+  done
+}
+
+case "${1:---toggle}" in
+  --zellij)
+    run_zellij
+    ;;
+  --open|--show)
+    open_pk_wiki
+    ;;
+  --toggle)
+    toggle_pk_wiki
+    ;;
+  --hide)
+    hide_pk_wiki
+    ;;
+  --unfocus)
+    unfocus_pk_wiki
+    ;;
+  --install-binds)
+    install_grave_binds
+    ;;
+  --watch-binds)
+    watch_grave_binds
+    ;;
+  *)
+    printf 'usage: %s [--toggle|--open|--hide|--unfocus|--install-binds|--watch-binds|--zellij]\n' "$0" >&2
+    exit 2
+    ;;
+esac
