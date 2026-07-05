@@ -435,6 +435,15 @@ hl.window_rule({
     center = true,
 })
 
+hl.window_rule({
+    name  = "cbox-sysadmin-terminal",
+    match = { title = "^sysadmin" },
+
+    float  = true,
+    size   = "85% 85%",
+    center = true,
+})
+
 local suppressMaximizeRule = hl.window_rule({
     -- Ignore maximize requests from all apps. You'll probably like this.
     name  = "suppress-maximize-events",

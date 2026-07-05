@@ -10,8 +10,18 @@
   "reload_style_on_change": true,
 
   "modules-left": [
-    "custom/launcher",
-    "hyprland/workspaces",
+    "custom/command-center",
+    "custom/ws1",
+    "custom/ws2",
+    "custom/ws3",
+    "custom/ws4",
+    "custom/ws5",
+    "custom/ws-separator",
+    "custom/ws6",
+    "custom/ws7",
+    "custom/ws8",
+    "custom/ws9",
+    "custom/ws10",
     "hyprland/submap"
   ],
   "modules-center": [
@@ -30,34 +40,90 @@
     "custom/power"
   ],
 
-  "custom/launcher": {
+  "custom/command-center": {
     "format": "░▒▓ 󰣇 ▓▒░",
-    "tooltip": "Launch apps with Rofi",
-    "on-click": "/home/swe/.local/state/nix/profiles/home-manager/home-path/bin/rofi -show drun -show-icons"
+    "tooltip": "cbox command center\nLeft: sysadmin Zellij\nRight: remember keybindings",
+    "on-click": "/home/swe/.local/bin/sysadmin --toggle",
+    "on-click-right": "/home/swe/.local/bin/hypr-keybindings-menu"
   },
 
-  "hyprland/workspaces": {
-    "format": "{icon}",
-    "on-click": "activate",
-    "sort-by-number": true,
-    "persistent-workspaces": {
-      "*": [1, 2, 3, 4, 5, 6, 7, 8]
-    },
-    "format-icons": {
-      "1": "",
-      "2": "",
-      "3": "",
-      "4": "",
-      "5": "",
-      "6": "",
-      "7": "󰊴",
-      "8": "",
-      "9": "",
-      "10": "",
-      "active": "",
-      "urgent": "",
-      "default": ""
-    }
+  // Waybar's built-in hyprland/workspaces click path sends legacy
+  // `dispatch workspace N`, which Hyprland's Lua config parser rejects. Use
+  // tiny custom modules so clicks call the Lua dispatcher directly while still
+  // showing all ten desktop slots.
+  "custom/ws1": {
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 1 '' 'd1 generic'",
+    "return-type": "json",
+    "interval": 1,
+    "signal": 8,
+    "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 1"
+  },
+  "custom/ws2": {
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 2 '' 'd2 browser'",
+    "return-type": "json",
+    "interval": 1,
+    "signal": 8,
+    "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 2"
+  },
+  "custom/ws3": {
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 3 '' 'd3 reading/research'",
+    "return-type": "json",
+    "interval": 1,
+    "signal": 8,
+    "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 3"
+  },
+  "custom/ws4": {
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 4 '' 'd4 terminal'",
+    "return-type": "json",
+    "interval": 1,
+    "signal": 8,
+    "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 4"
+  },
+  "custom/ws5": {
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 5 '' 'd5 ide'",
+    "return-type": "json",
+    "interval": 1,
+    "signal": 8,
+    "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 5"
+  },
+  "custom/ws-separator": {
+    "format": "│",
+    "tooltip": false
+  },
+  "custom/ws6": {
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 6 '' 'd6 generic'",
+    "return-type": "json",
+    "interval": 1,
+    "signal": 8,
+    "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 6"
+  },
+  "custom/ws7": {
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 7 '' 'd7 generic'",
+    "return-type": "json",
+    "interval": 1,
+    "signal": 8,
+    "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 7"
+  },
+  "custom/ws8": {
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 8 '' 'd8 wiki'",
+    "return-type": "json",
+    "interval": 1,
+    "signal": 8,
+    "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 8"
+  },
+  "custom/ws9": {
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 9 '' 'd9 generic'",
+    "return-type": "json",
+    "interval": 1,
+    "signal": 8,
+    "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 9"
+  },
+  "custom/ws10": {
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 10 '' 'd0 generic'",
+    "return-type": "json",
+    "interval": 1,
+    "signal": 8,
+    "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 10"
   },
 
   "hyprland/submap": {

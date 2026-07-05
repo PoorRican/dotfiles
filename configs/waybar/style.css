@@ -46,8 +46,19 @@ tooltip label {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
-#custom-launcher,
+#custom-command-center,
 #workspaces,
+#custom-ws1,
+#custom-ws2,
+#custom-ws3,
+#custom-ws4,
+#custom-ws5,
+#custom-ws-separator,
+#custom-ws6,
+#custom-ws7,
+#custom-ws8,
+#custom-ws9,
+#custom-ws10,
 #submap,
 #window,
 #idle_inhibitor,
@@ -67,7 +78,7 @@ tooltip label {
   background: transparent;
 }
 
-#custom-launcher {
+#custom-command-center {
   color: @bg-solid;
   background: linear-gradient(90deg, @cyan, @blue, @magenta);
   padding: 0 14px;
@@ -100,6 +111,73 @@ tooltip label {
 #workspaces button.urgent {
   color: @fg;
   background: @red;
+}
+
+#custom-ws1,
+#custom-ws2,
+#custom-ws3,
+#custom-ws4,
+#custom-ws5,
+#custom-ws6,
+#custom-ws7,
+#custom-ws8,
+#custom-ws9,
+#custom-ws10 {
+  margin: 0 2px;
+  padding: 0 8px;
+  border-radius: 10px;
+  color: @muted;
+  background: transparent;
+  transition: all 160ms ease-in-out;
+}
+
+#custom-ws1:hover,
+#custom-ws2:hover,
+#custom-ws3:hover,
+#custom-ws4:hover,
+#custom-ws5:hover,
+#custom-ws6:hover,
+#custom-ws7:hover,
+#custom-ws8:hover,
+#custom-ws9:hover,
+#custom-ws10:hover {
+  color: @fg;
+  background: alpha(@blue, 0.18);
+}
+
+#custom-ws1.occupied,
+#custom-ws2.occupied,
+#custom-ws3.occupied,
+#custom-ws4.occupied,
+#custom-ws5.occupied,
+#custom-ws6.occupied,
+#custom-ws7.occupied,
+#custom-ws8.occupied,
+#custom-ws9.occupied,
+#custom-ws10.occupied {
+  color: @fg;
+}
+
+#custom-ws1.active,
+#custom-ws2.active,
+#custom-ws3.active,
+#custom-ws4.active,
+#custom-ws5.active,
+#custom-ws6.active,
+#custom-ws7.active,
+#custom-ws8.active,
+#custom-ws9.active,
+#custom-ws10.active {
+  color: @bg-solid;
+  background: linear-gradient(90deg, @cyan, @blue);
+  padding: 0 13px;
+}
+
+#custom-ws-separator {
+  color: @muted;
+  margin: 0 1px;
+  padding: 0 2px;
+  background: transparent;
 }
 
 #submap {

@@ -1,0 +1,71 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+refresh_waybar() {
+  pkill -RTMIN+8 -x waybar 2>/dev/null || true
+}
+
+validate_workspace() {
+  local ws="$1"
+  [[ "$ws" == <-> && "$ws" -ge 1 && "$ws" -le 10 ]]
+}
+
+render_workspace() {
+  local ws="$1"
+  local icon="$2"
+  local label="${3:-d${ws}}"
+  local active=""
+  local occupied="false"
+  local state="empty"
+  local classes_json
+
+  if ! validate_workspace "$ws"; then
+    return 2
+  fi
+
+  active="$(hyprctl -j activeworkspace 2>/dev/null | jq -r '.id // empty' || true)"
+  occupied="$(hyprctl -j workspaces 2>/dev/null | jq -r --argjson ws "$ws" 'any(.[]; .id == $ws and .windows > 0)' || printf false)"
+
+  if [[ "$active" == "$ws" ]]; then
+    state="active"
+  elif [[ "$occupied" == "true" ]]; then
+    state="occupied"
+  fi
+
+  classes_json="$(jq -cn --arg state "$state" --arg ws "ws-${ws}" '["workspace", $state, $ws]')"
+  jq -cn \
+    --arg text "$icon" \
+    --arg tooltip "$label" \
+    --argjson class "$classes_json" \
+    '{text: $text, tooltip: $tooltip, class: $class}'
+}
+
+switch_workspace() {
+  local ws="$1"
+
+  if ! validate_workspace "$ws"; then
+    return 2
+  fi
+
+  # Hyprland 0.55's Lua config parser rejects Waybar's built-in legacy
+  # `dispatch workspace N` path, so use the same Lua dispatcher family as the
+  # keybindings in configs/hypr/hyprland.lua.
+  hyprctl dispatch "hl.dsp.focus({ workspace = ${ws} })" >/dev/null
+  refresh_waybar
+}
+
+case "${1:-render}" in
+  render)
+    render_workspace "${2:?workspace id required}" "${3:?icon required}" "${4:-}"
+    ;;
+  switch)
+    switch_workspace "${2:?workspace id required}"
+    ;;
+  refresh)
+    refresh_waybar
+    ;;
+  *)
+    print -u2 "usage: $0 render <1-10> <icon> [tooltip] | switch <1-10> | refresh"
+    exit 2
+    ;;
+esac

@@ -69,6 +69,18 @@
     source = dotfiles + "/bin/hypr-symbol-picker";
     executable = true;
   };
+  home.file.".local/bin/hypr-keybindings-menu" = {
+    source = dotfiles + "/bin/hypr-keybindings-menu";
+    executable = true;
+  };
+  home.file.".local/bin/waybar-hypr-workspace" = {
+    source = dotfiles + "/bin/waybar-hypr-workspace";
+    executable = true;
+  };
+  home.file.".local/bin/sysadmin" = {
+    source = dotfiles + "/bin/sysadmin";
+    executable = true;
+  };
   home.file.".local/bin/pk-wiki" = {
     source = dotfiles + "/bin/pk-wiki";
     executable = true;
@@ -85,6 +97,19 @@
     Categories=Utility;
     StartupWMClass=com.projectkairos.wiki
     Keywords=Kairos;Wiki;Zellij;Neovim;pi;
+  '';
+
+  xdg.dataFile."applications/cbox-sysadmin.desktop".text = ''
+    [Desktop Entry]
+    Type=Application
+    Name=cbox Sysadmin
+    GenericName=Sysadmin workspace
+    Comment=Open the sysadmin Zellij session
+    Exec=${config.home.homeDirectory}/.local/bin/sysadmin --show
+    Terminal=false
+    Categories=Utility;
+    StartupWMClass=com.cbox.sysadmin
+    Keywords=Sysadmin;Hermes;Zellij;Terminal;
   '';
 
   xdg.configFile."mimeapps.list" = {

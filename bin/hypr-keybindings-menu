@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
+entries() {
+  cat <<'KEYS'
+Super+Space / Super+R        App launcher
+Super+Enter                  Terminal
+Super+B                      Browser
+Super+Shift+C / Super+Shift+Q Close focused window
+Super+M                      Exit Hyprland / shutdown helper fallback
+Super+E                      File manager
+Super+Ctrl+V                 Clipboard history
+Super+Ctrl+Space             Symbol picker
+Super+`                      Project Kairos wiki scratchpad
+Super+Shift+`                Hide Project Kairos wiki scratchpad
+Super+V                      Toggle floating
+Super+F / Super+/            Toggle fullscreen
+Super+P                      Toggle pseudo tiling
+Super+J                      Toggle Dwindle split
+Super+G                      Toggle group
+Super+Tab                    Next grouped window
+Super+Shift+Tab              Previous grouped window
+Super+Shift+G                Move focused window into/out of group
+Super+Ctrl+G                 Lock active group
+Super+Ctrl+Shift+G           Lock all groups
+Super+Arrow                  Focus window by direction
+Super+Shift+Arrow            Move/swap focused window by direction
+Super+Ctrl+Arrow             Resize focused window
+Super+, / Super+.            Scrolling layout: move viewport by column
+Super+Ctrl+, / Super+Ctrl+.  Scrolling layout: focus neighboring column
+Super+Shift+, / Super+Shift+. Scrolling layout: swap column
+Super+Ctrl+I                 Scrolling layout: consume into previous column
+Super+Ctrl+O                 Scrolling layout: expel into own column
+Super+1..9 / Super+0         Switch to desktop d1..d9/d0
+Super+Shift+1..9 / Shift+0   Move window to desktop d1..d9/d0
+Super+S                      Toggle magic scratchpad workspace
+Super+Shift+S                Move window to magic scratchpad workspace
+Super+Mouse1 drag            Move floating/tiled window
+Super+Mouse2 drag            Resize floating/tiled window
+Audio/Brightness keys        Volume, mute, player, and brightness controls
+KEYS
+}
+
+case "${1:-menu}" in
+  --print|print)
+    entries
+    ;;
+  menu|--menu)
+    selection="$(entries | rofi -dmenu -i -p "remember keys" || true)"
+    [ -n "$selection" ] || exit 0
+    if command -v wl-copy >/dev/null 2>&1; then
+      printf '%s' "$selection" | wl-copy --type text/plain
+      notify-send -t 1500 "remember keys" "copied selected binding" 2>/dev/null || true
+    else
+      printf '%s\n' "$selection"
+    fi
+    ;;
+  *)
+    printf 'usage: %s [menu|--print]\n' "$0" >&2
+    exit 2
+    ;;
+esac

@@ -1,0 +1,447 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Dedicated cbox sysadmin launcher for Hyprland/Ghostty/Zellij.
+# Mirrors the pk-wiki scratchpad behavior: a pinned floating terminal can be
+# shown from any workspace, unfocused back to the previous window, or hidden on a
+# named special workspace without destroying the Zellij session.
+
+export PATH="$HOME/.bun/bin:$HOME/.local/state/nix/profiles/home-manager/home-path/bin:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
+session_name="sysadmin"
+special_workspace="sysadmin"
+app_class="com.cbox.sysadmin"
+app_title="sysadmin"
+working_dir="$HOME"
+terminal_bin="${SYSADMIN_TERMINAL:-/usr/bin/ghostty}"
+state_dir="${XDG_RUNTIME_DIR:-/tmp}/sysadmin"
+last_focus_file="$state_dir/last-focus"
+geometry_file="$state_dir/geometry"
+
+notify() {
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send -t "${2:-2500}" "sysadmin" "$1" 2>/dev/null || true
+  fi
+}
+
+zellij_session_exists() {
+  zellij list-sessions --short --no-formatting 2>/dev/null \
+    | awk -v session="$session_name" '$0 == session { found = 1 } END { exit found ? 0 : 1 }'
+}
+
+run_zellij() {
+  cd "$working_dir"
+
+  if ! command -v zellij >/dev/null 2>&1; then
+    printf 'zellij is not available on PATH.\n' >&2
+    exec "${SHELL:-/bin/bash}"
+  fi
+
+  if zellij_session_exists; then
+    exec zellij attach --force-run-commands "$session_name"
+  fi
+
+  exec zellij --session "$session_name" --new-session-with-layout sysadmin
+}
+
+hypr_available() {
+  command -v hyprctl >/dev/null 2>&1 \
+    && command -v jq >/dev/null 2>&1 \
+    && hyprctl -j monitors >/dev/null 2>&1
+}
+
+window_filter='select(.class == $class or ((.title // "") | startswith($title)))'
+window_query="[.[] | $window_filter] | sort_by(if .class == \$class then 0 else 1 end) | .[0]"
+
+window_address() {
+  hyprctl -j clients 2>/dev/null \
+    | jq -r --arg class "$app_class" --arg title "$app_title" "$window_query | .address // empty" \
+    | head -n 1
+}
+
+window_workspace() {
+  hyprctl -j clients 2>/dev/null \
+    | jq -r --arg class "$app_class" --arg title "$app_title" "$window_query | .workspace.name // empty" \
+    | head -n 1
+}
+
+window_pinned() {
+  hyprctl -j clients 2>/dev/null \
+    | jq -r --arg class "$app_class" --arg title "$app_title" "$window_query | .pinned // false" \
+    | head -n 1
+}
+
+window_geometry() {
+  hyprctl -j clients 2>/dev/null \
+    | jq -r --arg class "$app_class" --arg title "$app_title" "
+      $window_query
+      | select(.at and .size)
+      | [.at[0], .at[1], .size[0], .size[1]]
+      | @tsv
+    " \
+    | head -n 1
+}
+
+active_window_address() {
+  hyprctl -j activewindow 2>/dev/null \
+    | jq -r 'if (.address // "") == "0x0" then empty else .address // empty end'
+}
+
+valid_window_address() {
+  [ -n "${1:-}" ] && [ "${1:-}" != "0x0" ] && [ "${1:-}" != "null" ]
+}
+
+active_workspace_name() {
+  hyprctl -j monitors 2>/dev/null \
+    | jq -r '([.[] | select(.focused == true)][0] // .[0]).activeWorkspace.name // empty' \
+    | head -n 1
+}
+
+client_exists() {
+  [ -n "$(window_address)" ]
+}
+
+special_visible() {
+  hyprctl -j monitors 2>/dev/null \
+    | jq -e --arg workspace "special:$special_workspace" '.[] | select(.specialWorkspace.name == $workspace)' >/dev/null
+}
+
+hide_special() {
+  if special_visible; then
+    hyprctl dispatch "hl.dsp.workspace.toggle_special(\"$special_workspace\")" >/dev/null 2>&1 || true
+  fi
+}
+
+lua_quote() {
+  local value="$1"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  value="${value//$'\n'/\\n}"
+  printf '"%s"' "$value"
+}
+
+hypr_exec() {
+  local command="$1"
+  hyprctl dispatch "hl.dsp.exec_cmd($(lua_quote "$command"))" >/dev/null 2>&1
+}
+
+focus_window() {
+  local address="$1"
+  valid_window_address "$address" || return 1
+  hyprctl dispatch "hl.dsp.focus({ window = hl.get_window(\"address:$address\") })" >/dev/null 2>&1
+}
+
+remember_focus_address() {
+  local address="${1:-}" workspace="${2:-}" sys_address
+  valid_window_address "$address" || return 0
+
+  sys_address="$(window_address)"
+  if valid_window_address "$sys_address" && [ "$address" = "$sys_address" ]; then
+    return 0
+  fi
+
+  [ -n "$workspace" ] || workspace="$(active_workspace_name)"
+  mkdir -p "$state_dir" 2>/dev/null || return 0
+  printf '%s\t%s\n' "$address" "$workspace" > "$last_focus_file" 2>/dev/null || true
+}
+
+remember_active_non_sysadmin() {
+  remember_focus_address "$(active_window_address)" "$(active_workspace_name)"
+}
+
+focus_remembered_or_recent() {
+  local sys_address target_workspace saved_address saved_workspace target_address
+  sys_address="$(window_address)"
+  target_workspace="${1:-$(active_workspace_name)}"
+  [ -n "$target_workspace" ] || target_workspace="1"
+
+  if [ -r "$last_focus_file" ]; then
+    IFS=$'\t' read -r saved_address saved_workspace < "$last_focus_file" || true
+    if valid_window_address "${saved_address:-}" \
+      && { [ -z "${saved_workspace:-}" ] || [ "$saved_workspace" = "$target_workspace" ]; } \
+      && hyprctl -j clients 2>/dev/null \
+        | jq -e --arg address "$saved_address" --arg workspace "$target_workspace" '
+          .[] | select(.address == $address and .mapped == true and .workspace.name == $workspace)
+        ' >/dev/null; then
+      focus_window "$saved_address" || true
+      return 0
+    fi
+  fi
+
+  target_address="$(hyprctl -j clients 2>/dev/null \
+    | jq -r --arg sys "$sys_address" --arg workspace "$target_workspace" '
+      [.[] | select(.address != $sys and .mapped == true and .workspace.name == $workspace)]
+      | sort_by(.focusHistoryID)
+      | .[0].address // empty
+    ')"
+
+  if valid_window_address "$target_address"; then
+    focus_window "$target_address" || true
+  fi
+}
+
+pin_focused_if_needed() {
+  if [ "$(window_pinned)" != "true" ]; then
+    hyprctl dispatch "hl.dsp.window.pin()" >/dev/null 2>&1 || true
+  fi
+}
+
+unpin_focused_if_needed() {
+  if [ "$(window_pinned)" = "true" ]; then
+    hyprctl dispatch "hl.dsp.window.pin()" >/dev/null 2>&1 || true
+  fi
+}
+
+is_int() {
+  case "${1:-}" in
+    ''|'-') return 1 ;;
+    -*)
+      local value="${1#-}"
+      case "$value" in
+        ''|*[!0-9]*) return 1 ;;
+        *) return 0 ;;
+      esac
+      ;;
+    *[!0-9]*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+save_geometry() {
+  local x y w h
+  IFS=$'\t' read -r x y w h < <(window_geometry) || return 0
+  is_int "$x" && is_int "$y" && is_int "$w" && is_int "$h" || return 0
+
+  mkdir -p "$state_dir" 2>/dev/null || return 0
+  printf '%s\t%s\t%s\t%s\n' "$x" "$y" "$w" "$h" > "$geometry_file" 2>/dev/null || true
+}
+
+restore_geometry() {
+  local x y w h
+  [ -r "$geometry_file" ] || return 1
+  IFS=$'\t' read -r x y w h < "$geometry_file" || return 1
+  is_int "$x" && is_int "$y" && is_int "$w" && is_int "$h" || return 1
+
+  hyprctl dispatch "hl.dsp.window.resize({ x = $w, y = $h, exact = true })" >/dev/null 2>&1 || true
+  hyprctl dispatch "hl.dsp.window.move({ x = $x, y = $y, exact = true })" >/dev/null 2>&1 || true
+}
+
+apply_default_geometry() {
+  local mx my mw mh w h x y
+  IFS=$'\t' read -r mx my mw mh < <(
+    hyprctl -j monitors 2>/dev/null \
+      | jq -r '([.[] | select(.focused == true)][0] // .[0]) | [.x, .y, .width, .height] | @tsv'
+  ) || return 1
+  is_int "$mx" && is_int "$my" && is_int "$mw" && is_int "$mh" || return 1
+
+  w=$((mw * 85 / 100))
+  h=$((mh * 85 / 100))
+  x=$((mx + (mw - w) / 2))
+  y=$((my + (mh - h) / 2))
+
+  hyprctl dispatch "hl.dsp.window.resize({ x = $w, y = $h, exact = true })" >/dev/null 2>&1 || true
+  hyprctl dispatch "hl.dsp.window.move({ x = $x, y = $y, exact = true })" >/dev/null 2>&1 || true
+}
+
+wait_for_window() {
+  local _ address
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    address="$(window_address)"
+    if valid_window_address "$address"; then
+      printf '%s\n' "$address"
+      return 0
+    fi
+    sleep 0.25
+  done
+  return 1
+}
+
+show_window() {
+  local address previous_active target_workspace workspace
+  address="$(window_address)"
+  valid_window_address "$address" || return 1
+
+  previous_active="$(active_window_address)"
+  target_workspace="$(active_workspace_name)"
+  [ -n "$target_workspace" ] || target_workspace="1"
+  remember_focus_address "$previous_active" "$target_workspace"
+
+  workspace="$(window_workspace)"
+  if [ "$workspace" != "special:$special_workspace" ] && [ -r "$geometry_file" ]; then
+    save_geometry
+  fi
+
+  focus_window "$address" || true
+  hyprctl dispatch "hl.dsp.window.move({ workspace = \"$target_workspace\" })" >/dev/null 2>&1 || true
+  pin_focused_if_needed
+  restore_geometry || apply_default_geometry || true
+  hyprctl dispatch "hl.dsp.window.bring_to_top()" >/dev/null 2>&1 || true
+  hide_special
+}
+
+hide_window() {
+  local address target_workspace
+  address="$(window_address)"
+  valid_window_address "$address" || return 0
+  target_workspace="$(active_workspace_name)"
+  [ -n "$target_workspace" ] || target_workspace="1"
+
+  save_geometry
+  focus_window "$address" || true
+  unpin_focused_if_needed
+  hyprctl dispatch "hl.dsp.window.move({ workspace = \"special:$special_workspace\" })" >/dev/null 2>&1 || true
+  hide_special
+  focus_remembered_or_recent "$target_workspace"
+}
+
+unfocus_window() {
+  local address target_workspace workspace
+  address="$(window_address)"
+  valid_window_address "$address" || return 0
+
+  workspace="$(window_workspace)"
+  if [ "$workspace" = "special:$special_workspace" ]; then
+    show_window || true
+  else
+    save_geometry
+  fi
+
+  target_workspace="$(active_workspace_name)"
+  [ -n "$target_workspace" ] || target_workspace="1"
+  focus_remembered_or_recent "$target_workspace"
+}
+
+resolve_terminal() {
+  if [ -x "$terminal_bin" ]; then
+    printf '%s\n' "$terminal_bin"
+    return 0
+  fi
+
+  command -v ghostty 2>/dev/null && return 0
+  return 1
+}
+
+launch_terminal_direct() {
+  local terminal script_path
+  terminal="$(resolve_terminal)" || {
+    notify "ghostty is not installed" 4000
+    return 1
+  }
+
+  script_path="$HOME/.local/bin/sysadmin"
+  if [ ! -x "$script_path" ]; then
+    script_path="${BASH_SOURCE[0]}"
+  fi
+
+  "$terminal" \
+    --class="$app_class" \
+    --title="$app_title" \
+    --gtk-single-instance=false \
+    --working-directory="$working_dir" \
+    -e "$script_path" --zellij \
+    >/dev/null 2>&1 &
+}
+
+launch_terminal_hypr() {
+  local terminal script_path launch_cmd address
+  terminal="$(resolve_terminal)" || {
+    notify "ghostty is not installed" 4000
+    return 1
+  }
+
+  script_path="$HOME/.local/bin/sysadmin"
+  if [ ! -x "$script_path" ]; then
+    script_path="${BASH_SOURCE[0]}"
+  fi
+
+  printf -v launch_cmd '%q ' \
+    "$terminal" \
+    "--class=$app_class" \
+    "--title=$app_title" \
+    "--gtk-single-instance=false" \
+    "--working-directory=$working_dir" \
+    -e "$script_path" --zellij
+
+  if hypr_exec "[float; pin; center] $launch_cmd"; then
+    if address="$(wait_for_window)"; then
+      focus_window "$address" || true
+      pin_focused_if_needed
+      restore_geometry || apply_default_geometry || true
+      hyprctl dispatch "hl.dsp.window.bring_to_top()" >/dev/null 2>&1 || true
+    fi
+  else
+    launch_terminal_direct
+  fi
+}
+
+open_sysadmin() {
+  if hypr_available; then
+    remember_active_non_sysadmin
+    if ! client_exists; then
+      launch_terminal_hypr
+    else
+      show_window
+    fi
+  else
+    launch_terminal_direct
+  fi
+}
+
+toggle_sysadmin() {
+  local address active workspace
+
+  if hypr_available; then
+    address="$(window_address)"
+    if valid_window_address "$address"; then
+      active="$(active_window_address)"
+      workspace="$(window_workspace)"
+
+      if [ "$workspace" = "special:$special_workspace" ]; then
+        show_window
+      elif [ "$active" = "$address" ]; then
+        unfocus_window
+      else
+        show_window
+      fi
+    else
+      remember_active_non_sysadmin
+      launch_terminal_hypr
+    fi
+  else
+    launch_terminal_direct
+  fi
+}
+
+hide_sysadmin() {
+  if hypr_available; then
+    hide_window
+  else
+    notify "hide is only available inside Hyprland" 3000
+  fi
+}
+
+case "${1:---toggle}" in
+  --zellij)
+    run_zellij
+    ;;
+  --open|--show)
+    open_sysadmin
+    ;;
+  --toggle)
+    toggle_sysadmin
+    ;;
+  --hide)
+    hide_sysadmin
+    ;;
+  --unfocus)
+    if hypr_available; then
+      unfocus_window
+    else
+      notify "unfocus is only available inside Hyprland" 3000
+    fi
+    ;;
+  *)
+    printf 'usage: %s [--toggle|--open|--hide|--unfocus|--zellij]\n' "$0" >&2
+    exit 2
+    ;;
+esac
