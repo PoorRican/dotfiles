@@ -132,6 +132,13 @@ hl.bind(mainMod .. " + CTRL + SHIFT + G", hl.dsp.group.lock({ action = "toggle" 
 
 Mental model: a group is a tabbed/stacked container inside the current layout. In scrolling layout, it behaves well as one stable column in the tape. `lock_active` is the closest built-in way to preserve a few grouped windows together; it prevents accidental group-membership changes, but it does not hard-freeze arbitrary tiled geometry.
 
+Waybar workspace click pitfall under Hyprland Lua parser:
+
+- Waybar's built-in `hyprland/workspaces` click handling hardcodes legacy IPC commands such as `dispatch workspace N` or `dispatch focusworkspaceoncurrentmonitor N`.
+- In Hyprland 0.55+ Lua-parser sessions this fails with errors like `')' expected near '2'`, even though `SUPER+N` keybinds work, because the repo binds workspaces through `hl.dsp.focus({ workspace = N })`.
+- If clickable workspace buttons are important, replace the built-in workspace module with explicit `custom/wsN` modules whose `on-click` runs a helper/wrapper command like `hyprctl dispatch 'hl.dsp.focus({ workspace = N })'`. Use JSON return classes (`active`, `occupied`, `empty`) plus a Waybar realtime signal or short polling interval to preserve active styling.
+- Keep the semantic icon mapping in `configs/waybar/config.jsonc`; Hyprland workspace rules/keybinds should remain in `configs/hypr/hyprland.lua`.
+
 Verification after applying live or declaratively:
 
 ```bash

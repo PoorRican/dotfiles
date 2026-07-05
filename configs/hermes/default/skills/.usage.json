@@ -12,6 +12,32 @@
     "use_count": 12,
     "view_count": 12
   },
+  "claude-code-internals-inspection": {
+    "archived_at": null,
+    "created_at": "2026-07-04T03:08:02.187005+00:00",
+    "created_by": "agent",
+    "last_patched_at": null,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
+  },
+  "coding-agent-output-styles": {
+    "archived_at": null,
+    "created_at": "2026-07-04T03:16:23.303372+00:00",
+    "created_by": "agent",
+    "last_patched_at": "2026-07-05T01:24:43.938596+00:00",
+    "last_used_at": "2026-07-05T01:18:52.615543+00:00",
+    "last_viewed_at": "2026-07-05T01:18:52.609969+00:00",
+    "patch_count": 4,
+    "pinned": false,
+    "state": "active",
+    "use_count": 4,
+    "view_count": 4
+  },
   "domain-intel": {
     "archived_at": null,
     "created_at": "2026-06-12T17:13:55.594411+00:00",
@@ -30,26 +56,39 @@
     "created_at": "2026-06-13T02:31:51.062855+00:00",
     "created_by": null,
     "last_patched_at": "2026-07-01T19:13:16.509449+00:00",
-    "last_used_at": "2026-07-01T19:10:01.642333+00:00",
-    "last_viewed_at": "2026-07-01T19:10:01.632782+00:00",
+    "last_used_at": "2026-07-05T11:54:31.022087+00:00",
+    "last_viewed_at": "2026-07-05T11:54:31.016505+00:00",
     "patch_count": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 7,
-    "view_count": 7
+    "use_count": 8,
+    "view_count": 8
+  },
+  "hermes-tui-development": {
+    "archived_at": null,
+    "created_at": "2026-07-05T13:21:21.586700+00:00",
+    "created_by": "agent",
+    "last_patched_at": null,
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
   },
   "linux-system-debugging": {
     "archived_at": null,
     "created_at": "2026-06-30T21:57:26.606052+00:00",
     "created_by": null,
     "last_patched_at": "2026-07-01T01:38:55.083408+00:00",
-    "last_used_at": "2026-06-30T22:38:07.212666+00:00",
-    "last_viewed_at": "2026-06-30T22:38:07.207039+00:00",
+    "last_used_at": "2026-07-04T20:18:11.540371+00:00",
+    "last_viewed_at": "2026-07-04T20:18:11.535016+00:00",
     "patch_count": 7,
     "pinned": false,
     "state": "active",
-    "use_count": 4,
-    "view_count": 4
+    "use_count": 6,
+    "view_count": 6
   },
   "local-columnar-data-inspection": {
     "archived_at": null,
@@ -67,13 +106,26 @@
   "nix-flake-dotfiles-maintenance": {
     "archived_at": null,
     "created_at": "2026-05-05T02:56:31.234763+00:00",
-    "last_patched_at": "2026-07-01T20:34:01.652374+00:00",
-    "last_used_at": "2026-07-01T20:33:49.225185+00:00",
-    "last_viewed_at": "2026-07-01T20:33:49.219491+00:00",
-    "patch_count": 112,
+    "last_patched_at": "2026-07-05T11:53:04.020962+00:00",
+    "last_used_at": "2026-07-05T20:30:07.841295+00:00",
+    "last_viewed_at": "2026-07-05T20:30:07.833924+00:00",
+    "patch_count": 121,
     "pinned": false,
     "state": "active",
-    "use_count": 78,
-    "view_count": 78
+    "use_count": 91,
+    "view_count": 91
+  },
+  "terminal-multiplexer-workflows": {
+    "archived_at": null,
+    "created_at": "2026-07-03T16:18:15.073794+00:00",
+    "created_by": "agent",
+    "last_patched_at": "2026-07-03T16:18:40.314338+00:00",
+    "last_used_at": null,
+    "last_viewed_at": null,
+    "patch_count": 1,
+    "pinned": false,
+    "state": "active",
+    "use_count": 0,
+    "view_count": 0
   }
 }
