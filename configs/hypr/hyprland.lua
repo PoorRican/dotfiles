@@ -238,8 +238,16 @@ hl.animation({ leaf = "zoomFactor",    enabled = true,  speed = 7,    bezier = "
 --     rounding    = 0,
 -- })
 
--- Workspace 4 is a scrolling-layout playground: windows form a horizontal tape
+-- Workspaces 1 and 4 use the scrolling layout: windows form a horizontal tape
 -- of columns instead of a fixed BSP tree.
+hl.workspace_rule({
+    workspace = "1",
+    layout = "scrolling",
+    layout_opts = {
+        direction = "right",
+    },
+})
+
 hl.workspace_rule({
     workspace = "4",
     layout = "scrolling",

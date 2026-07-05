@@ -52,7 +52,7 @@
   // tiny custom modules so clicks call the Lua dispatcher directly while still
   // showing all ten desktop slots.
   "custom/ws1": {
-    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 1 '' 'd1 generic'",
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 1 '' 'd1 scrolling'",
     "return-type": "json",
     "interval": 1,
     "signal": 8,

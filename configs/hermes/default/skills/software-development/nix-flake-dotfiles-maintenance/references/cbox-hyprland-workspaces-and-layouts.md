@@ -5,16 +5,20 @@ Session-derived notes for evolving the user's cbox Hyprland setup in `~/dotfiles
 ## Current distinction to preserve
 
 - Hyprland config currently binds numeric workspaces 1-10 with `SUPER+[0-9]` and moves windows with `SUPER+SHIFT+[0-9]`.
-- Semantic icons currently come from Waybar, not Hyprland workspace rules:
-  - 1 `` terminal/general
-  - 2 `` browser (user wants non-Chrome icon if revisited)
-  - 3 `` email
-  - 4 `` files
-  - 5 `` chat
-  - 6 `` music
-  - 7 `󰊴` games
-  - 8 `` debug/bug
-- Waybar uses `hyprland/workspaces` with `persistent-workspaces` for 1-8 and `format-icons`; changing workspace meaning should update Waybar icons/labels as well as Hyprland bindings/rules.
+- Workspace layout rules live in `configs/hypr/hyprland.lua`; semantic icons/tooltips come from Waybar, not Hyprland workspace rules.
+- Waybar currently uses explicit `custom/wsN` modules rather than built-in `hyprland/workspaces`, because the built-in click path sends legacy dispatcher commands that fail under the Hyprland Lua parser.
+- Current Waybar workspace labels/icons:
+  - 1 `` `d1 scrolling`
+  - 2 `` `d2 browser`
+  - 3 `` `d3 reading/research`
+  - 4 `` `d4 terminal`
+  - 5 `` `d5 ide`
+  - 6 `` `d6 generic`
+  - 7 `` `d7 generic`
+  - 8 `` `d8 wiki`
+  - 9 `` `d9 generic`
+  - 10 `` `d0 generic`
+- Changing workspace meaning should update Waybar icons/labels as well as Hyprland bindings/rules.
 
 ## Hyprland terminology
 
