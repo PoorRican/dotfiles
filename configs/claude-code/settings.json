@@ -47,7 +47,7 @@
     "ask": [],
     "defaultMode": "plan"
   },
-  "model": "claude-fable-5[1m]",
+  "model": "opus[1m]",
   "worktree": {
     "baseRef": "head"
   },
@@ -58,12 +58,10 @@
   "enabledPlugins": {
     "pyright-lsp@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
-    "Notion@claude-plugins-official": true,
     "github@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
-    "feature-dev@claude-plugins-official": true,
-    "greptile@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": false,
     "claude-md-management@claude-plugins-official": true,
     "brainstorming-skill@jamie-bitflight-skills": true,
     "conventional-commits@jamie-bitflight-skills": true,
@@ -79,13 +77,10 @@
     "clangd-lsp@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "mcp-server-dev@claude-plugins-official": true,
-    "deploy-on-aws@claude-plugins-official": true,
-    "aws-dev-toolkit@claude-plugins-official": true,
-    "aws-core@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
-    "atomic-agents@claude-plugins-official": true,
-    "fiftyone@claude-plugins-official": true
+    "fiftyone@claude-plugins-official": false,
+    "dignified-python@dagster": true
   },
   "extraKnownMarketplaces": {
     "dagster": {
@@ -96,12 +91,12 @@
     }
   },
   "alwaysThinkingEnabled": true,
-  "effortLevel": "xhigh",
+  "effortLevel": "high",
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
   "editorMode": "vim",
-  "verbose": true,
+  "verbose": false,
   "preferredNotifChannel": "terminal_bell",
   "teammateMode": "auto",
   "inputNeededNotifEnabled": true,
