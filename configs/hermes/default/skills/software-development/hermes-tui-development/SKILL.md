@@ -98,6 +98,8 @@ Global handlers own transcript scrolling, interrupt/exit/redraw/editor open, ses
 
 Do not claim this is a config toggle unless the current source proves it. If no modal implementation exists, treat it as a TUI feature.
 
+For a concrete porting reference, see `references/helix-kakoune-modal-input-port.md`. It summarizes the `/home/swe/repos/pi-modal` OMP modal-editor implementation and maps its pure-engine/adapter split onto Hermes TUI's `TextInput` composer architecture.
+
 Recommended approach:
 
 1. Add a frontend/backed config field such as:

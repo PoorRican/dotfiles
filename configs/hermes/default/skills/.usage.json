@@ -68,27 +68,27 @@
     "archived_at": null,
     "created_at": "2026-07-05T13:21:21.586700+00:00",
     "created_by": "agent",
-    "last_patched_at": null,
-    "last_used_at": null,
-    "last_viewed_at": null,
-    "patch_count": 0,
+    "last_patched_at": "2026-07-05T20:35:24.167239+00:00",
+    "last_used_at": "2026-07-05T20:34:49.567421+00:00",
+    "last_viewed_at": "2026-07-05T20:34:49.559274+00:00",
+    "patch_count": 2,
     "pinned": false,
     "state": "active",
-    "use_count": 0,
-    "view_count": 0
+    "use_count": 1,
+    "view_count": 1
   },
   "linux-system-debugging": {
     "archived_at": null,
     "created_at": "2026-06-30T21:57:26.606052+00:00",
     "created_by": null,
-    "last_patched_at": "2026-07-01T01:38:55.083408+00:00",
-    "last_used_at": "2026-07-04T20:18:11.540371+00:00",
-    "last_viewed_at": "2026-07-04T20:18:11.535016+00:00",
-    "patch_count": 7,
+    "last_patched_at": "2026-07-06T21:07:01.009485+00:00",
+    "last_used_at": "2026-07-06T20:59:25.256279+00:00",
+    "last_viewed_at": "2026-07-06T20:59:25.250519+00:00",
+    "patch_count": 11,
     "pinned": false,
     "state": "active",
-    "use_count": 6,
-    "view_count": 6
+    "use_count": 11,
+    "view_count": 11
   },
   "local-columnar-data-inspection": {
     "archived_at": null,
@@ -103,17 +103,30 @@
     "use_count": 1,
     "view_count": 1
   },
+  "marimo-pair": {
+    "archived_at": null,
+    "created_at": "2026-07-06T20:35:20.882674+00:00",
+    "created_by": null,
+    "last_patched_at": null,
+    "last_used_at": "2026-07-06T20:35:20.894614+00:00",
+    "last_viewed_at": "2026-07-06T20:35:20.882683+00:00",
+    "patch_count": 0,
+    "pinned": false,
+    "state": "active",
+    "use_count": 1,
+    "view_count": 1
+  },
   "nix-flake-dotfiles-maintenance": {
     "archived_at": null,
     "created_at": "2026-05-05T02:56:31.234763+00:00",
-    "last_patched_at": "2026-07-05T11:53:04.020962+00:00",
-    "last_used_at": "2026-07-05T20:30:07.841295+00:00",
-    "last_viewed_at": "2026-07-05T20:30:07.833924+00:00",
-    "patch_count": 121,
+    "last_patched_at": "2026-07-06T21:07:13.589129+00:00",
+    "last_used_at": "2026-07-06T21:04:34.620890+00:00",
+    "last_viewed_at": "2026-07-06T21:04:34.615190+00:00",
+    "patch_count": 128,
     "pinned": false,
     "state": "active",
-    "use_count": 91,
-    "view_count": 91
+    "use_count": 96,
+    "view_count": 96
   },
   "terminal-multiplexer-workflows": {
     "archived_at": null,

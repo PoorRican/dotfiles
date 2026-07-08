@@ -150,6 +150,32 @@ hyprctl -j activeworkspace | jq .tiledLayout
 # expect "scrolling" while focused on workspace 4
 ```
 
+### Hyprland 0.55 Lua workspace-rule reload pitfall
+
+In a Hyprland 0.55.3 Lua-parser session, adding multiple top-level `hl.workspace_rule(...)` calls to `configs/hypr/hyprland.lua` may leave only the last rule visible after `hyprctl reload`:
+
+```bash
+hyprctl -j workspacerules
+hyprctl -j workspaces | jq '.[] | select(.id == 1 or .id == 4) | {id, tiledLayout}'
+```
+
+Observed symptom: the live config symlink contains both workspace `1` and workspace `4` scrolling rules, but `hyprctl -j workspacerules` lists only workspace `4`, and workspace `1` still reports `"dwindle"`.
+
+A live repair that works for the current compositor instance is to apply both rules through one Lua eval:
+
+```bash
+hyprctl eval 'hl.workspace_rule({ workspace = "1", layout = "scrolling", layout_opts = { direction = "right" } }); hl.workspace_rule({ workspace = "4", layout = "scrolling", layout_opts = { direction = "right" } })'
+```
+
+Then verify both active workspace rules and layouts. Treat this as live-state repair, not a durable config fix. Do not commit speculative workarounds such as delayed `hl.exec_cmd("hyprctl eval ...")` or `hl.timer(...)` unless they are verified to survive `home-manager switch` + `hyprctl reload`; in-session tests showed those did not apply the rule after reload.
+
+When diagnosing “still says dwindle,” separate four layers before editing again:
+
+1. repo content: `configs/hypr/hyprland.lua` has the intended rules
+2. applied generation: `readlink -f ~/.config/hypr/hyprland.lua` points to a store file containing the intended rules
+3. registered compositor rules: `hyprctl -j workspacerules` lists each intended workspace
+4. resulting layout: `hyprctl -j workspaces` / `hyprctl -j activeworkspace` reports `tiledLayout = "scrolling"`
+
 ## Master layout notes
 
 Master layout is a main pane plus a visible stack of secondary windows. Good for one primary engineering/browser window plus references/logs/chat.

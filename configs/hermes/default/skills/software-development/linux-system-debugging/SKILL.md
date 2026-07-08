@@ -286,6 +286,10 @@ For Chromium-family browsers, including Vivaldi/Chrome:
 3. Inspect window-manager metadata for visible browser title when helpful, e.g. `hyprctl clients -j`.
 4. If appropriate, scan readable anonymous/dev-shm mappings for repeated URL/title/domain strings; phrase as heuristic, not guaranteed tab mapping.
 
+### Coding-agent MCP sidecar attribution
+
+For many `uvx`, `npm exec`, `awslabs.*-mcp-server`, `mcp-proxy-for-aws`, or `context7-mcp` processes, trace parentage before blaming notebooks or experiment kernels. Multiple active Claude Code/OMP sessions can each spawn plugin-provided MCP sidecars, and installed user-scope plugins can duplicate servers per session. Attribute by parent process (`claude`, `~/.local/share/claude/versions/...`, `bun ~/.bun/bin/omp`) and then inspect plugin `.mcp.json` / `enabledPlugins` settings. Durable fix is to disable the plugin for new sessions and close old agent sessions to reclaim memory; killing child MCP processes alone is temporary. See `references/memory-attribution-claude-omp-plugin-mcp-sidecars.md`.
+
 ### Resource answer format
 
 1. Overall resource state: RAM, swap/zram, pressure.
@@ -296,6 +300,7 @@ For Chromium-family browsers, including Vivaldi/Chrome:
 
 References:
 - `references/linux-memory-attribution.md`
+- `references/linux-memory-attribution-marimo-omp-vllm-case.md` — case pattern for disproving a suspected marimo notebook by PSS, grouping OMP/bun + Python runners, and using Docker/cgroup accounting for vLLM.
 
 ## Verification checklist
 
