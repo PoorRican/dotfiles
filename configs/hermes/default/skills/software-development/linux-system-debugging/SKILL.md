@@ -290,6 +290,21 @@ For Chromium-family browsers, including Vivaldi/Chrome:
 
 For many `uvx`, `npm exec`, `awslabs.*-mcp-server`, `mcp-proxy-for-aws`, or `context7-mcp` processes, trace parentage before blaming notebooks or experiment kernels. Multiple active Claude Code/OMP sessions can each spawn plugin-provided MCP sidecars, and installed user-scope plugins can duplicate servers per session. Attribute by parent process (`claude`, `~/.local/share/claude/versions/...`, `bun ~/.bun/bin/omp`) and then inspect plugin `.mcp.json` / `enabledPlugins` settings. Durable fix is to disable the plugin for new sessions and close old agent sessions to reclaim memory; killing child MCP processes alone is temporary. See `references/memory-attribution-claude-omp-plugin-mcp-sidecars.md`.
 
+### Desktop freezes at high RAM usage
+
+When a Linux desktop freezes around ~90-95% RAM during training or data/LLM workloads, treat it as a memory-pressure/OOM policy problem until proven otherwise, not as a compression problem by default. zram compression can be working correctly while the system still stalls because zram is saturated, disk swap is absent/tiny, and the kernel OOM killer acts only as a late last resort.
+
+Evidence to gather: RAM/swap/zram, PSI memory pressure, kernel OOM logs with `Free swap`, active proactive OOM services (`earlyoom`, `systemd-oomd`, `nohang`), and top RSS/PSS consumers. If the user asks why Linux does not behave like macOS, explain that Linux has the primitives but desktop-friendly proactive kill/notification policy often must be enabled.
+
+Mitigation pattern:
+- Keep zram as high-priority first-tier swap.
+- Add lower-priority disk/NVMe swap as overflow; on Btrfs use `btrfs filesystem mkswapfile`, not a naive swapfile recipe.
+- Add a proactive OOM daemon such as `earlyoom` or properly configured `systemd-oomd`.
+- For known-heavy training jobs, run them in a cgroup/systemd user scope with `MemoryHigh`, `MemoryMax`, and `MemorySwapMax` so the training job dies or throttles before the desktop is starved.
+- Warn that larger swap can prevent crashes but can also lengthen freezes if used without proactive OOM/containment.
+
+See `references/linux-desktop-memory-pressure-guardrails.md` for the detailed playbook.
+
 ### Resource answer format
 
 1. Overall resource state: RAM, swap/zram, pressure.
@@ -300,6 +315,7 @@ For many `uvx`, `npm exec`, `awslabs.*-mcp-server`, `mcp-proxy-for-aws`, or `con
 
 References:
 - `references/linux-memory-attribution.md`
+- `references/linux-desktop-memory-pressure-guardrails.md`
 - `references/linux-memory-attribution-marimo-omp-vllm-case.md` — case pattern for disproving a suspected marimo notebook by PSS, grouping OMP/bun + Python runners, and using Docker/cgroup accounting for vLLM.
 
 ## Verification checklist

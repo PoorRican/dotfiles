@@ -81,10 +81,10 @@
     "archived_at": null,
     "created_at": "2026-06-30T21:57:26.606052+00:00",
     "created_by": null,
-    "last_patched_at": "2026-07-06T21:07:01.009485+00:00",
+    "last_patched_at": "2026-07-10T23:51:30.543283+00:00",
     "last_used_at": "2026-07-06T20:59:25.256279+00:00",
     "last_viewed_at": "2026-07-06T20:59:25.250519+00:00",
-    "patch_count": 11,
+    "patch_count": 13,
     "pinned": false,
     "state": "active",
     "use_count": 11,
@@ -119,14 +119,14 @@
   "nix-flake-dotfiles-maintenance": {
     "archived_at": null,
     "created_at": "2026-05-05T02:56:31.234763+00:00",
-    "last_patched_at": "2026-07-06T21:07:13.589129+00:00",
-    "last_used_at": "2026-07-06T21:04:34.620890+00:00",
-    "last_viewed_at": "2026-07-06T21:04:34.615190+00:00",
-    "patch_count": 128,
+    "last_patched_at": "2026-07-09T06:13:48.110766+00:00",
+    "last_used_at": "2026-07-10T23:49:53.244076+00:00",
+    "last_viewed_at": "2026-07-10T23:49:53.238216+00:00",
+    "patch_count": 132,
     "pinned": false,
     "state": "active",
-    "use_count": 96,
-    "view_count": 96
+    "use_count": 100,
+    "view_count": 100
   },
   "terminal-multiplexer-workflows": {
     "archived_at": null,
