@@ -11,6 +11,7 @@
     direnv
     cmake
     pyright
+    pyrefly
 
     nodejs_22
     bun

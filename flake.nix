@@ -14,6 +14,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Separate nixpkgs pin for tools where the main flake lock intentionally lags.
+    # Keeps pyrefly current without updating every package from the primary nixpkgs.
+    pyrefly-nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+
   };
 
   outputs = { nixpkgs, home-manager, hermes-agent, ... }@inputs:
@@ -50,6 +54,20 @@
       });
     };
 
+    # Primary nixpkgs in flake.lock currently has pyrefly 1.0.0 while upstream
+    # nixos-26.05 has 1.1.1. Pull just pyrefly from a separate nixpkgs pin so we
+    # get the current release without broad primary lockfile churn.
+    pyrefly_latest_overlay = final: prev: {
+      pyrefly =
+        let
+          pyreflyPkgs = import inputs.pyrefly-nixpkgs {
+            system = prev.stdenvNoCC.hostPlatform.system;
+            config = { allowUnfree = true; };
+          };
+        in
+        pyreflyPkgs.pyrefly;
+    };
+
     darwinTestFixesOverlay = final: prev: {
       python313 = prev.python313.override {
         packageOverrides = pfinal: pprev: {
@@ -69,9 +87,9 @@
         pkgs = import nixpkgs {
           inherit system;
           config = { allowUnfree = true; };
-          # Apply the Bun pin to every host so shared dev tooling evaluates the
-          # same way on Linux and Darwin; host-specific overlays still append.
-          overlays = [ bun_1_3_14_overlay ] ++ overlays;
+          # Apply narrow package pins to every host so shared dev tooling evaluates
+          # the same way on Linux and Darwin; host-specific overlays still append.
+          overlays = [ bun_1_3_14_overlay pyrefly_latest_overlay ] ++ overlays;
         };
         extraSpecialArgs = {
           dotfiles = ./.;

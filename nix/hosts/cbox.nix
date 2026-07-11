@@ -10,6 +10,7 @@
     ../profiles/hyprland-desktop.nix
     ../profiles/dev-core.nix
     ../profiles/dev-extra.nix
+    ../profiles/pkm.nix
     # not used at this moment
     #../layers/knowledge-tools.nix
   ];
