@@ -1,0 +1,24 @@
+theme = "dracula"
+
+[editor]
+line-number = "relative"
+scrolloff = 15
+cursorline = true
+cursorcolumn = true
+
+shell = ["zsh", "-c"]
+color-modes = true
+text-width = 100
+
+trim-trailing-whitespace = true
+
+[editor.lsp]
+display-inlay-hints = true
+
+[editor.auto-save]
+focus-lost = true
+after-delay.enable = true
+
+[editor.soft-wrap]
+enable = true
+
