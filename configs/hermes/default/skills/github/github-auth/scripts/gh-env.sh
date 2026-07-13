@@ -1,4 +1,4 @@
-#!/nix/store/3hgg7pr65imdrifqqh3flg3arvkc2r22-bash-5.3p3/bin/bash
+#!/nix/store/gik3rh1vz2jlgnifb9dh6vc6sxwwz9jj-bash-5.3p9/bin/bash
 # GitHub environment detection helper for Hermes Agent skills.
 #
 # Usage (via terminal tool):

@@ -28,6 +28,44 @@ Use this skill when asked to locate built-in or plugin-provided output style pro
 4. When porting, prefer additive prompt injection over replacing the base system prompt.
 5. Avoid stacking styles that already include each other; this duplicates behavioral markers and makes the agent noisy.
 
+## Claude Code Internals Inspection
+
+When you need to locate Claude Code's internal output style prompts, plugin recreations, or built-in strings:
+
+### Plugin recreations (preferred readable source)
+
+Claude Code migrated/deprecated some output styles into official plugins implemented as SessionStart hooks. Check the plugin marketplace cache first:
+
+```bash
+~/.claude/plugins/marketplaces/claude-plugins-official/plugins/*output-style/
+```
+
+Known locations:
+- Explanatory: `~/.claude/plugins/marketplaces/claude-plugins-official/plugins/explanatory-output-style/hooks-handlers/session-start.sh`
+- Learning: `~/.claude/plugins/marketplaces/claude-plugins-official/plugins/learning-output-style/hooks-handlers/session-start.sh`
+
+The prompt is usually in `hooks-handlers/session-start.sh`, emitted as JSON under:
+```json
+hookSpecificOutput.additionalContext
+```
+Parse the heredoc JSON and report the `additionalContext`, not the shell wrapper.
+
+### Native built-in strings (fallback)
+
+For built-in/native output style strings, inspect the installed binary:
+
+```bash
+strings -n 5 /path/to/claude | grep -i -C 20 'Explanatory\|Learning\|outputStyle'
+```
+
+If exact extraction matters, do not rely only on `strings`: Claude Code native binaries may contain mixed UTF-8 and UTF-16LE string chunks. Read bytes around the match and decode both encodings. Look for style metadata near names such as `Explanatory`, `Learning`, `Proactive`, descriptions, and headings like `# Explanatory Style Active` or `# Learning Style Active`.
+
+### Report provenance
+
+Always distinguish:
+- "official plugin recreation / SessionStart hook" for plugin prompts
+- "native built-in prompt strings from installed Claude Code version X" for binary-extracted strings
+
 ## Agent-specific injection targets
 
 ### Claude Code
@@ -68,6 +106,9 @@ Wire these with a small Home Manager module (for example `programs.coding-agent-
 - Do not add Claude's Explanatory and Learning prompts simultaneously. Learning already includes Explanatory behavior, so stacking both duplicates the `★ Insight` instruction.
 - Do not claim a style is unavailable just because it is not in the CLI help. Search plugin caches, settings/config directories, and install roots.
 - Do not rely on binary extraction as the authoritative prompt if an official plugin or documented file provides readable prompt text.
+- Do not claim the plugin prompt is identical to the native built-in prompt unless you verified both. The Learning plugin may explicitly say it combines the unshipped Learning style with Explanatory functionality.
+- Do not copy README summaries when the user asked for prompts; extract the actual injected context from the hook or binary.
+- If a search returns too much noise, narrow to `~/.claude/plugins/marketplaces/claude-plugins-official/plugins` and then to `*output-style*`.
 - Pi/OMP extension hook APIs may have changed since examples mentioning `systemPromptAppend`: Pi `0.80.3` expects `before_agent_start` handlers to return a full `systemPrompt` string (`event.systemPrompt + extra`), while OMP `16.3.x` expects a `systemPrompt` block array (`[...event.systemPrompt, extra]`). Preserve additive semantics even when the literal return field is no longer `systemPromptAppend`.
 
 ## References
