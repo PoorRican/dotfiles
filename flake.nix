@@ -19,6 +19,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    huggingface-kernels = {
+      url = "github:huggingface/kernels";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs = { nixpkgs, home-manager, imsg-overlay, hermes-agent, ... }@inputs:
