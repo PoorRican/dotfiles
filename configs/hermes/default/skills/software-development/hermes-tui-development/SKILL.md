@@ -113,8 +113,15 @@ Recommended approach:
 5. Start with a small useful subset: Esc→normal, `i`/`a` insert, `h/j/k/l` movement, `w/b/e` word movement, `x` select line, `d` delete selection, `y` yank, `p` paste, `u` undo, and preserve existing Shift/Alt+Enter newline behavior.
 6. Add tests for pass-through collisions, especially `Esc`, `Tab`, `Ctrl+C`, paste, and voice shortcuts. `TextInput.shouldPassThroughToGlobalHandler()` is a key collision point.
 
+## ANSI/Input-Corruption Debugging
+
+When the composer receives numeric `...;...M` fragments, `[I` / `[O`, or keyboard and mouse input appear to freeze after pane/focus changes, use `references/ansi-input-leak-debugging.md`. It contains protocol signatures, active-install/revision checks, the split-SGR differential tokenizer probe, terminal-mode lifecycle checks, issue-search vocabulary, and guidance for separating a Hermes parser defect from a multiplexer mouse-state defect.
+
 ## Pitfalls
 
+- Always identify the active packaged TUI revision before analyzing a source checkout. With Nix, `command -v`, `readlink -f`, `HERMES_TUI_DIR`, `HERMES_REVISION`, and the named flake lock are stronger evidence than the HEAD of a nearby repository.
+- Do not treat visible ANSI-like composer text as model output or ordinary user text. Classify SGR mouse, focus, and bracketed-paste signatures first, then trace the tokenizer → key parser → `TextInput` path.
+- A multiplexer can be the trigger without being the primary defect: pane switching legitimately creates focus reports, while a TUI tokenizer may incorrectly turn split protocol bytes into printable text.
 - The TUI dist bundle can be huge; prefer source files when available, and read only focused sections of `dist/entry.js` when source is unavailable.
 - On Nix, the installed `$HERMES_TUI_DIR` may contain only `dist/`; use derivations to find the source input.
 - `terminal.modal_mode` in Hermes config is not proof of TUI modal composer support; verify it is read by the TUI before telling the user it can enable Helix/Kakoune mode.
