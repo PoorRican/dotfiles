@@ -136,6 +136,12 @@
         homeDirectory = "/home/swe";
         modules = [ ./nix/hosts/cbox.nix ];
       };
+      wst = mkHome {
+        system = "x86_64-linux";
+        username = "swe";
+        homeDirectory = "/home/swe";
+        modules = [ ./nix/hosts/wst.nix ];
+      };
     };
   };
 }
