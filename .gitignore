@@ -6,8 +6,9 @@ packer_compiled.lua
 # nix build
 result
 
-# local Hermes workspace state
+# local Hermes workspace and generated state
 .hermes/
+/configs/hermes/default/skills/.curator_backups/
 
 # local source checkouts
 /misc/helix.vim/
