@@ -27,6 +27,8 @@
       withNodeJs = false;
     })
     pkgs.markdown-oxide
+    pkgs.nixd
+    pkgs.nixfmt
     pkgs.tree-sitter
   ];
 }

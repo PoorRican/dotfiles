@@ -19,8 +19,8 @@ return {
 				json = prettier,
 				lua = { "stylua" },
 				markdown = prettier,
-				nix = { "nixpkgs-fmt" },
-        -- TODO: update to use ruff
+				nix = { "nixfmt" },
+				-- TODO: update to use ruff
 				python = { "isort", "black" },
 				sh = { "shfmt" },
 				typescript = prettier,
@@ -38,9 +38,6 @@ return {
 				["cmake-format"] = {
 					command = "cmake-format",
 					prepend_args = { "-i" },
-				},
-				nix = {
-					command = "nixpkgs-fmt",
 				},
 				prettier = {
 					command = "prettier",
