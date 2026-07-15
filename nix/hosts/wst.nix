@@ -13,6 +13,8 @@
   ];
 
 	home.packages = with pkgs; [
-		k3s
+		python3
+		python314
+		python315
 	];
 }
