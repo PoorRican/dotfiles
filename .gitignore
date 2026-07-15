@@ -9,5 +9,8 @@ result
 # local Hermes workspace state
 .hermes/
 
+# local source checkouts
+/misc/helix.vim/
+
 # secrets
 OPENCODE_API_KEY
