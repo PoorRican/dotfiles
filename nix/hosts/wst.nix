@@ -13,8 +13,8 @@
   ];
 
 	home.packages = with pkgs; [
-		python3
 		python314
-		python315
+
+		tree
 	];
 }
