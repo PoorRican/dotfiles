@@ -1,5 +1,5 @@
 # wst server
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   imports = [
@@ -11,6 +11,8 @@
 		# not used at this moment
 		#../layers/knowledge-tools.nix
   ];
+
+  programs.hermes.enable = lib.mkDefault true;
 
 	home.packages = with pkgs; [
 		python314
