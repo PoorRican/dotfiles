@@ -26,15 +26,12 @@
       withPerl = true;
       withNodeJs = false;
     })
+    pkgs.tree-sitter
     pkgs.markdown-oxide
     pkgs.nixd
     pkgs.nixfmt
-    pkgs.tree-sitter
 		pkgs.clang-tools
-		pkgs.pylsp
 		pkgs.ruff
-		pkgs.python-lsp-ruff
-		pkgs.python-lsp-ruff
 		pkgs.pyrefly
   ];
 }
