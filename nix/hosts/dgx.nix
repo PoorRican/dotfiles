@@ -10,4 +10,6 @@
 
   home.packages = with pkgs; [
   ];
+
+  programs.agent-skills.host = "dgx";
 }

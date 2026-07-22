@@ -26,9 +26,6 @@ in {
       config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/agents";
     home.file.".claude/commands".source =
       config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/commands";
-    home.file.".claude/skills".source =
-      config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/skills";
-
     home.activation.installClaudeCode = ext.mkActivation cfg;
   };
 }

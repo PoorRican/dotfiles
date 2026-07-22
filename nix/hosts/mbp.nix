@@ -13,6 +13,7 @@
   ];
 
   programs.hermes.profile = "mbp";
+  programs.agent-skills.host = "mbp";
   programs.claude-code.autoUpdate = true;
 
   home.packages = with pkgs; [

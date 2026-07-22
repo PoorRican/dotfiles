@@ -11,4 +11,6 @@
 		# not used at this moment
 		#../layers/knowledge-tools.nix
   ];
+
+  programs.agent-skills.host = "emc";
 }

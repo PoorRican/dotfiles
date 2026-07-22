@@ -20,4 +20,5 @@
   # here so it does not generate ~/.config/nvim/init.lua alongside the symlinked
   # config tree.
   programs.neovim.enable = lib.mkForce false;
+  programs.agent-skills.host = "cbox";
 }

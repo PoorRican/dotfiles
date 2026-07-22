@@ -1,6 +1,7 @@
 # Hermes Agent — config + package installation via upstream flake
-# Symlinks non-config profile files from configs/hermes/<profile>/ into ~/.hermes/
-# and deep-merges Nix-managed baseline settings into ~/.hermes/config.yaml.
+# Symlinks non-config, non-skill profile files from configs/hermes/<profile>/
+# into ~/.hermes/ and deep-merges Nix-managed baseline settings into
+# ~/.hermes/config.yaml. Skills are distributed by agent-skills.nix.
 { config, lib, pkgs, dotfiles, inputs, ... }:
 let
   cfg = config.programs.hermes;
@@ -28,7 +29,9 @@ let
   ];
   profileConfigPath = profileSrc + "/config.nix";
   profileSettings = if builtins.pathExists profileConfigPath then import profileConfigPath { inherit lib; } else {};
-  linkedEntries = lib.filterAttrs (name: _type: !(builtins.elem name [ "config.yaml" "config.nix" ])) entries;
+  linkedEntries = lib.filterAttrs
+    (name: _type: !(builtins.elem name [ "config.yaml" "config.nix" "skills" ]))
+    entries;
   settingsJson = pkgs.writeText "hermes-settings.json" (builtins.toJSON cfg.settings);
   mergeHermesConfig = pkgs.writeScript "hermes-config-merge" ''
     #!${pkgs.python3.withPackages (ps: [ ps.pyyaml ])}/bin/python3

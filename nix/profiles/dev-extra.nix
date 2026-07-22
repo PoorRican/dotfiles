@@ -2,6 +2,7 @@
 { pkgs, lib, ... }:
 {
   imports = [
+    ../modules/agent-skills.nix
     ../modules/claude-code.nix
     ../modules/codex.nix
     ../modules/hermes.nix
@@ -14,6 +15,7 @@
   programs.claude-code.enable = lib.mkDefault true;
   programs.codex.enable = lib.mkDefault true;
   programs.hermes.enable = lib.mkDefault true;
+  programs.agent-skills.enable = lib.mkDefault true;
   programs.coding-agent-output-styles.enable = lib.mkDefault true;
   # Default-on for dev machines, but intentionally not forced so host profiles
   # can opt out without editing this shared profile.
