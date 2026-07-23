@@ -6,6 +6,10 @@ packer_compiled.lua
 # nix build
 result
 
+# Python bytecode
+__pycache__/
+*.py[cod]
+
 # local Hermes workspace and generated state
 .hermes/
 /configs/hermes/default/skills/.curator_backups/
