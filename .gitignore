@@ -12,6 +12,7 @@ __pycache__/
 
 # local Hermes workspace and generated state
 .hermes/
+/configs/agent-skills/inventory/
 /configs/hermes/default/skills/.curator_backups/
 
 # local source checkouts
