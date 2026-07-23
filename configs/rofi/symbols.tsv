@@ -1,5 +1,6 @@
 ∴	therefore	logic proof conclusion hence
 ∵	because	logic proof reason since
+—	em dash	prose emdash mdash
 ¬	not	logic negation
 ∧	and	logic conjunction wedge
 ∨	or	logic disjunction vee
@@ -11,7 +12,7 @@
 ⊢	turnstile	logic proves entails syntactic
 ⊨	double turnstile	logic models entails semantic
 ⊥	bottom	logic false contradiction perpendicular
-⊤	top	logic true tautology
+⊤	top	logic true tautology transpose
 ∀	for all	logic quantifier forall
 ∃	exists	logic quantifier existential
 ∄	does not exist	logic quantifier
