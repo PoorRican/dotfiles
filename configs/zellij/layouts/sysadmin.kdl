@@ -8,8 +8,8 @@ layout {
                 // hide_frame_for_single_pane "true"
 
                 format_left  "{mode} {tabs}"
-                format_center "#[bg=#111111,fg=#87ceeb,bold]{session}#[bg=#111111,fg=#666666]@{command_hostname}"
-                format_right "{command_datetime}"
+                format_center "#[bg=#111111,fg=#87ceeb,bold]{session}"
+                format_right "@{command_hostname}{command_datetime}"
                 format_space "#[bg=#111111]"
                 format_hide_on_overlength "true"
                 format_precedence "lcr"
