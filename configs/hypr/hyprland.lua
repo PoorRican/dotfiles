@@ -492,3 +492,7 @@ hl.window_rule({
     move  = "20 monitor_h-120",
     float = true,
 })
+
+hl.window_rule({ name = "drift-host", match = { class = [[dev\.drift\.host]] }, float = true, size = {1, 1}, no_initial_focus = true, no_focus = true, no_anim = true, border_size = 0, no_shadow = true })
+hl.window_rule({ name = "drift-checkin", match = { class = [[dev\.drift\.checkin]] }, float = true, center = true, size = {440, 220}, focus_on_activate = true, stay_focused = true })
+
