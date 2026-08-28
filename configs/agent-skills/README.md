@@ -38,15 +38,21 @@ categorized view per Hermes profile from the same roots.
 
 - `coding` is the explicit allowlist shared by coding agents.
 - `hermes` is additive; the default Hermes profile receives `coding` plus this list.
+- `hermesBundled` names upstream Hermes-bundled skills the default profile
+  exposes without seeding the full bundled catalog.
 - `hosts.<name>` adds narrowly scoped skills for one machine.
 
-- **Hermes** profiles receive an immutable categorized Nix-store view through
-  `skills.external_dirs`, selected by `programs.hermes.profiles.<name>.skills.names`.
-  Named profiles (including private ones from another flake) pick their own
-  names and may add private roots; nothing is inherited automatically. The
-  mutable `$HERMES_HOME/skills` directory remains local runtime state, and
-  `.no-bundled-skills` prevents Hermes from reseeding the bundled catalog.
-  See `configs/hermes/README.md`.
+- **Hermes** profiles receive immutable categorized Nix-store views through
+  `skills.external_dirs`, selected per profile by
+  `programs.hermes.profiles.<name>.skills.names`. Named profiles (including
+  private ones from another flake) pick their own names and may add private
+  roots; nothing is inherited automatically. An optional second view per
+  profile exposes only the upstream Hermes-bundled skills named in
+  `skills.bundledNames` (the default profile takes them from
+  `collections.nix`'s `hermesBundled` allowlist). The mutable
+  `$HERMES_HOME/skills` directory remains local runtime state, and
+  `.no-bundled-skills` prevents Hermes from reseeding the full bundled
+  catalog. See `configs/hermes/README.md`.
 - **Claude Code** receives a Nix-built flat union under `~/.claude/skills`.
 - **Codex** receives a Nix-built flat union under `~/.codex/skills`.
 - **Pi** receives a Nix-built flat union under `~/.pi/agent/skills`.
@@ -90,7 +96,10 @@ It intentionally excluded:
 3. Ensure the directory basename equals the frontmatter `name`.
 4. Ensure no other selected skill exposes the same name.
 5. Add the skill name to `coding`, `hermes`, or a host collection only when it should
-   be distributed by that collection.
+   be distributed by that collection. To allow an upstream Hermes-provided skill
+   without importing the whole bundled catalog, add its frontmatter `name` to
+   `hermesBundled` instead, and remove that name from the relevant
+   `configs/hermes/<profile>/config.nix` `skills.disabled` list if present.
 6. Run all-host Home Manager evaluation before committing. The Nix module rejects
    duplicate names, uncategorized skills, backup/hidden paths, and invalid names.
 7. Apply Home Manager to publish the new immutable views.

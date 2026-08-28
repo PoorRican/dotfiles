@@ -197,6 +197,15 @@ let
           default = [ ];
           description = "Skill names published to this profile as an immutable external directory.";
         };
+        bundledNames = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [ ];
+          description = ''
+            Names of upstream Hermes-bundled skills to expose to this profile
+            through an immutable allowlist view, without letting Hermes seed
+            its full bundled catalog into the mutable skills directory.
+          '';
+        };
         allowBundled = lib.mkOption {
           type = lib.types.bool;
           default = false;
@@ -242,10 +251,88 @@ let
       skills = (profileCatalog profile).select profile.skills.names;
     };
 
+  # Selected upstream-bundled skills as an immutable allowlist view, so a
+  # profile can expose a few bundled skills without Hermes seeding the full
+  # bundled catalog into its mutable skills directory.
+  bundledSkillView = name: profile:
+    pkgs.runCommand "hermes-${name}-bundled-skills-allowlist"
+      {
+        nativeBuildInputs = [ pkgs.python3 ];
+        allowlistJson = builtins.toJSON profile.skills.bundledNames;
+        passAsFile = [ "allowlistJson" ];
+      } ''
+        set -euo pipefail
+        mkdir -p "$out"
+        python3 - "$out" "${cfg.package}/share/hermes-agent/skills" "$allowlistJsonPath" <<'PY'
+        import json
+        import os
+        import sys
+        from pathlib import Path
+
+        out = Path(sys.argv[1])
+        bundled = Path(sys.argv[2])
+        allowlist = json.loads(Path(sys.argv[3]).read_text())
+
+        if not allowlist:
+            raise SystemExit(0)
+        if not bundled.is_dir():
+            raise SystemExit(f"Hermes bundled skills directory is missing: {bundled}")
+
+        def skill_name(skill_md: Path) -> str:
+            fallback = skill_md.parent.name
+            try:
+                content = skill_md.read_text(encoding="utf-8", errors="replace")[:4000]
+            except OSError:
+                return fallback
+
+            in_frontmatter = False
+            for line in content.splitlines():
+                stripped = line.strip()
+                if stripped == "---":
+                    if in_frontmatter:
+                        break
+                    in_frontmatter = True
+                    continue
+                if in_frontmatter and stripped.startswith("name:"):
+                    value = stripped.split(":", 1)[1].strip().strip("\"'")
+                    return value or fallback
+            return fallback
+
+        index = {}
+        for skill_md in bundled.rglob("SKILL.md"):
+            if any(part in {".git", ".github", ".hub", "index-cache"} for part in skill_md.parts):
+                continue
+            index.setdefault(skill_name(skill_md), []).append(skill_md.parent)
+
+        missing = [name for name in allowlist if name not in index]
+        duplicate = {name: paths for name, paths in index.items() if name in allowlist and len(paths) > 1}
+        if missing or duplicate:
+            if missing:
+                print("Missing Hermes bundled skills:", ", ".join(missing), file=sys.stderr)
+            if duplicate:
+                for name, paths in duplicate.items():
+                    print(f"Duplicate Hermes bundled skill {name}: " + ", ".join(map(str, paths)), file=sys.stderr)
+            print("Available bundled skill names:", file=sys.stderr)
+            for name in sorted(index):
+                print(f"  {name}", file=sys.stderr)
+            raise SystemExit(1)
+
+        for name in allowlist:
+            source = index[name][0]
+            relative = source.relative_to(bundled)
+            target = out / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            os.symlink(source, target)
+        PY
+      '';
+
   # Skill view first so the store path is part of the rendered settings.
   effectiveSettings = name: profile:
     lib.recursiveUpdate profile.settings {
-      skills.external_dirs = [ (toString (skillView name profile)) ];
+      skills.external_dirs =
+        [ (toString (skillView name profile)) ]
+        ++ lib.optional (profile.skills.bundledNames != [ ])
+          (toString (bundledSkillView name profile));
     };
 
   configFile = name: profile:
@@ -334,7 +421,9 @@ let
       '' else ''
         run install -m 0600 ${pkgs.writeText "hermes-no-bundled-skills" ''
           This profile is managed by Nix; its skills come from an immutable external
-          directory. Remove this file only through programs.hermes.profiles.${name}.skills.allowBundled.
+          directory. Selected upstream Hermes-bundled skills are exposed only through
+          programs.hermes.profiles.${name}.skills.bundledNames. Remove this file only
+          through programs.hermes.profiles.${name}.skills.allowBundled.
         ''} ${marker}
       ''}
       ${lib.concatStringsSep "\n" (lib.mapAttrsToList (relative:
@@ -489,6 +578,9 @@ in {
       soul = dotfiles + "/configs/hermes/default/SOUL.md";
       skills.names = lib.unique (
         collections.coding ++ hostCollections.coding ++ collections.hermes ++ hostCollections.hermes
+      );
+      skills.bundledNames = lib.unique (
+        (collections.hermesBundled or [ ]) ++ (hostCollections.hermesBundled or [ ])
       );
     };
 
