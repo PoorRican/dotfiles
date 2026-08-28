@@ -7,6 +7,34 @@ local function LspToggle()
 		print(" lsp toggled")
 end
 
+local function open_location_in_vsplit(item)
+	local bufnr = item.bufnr or vim.fn.bufadd(item.filename)
+	vim.fn.bufload(bufnr)
+	vim.cmd.vsplit()
+	vim.bo[bufnr].buflisted = true
+	vim.api.nvim_win_set_buf(0, bufnr)
+	vim.api.nvim_win_set_cursor(0, { item.lnum, math.max(item.col - 1, 0) })
+	vim.cmd("normal! zv")
+end
+
+local function definition_in_vsplit()
+	vim.lsp.buf.definition({
+		on_list = function(options)
+			if #options.items == 1 then
+				open_location_in_vsplit(options.items[1])
+				return
+			end
+
+			vim.fn.setqflist({}, " ", options)
+			local fzf = require("fzf-lua")
+			fzf.quickfix({
+				jump1 = false,
+				actions = { enter = fzf.actions.file_vsplit },
+			})
+		end,
+	})
+end
+
 local function generate_buf_keymapper(bufnr)
 	return function(type, input, output, description, extraOptions)
 		local options = { buffer = bufnr }
@@ -29,9 +57,7 @@ function X.set_default_on_buffer(client, bufnr)
 	buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
 
 	if cap.definitionProvider then
-		buf_set_keymap("n", "<leader>lD", function()
-			vim.lsp.buf.definition({ open_in = "vsplit", reuse_win = true })
-		end, "show definition")
+		buf_set_keymap("n", "<leader>lD", definition_in_vsplit, "definition in vertical split")
 	end
 
 	if cap.declarationProvider then
@@ -61,6 +87,7 @@ function X.set_default_on_buffer(client, bufnr)
 
 	if cap.hoverProvider then
 		buf_set_keymap("n", "K", vim.lsp.buf.hover, "hover docs")
+		buf_set_keymap("n", "<leader>lh", vim.lsp.buf.hover, "hover docs")
 	end
 
 	if cap.codeActionProvider then
