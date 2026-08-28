@@ -1,4 +1,4 @@
-local f= require("utils.functions")
+local f = require("utils.functions")
 return {
 -- 	"xero/evangelion.nvim",
 -- 	-- dev = true,
@@ -25,7 +25,8 @@ return {
 -- 	end,
 -- },{
 	"xero/sourcerer.vim",
-	verylazy = true,
+	lazy = false,
+	priority = 1000,
 	config = function()
 		vim.cmd.colorscheme("sourcerer")
 

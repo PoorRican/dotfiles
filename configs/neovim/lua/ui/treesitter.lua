@@ -47,7 +47,20 @@ return {
 	build = install_parsers,
 	config = function()
 		local r = require("utils.remaps")
-		require("nvim-treesitter").setup()
+		local treesitter = require("nvim-treesitter")
+		treesitter.setup()
+
+		local installed = {}
+		for _, parser in ipairs(treesitter.get_installed()) do
+			installed[parser] = true
+		end
+		local missing = vim.tbl_filter(function(parser)
+			return not installed[parser]
+		end, parsers)
+		if #missing > 0 then
+			treesitter.install(missing):wait(300000)
+		end
+
 		require("nvim-treesitter-textobjects").setup({
 			select = {
 				lookahead = true,

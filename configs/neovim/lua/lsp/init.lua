@@ -129,11 +129,9 @@ return {
 		vim.lsp.config("jsonls", require("lsp.jsonls"))
 		vim.lsp.config("lua_ls", require("lsp.luals"))
 		vim.lsp.config("markdown_oxide", {})
-		vim.lsp.config("mypy", require("lsp.mypy"))
 		vim.lsp.config("nixd", require("lsp.nixd"))
-		vim.lsp.config("pylsp", require("lsp.pylsp"))
-		vim.lsp.config("pyright", require("lsp.pyright"))
-		vim.lsp.config("ruff", require("lsp.ruff"))
+		vim.lsp.config("pyrefly", {})
+		vim.lsp.config("ruff", {})
 		vim.lsp.config("rust_analyzer", require("lsp.rust_analyzer"))
 
 		vim.lsp.config("tailwindcss", require("lsp.tailwindcss"))
@@ -143,13 +141,13 @@ return {
 
 		local server_names = {
 			"bashls", "clangd", "cssls", "dockerls", "html", "jsonls",
-			"lua_ls", "markdown_oxide", "mypy", "nixd", "pylsp", "pyright", "ruff", "rust_analyzer",
+			"lua_ls", "markdown_oxide", "nixd", "pyrefly", "ruff", "rust_analyzer",
 			"tailwindcss", "ts_ls", "yamlls", "powershell_es",
 		}
 		local mason_server_names = vim.tbl_filter(function(server_name)
-			return server_name ~= "mypy" and server_name ~= "nixd"
+			return server_name ~= "nixd" and server_name ~= "pyrefly" and server_name ~= "ruff"
 		end, server_names)
-		vim.lsp.enable("nixd")
+		vim.lsp.enable({ "nixd", "pyrefly", "ruff" })
 
 		local mason_ok, mason = pcall(require, "mason")
 		local mason_lspconfig_ok, mason_lspconfig = pcall(require, "mason-lspconfig")
