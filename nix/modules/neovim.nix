@@ -19,19 +19,24 @@
   xdg.configFile."nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dotfiles/configs/neovim";
 
-  home.packages = [
-    (pkgs.neovim.override {
+  home.packages = with pkgs; [
+    (neovim.override {
       withRuby = true;
       withPython3 = true;
       withPerl = true;
       withNodeJs = false;
     })
-    pkgs.tree-sitter
-    pkgs.markdown-oxide
-    pkgs.nixd
-    pkgs.nixfmt
-		pkgs.clang-tools
-		pkgs.ruff
-		pkgs.pyrefly
+
+		# required deps
+		fzf
+    tree-sitter
+
+		# LSPs
+		clang-tools
+    markdown-oxide
+    nixd
+    nixfmt
+		pyrefly
+		ruff
   ];
 }
