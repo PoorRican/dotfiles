@@ -9,6 +9,32 @@ let
   dotfilesPath = "${config.home.homeDirectory}/dotfiles/configs/hermes/${cfg.profile}";
   entries = builtins.readDir profileSrc;
   upstreamHermesPackage = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  # Hermes 0.19.0 split hermes_state.py into four top-level modules without
+  # adding them to setuptools' py-modules list. The files are present in the
+  # locked source, but uv2nix consequently omits them from the sealed venv.
+  # Keep the repair Nix-managed and source-matched; a later upstream package
+  # can provide the same modules without changing this wrapper's behavior.
+  hermesStateModules = pkgs.runCommand "hermes-state-modules" {} ''
+    site="$out/${pkgs.python312.sitePackages}"
+    mkdir -p "$site"
+    for module in \
+      hermes_state_common \
+      hermes_state_portability \
+      hermes_state_schema \
+      hermes_state_search
+    do
+      install -m 0444 "${inputs.hermes-agent}/$module.py" "$site/$module.py"
+    done
+  '';
+  withHermesStateModules = package: package.overrideAttrs (old: {
+    nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.makeWrapper ];
+    postFixup = (old.postFixup or "") + ''
+      for program in hermes hermes-agent hermes-acp; do
+        wrapProgram "$out/bin/$program" \
+          --suffix PYTHONPATH : "${hermesStateModules}/${pkgs.python312.sitePackages}"
+      done
+    '';
+  });
   defaultExtras = [
     "dev"
     # Discord gateway support is enabled in config, and Nix-managed installs can't
@@ -90,9 +116,11 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    programs.hermes.package = lib.mkDefault (upstreamHermesPackage.override {
-      extraDependencyGroups = cfg.extras;
-    });
+    programs.hermes.package = lib.mkDefault (withHermesStateModules (
+      upstreamHermesPackage.override {
+        extraDependencyGroups = cfg.extras;
+      }
+    ));
 
     home.packages = [ cfg.package ];
 
