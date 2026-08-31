@@ -47,6 +47,7 @@ local fileManager = "ranger"
 local menu        = hmBin .. "/rofi -show drun -show-icons"
 local cliphist    = home .. "/.local/bin/hypr-start-cliphist"
 local clipMenu    = home .. "/.local/bin/hypr-clipboard-menu"
+local proseSymbolMenu = home .. "/.local/bin/hypr-prose-symbol-picker"
 local symbolMenu  = home .. "/.local/bin/hypr-symbol-picker"
 local pkWiki      = home .. "/.local/bin/pk-wiki"
 
@@ -344,6 +345,7 @@ hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + CTRL + V", hl.dsp.exec_cmd(clipMenu))
 hl.bind(mainMod .. " + CTRL + Space", hl.dsp.exec_cmd(symbolMenu))
+hl.bind(mainMod .. " + CTRL + P", hl.dsp.exec_cmd(proseSymbolMenu))
 -- The Project Kairos grave/backtick hotkey is maintained by the tiny watcher
 -- started from the autostart/reload hooks above because Hyprland 0.55 drops
 -- this key when it is bound inline.

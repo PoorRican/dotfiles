@@ -44,6 +44,7 @@
   };
   xdg.configFile."rofi/config.rasi".source = lib.mkDefault (dotfiles + "/configs/rofi/config.rasi");
   xdg.configFile."rofi/symbols.tsv".source = lib.mkDefault (dotfiles + "/configs/rofi/symbols.tsv");
+  xdg.configFile."rofi/prose-symbols.tsv".source = lib.mkDefault (dotfiles + "/configs/rofi/prose-symbols.tsv");
   xdg.configFile."rofi/themes/sourcerer.rasi".source = lib.mkDefault (dotfiles + "/configs/rofi/themes/sourcerer.rasi");
 
   # Replace the smoke-test tty autostart with a neutral login profile. LightDM
@@ -67,6 +68,10 @@
   };
   home.file.".local/bin/hypr-symbol-picker" = {
     source = dotfiles + "/bin/hypr-symbol-picker";
+    executable = true;
+  };
+  home.file.".local/bin/hypr-prose-symbol-picker" = {
+    source = dotfiles + "/bin/hypr-prose-symbol-picker";
     executable = true;
   };
   home.file.".local/bin/hypr-keybindings-menu" = {

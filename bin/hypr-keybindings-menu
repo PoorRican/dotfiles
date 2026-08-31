@@ -13,6 +13,7 @@ Super+M                      Exit Hyprland / shutdown helper fallback
 Super+E                      File manager
 Super+Ctrl+V                 Clipboard history
 Super+Ctrl+Space             Symbol picker
+Super+Ctrl+P                 Prose symbol picker
 Super+`                      Project Kairos wiki scratchpad
 Super+Shift+`                Hide Project Kairos wiki scratchpad
 Super+V                      Toggle floating
