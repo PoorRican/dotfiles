@@ -63,6 +63,7 @@ return {
 			},
 		}
 		vim.diagnostic.config(config)
+		require("lsp.restart").setup()
 
 		local border = { border = "shadow" }
 		local function with_lsp_window_options(handler)

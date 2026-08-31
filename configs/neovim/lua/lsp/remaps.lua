@@ -96,6 +96,9 @@ function X.set_default_on_buffer(client, bufnr)
 	end
 
 	buf_set_keymap("n", "<leader>lI", ":LspInfo<CR>", "lsp info")
+	buf_set_keymap("n", "<leader>lr", function()
+		require("lsp.restart").restart({ bufnr = bufnr })
+	end, "restart lsp")
 	buf_set_keymap("n", "<leader>ls", vim.lsp.buf.signature_help, "show signature")
 	buf_set_keymap("n", "<leader>lE", "<cmd>Lspsaga show_line_diagnostics<CR>", "show line diagnostics")
 	buf_set_keymap("n", "<leader>lb", "<cmd>Lspsaga show_buf_diagnostics<CR>", "show buffer diagnostics")
@@ -107,6 +110,7 @@ function X.set_default_on_buffer(client, bufnr)
 	r.map_virtual({
 		{ "<leader>l", group = "lsp", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>lI", group = "lsp Info", icon = { icon = "", hl = "Constant" } },
+		{ "<leader>lr", group = "restart lsp", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>ls", group = "show signature", icon = { icon = "󰅨", hl = "Constant" } },
 		{ "<leader>lE", group = "show line diagnostics", icon = { icon = "󰅰", hl = "Constant" } },
 		{ "<leader>lb", group = "show buffer diagnostics", icon = { icon = "󰅰", hl = "Constant" } },
