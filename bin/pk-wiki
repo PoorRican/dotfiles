@@ -422,7 +422,7 @@ unfocus_pk_wiki() {
   fi
 }
 
-install_grave_binds() {
+install_runtime_binds() {
   local script_path toggle_cmd hide_cmd lua=""
   script_path="$HOME/.local/bin/pk-wiki"
   if [ ! -x "$script_path" ]; then
@@ -454,17 +454,15 @@ install_grave_binds() {
   return 0
 }
 
-watch_grave_binds() {
-  local lock_dir
-  lock_dir="$state_dir/bind-watch.lock"
+watch_runtime_binds() {
+  local lock_file
+  lock_file="$state_dir/bind-watch.lock"
   mkdir -p "$state_dir" 2>/dev/null || return 0
-  if ! mkdir "$lock_dir" 2>/dev/null; then
-    return 0
-  fi
-  trap 'rmdir "$lock_dir" 2>/dev/null || true' EXIT
+  exec 9>"$lock_file"
+  flock -n 9 || return 0
 
   while command -v hyprctl >/dev/null 2>&1 && hyprctl -j monitors >/dev/null 2>&1; do
-    install_grave_binds
+    install_runtime_binds
     sleep 3
   done
 }
@@ -486,10 +484,10 @@ case "${1:---toggle}" in
     unfocus_pk_wiki
     ;;
   --install-binds)
-    install_grave_binds
+    install_runtime_binds
     ;;
   --watch-binds)
-    watch_grave_binds
+    watch_runtime_binds
     ;;
   *)
     printf 'usage: %s [--toggle|--open|--hide|--unfocus|--install-binds|--watch-binds|--zellij]\n' "$0" >&2

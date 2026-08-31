@@ -60,7 +60,7 @@ tooltip label {
 #custom-ws9,
 #custom-ws10,
 #submap,
-#window,
+#custom-active-workspace-title,
 #idle_inhibitor,
 #pulseaudio,
 #bluetooth,
@@ -185,7 +185,7 @@ tooltip label {
   background: @yellow;
 }
 
-#window {
+#custom-active-workspace-title {
   color: @fg;
   padding: 0 16px;
 }

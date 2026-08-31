@@ -11,7 +11,6 @@
     wl-clipboard
     cliphist
     wtype
-    dunst
     libnotify
     pavucontrol
     networkmanagerapplet
@@ -22,6 +21,86 @@
     font-awesome
     nerd-fonts.jetbrains-mono
   ];
+
+  # Run the notification daemon as a user service instead of tying it to a
+  # one-shot compositor start event. This also gives D-Bus a stable owner for
+  # org.freedesktop.Notifications after Hyprland config reloads.
+  services.dunst.enable = true;
+
+  # Desktop daemons that must survive a Hyprland crash/respawn. Hyprland's
+  # `hyprland.start` hook fires only on a fresh compositor process start, so it
+  # cannot run when the start-hyprland watchdog respawns Hyprland in safe mode
+  # or when "Load config" reloads. Running these as systemd user services with
+  # Restart=always means the (still-alive) user manager respawns them whenever
+  # they die. They are enabled on default.target because LightDM does not
+  # activate graphical-session.target for this session.
+  # The Hyprland Lua config still `systemctl --user start`s these at
+  # hyprland.start and on `config.reloaded` so the environment is current and
+  # they are up even before their default.target enablement has taken effect.
+  systemd.user.services = let
+    homeDir = config.home.homeDirectory;
+    hmBin = homeDir + "/.local/state/nix/profiles/home-manager/home-path/bin";
+
+    # Shared shape for the cbox desktop daemons. Each one owns a single long-lived
+    # process; the user manager respawns it on death. StartLimit* keeps a
+    # flapping applet from tight-looping on the GPU after a wedged reset.
+    desktopService = exec: {
+      Unit = {
+        PartOf = [ "graphical-session.target" ];
+      };
+      Service = {
+        ExecStart = exec;
+        Restart = "always";
+        RestartSec = 3;
+        StartLimitIntervalSec = 30;
+        StartLimitBurst = 5;
+      };
+      Install.WantedBy = [ "default.target" ];
+    };
+  in {
+    # Reapplies the cbox grave-key runtime binds (see bin/pk-wiki --watch-binds).
+    # Targets graphical-session.target like before; started explicitly from the
+    # Hyprland autostart hook because LightDM does not activate that target.
+    hypr-runtime-binds = {
+      Unit = {
+        Description = "Reapply cbox Hyprland runtime key bindings";
+        After = [ "graphical-session.target" ];
+        PartOf = [ "graphical-session.target" ];
+      };
+      Service = {
+        ExecStart = "${homeDir}/.local/bin/pk-wiki --watch-binds";
+        Restart = "always";
+        RestartSec = 2;
+      };
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
+
+    hypr-waybar =
+      desktopService "/usr/bin/waybar"
+      // { Unit.Description = "cbox Hyprland status bar (waybar)"; };
+
+    hypr-blueman-applet =
+      desktopService (hmBin + "/blueman-applet")
+      // { Unit.Description = "cbox Bluetooth applet (blueman-applet)"; };
+
+    hypr-lxqt-policykit-agent =
+      desktopService (hmBin + "/lxqt-policykit-agent")
+      // { Unit.Description = "cbox Wayland Polkit agent (lxqt-policykit-agent)"; };
+
+    hypr-nm-applet =
+      desktopService (hmBin + "/nm-applet")
+      // { Unit.Description = "cbox NetworkManager applet (nm-applet)"; };
+
+    # Native Wayland clipboard history. Two long-lived watch processes
+    # (text + image) instead of the previous one-shot hypr-start-cliphist.
+    hypr-cliphist-text =
+      desktopService "${hmBin}/wl-paste --type text --watch cliphist store"
+      // { Unit.Description = "cbox Wayland clipboard history watcher (text)"; };
+
+    hypr-cliphist-image =
+      desktopService "${hmBin}/wl-paste --type image --watch cliphist store"
+      // { Unit.Description = "cbox Wayland clipboard history watcher (image)"; };
+  };
 
   home.sessionVariables = {
     BROWSER = "vivaldi-stable";

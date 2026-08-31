@@ -45,19 +45,37 @@ local terminal    = "/usr/bin/ghostty"
 local browser     = "/usr/bin/vivaldi-stable"
 local fileManager = "ranger"
 local menu        = hmBin .. "/rofi -show drun -show-icons"
-local cliphist    = home .. "/.local/bin/hypr-start-cliphist"
 local clipMenu    = home .. "/.local/bin/hypr-clipboard-menu"
 local proseSymbolMenu = home .. "/.local/bin/hypr-prose-symbol-picker"
 local symbolMenu  = home .. "/.local/bin/hypr-symbol-picker"
 local pkWiki      = home .. "/.local/bin/pk-wiki"
 
-local function startPkWikiBindWatcher()
-    -- Hyprland 0.55's Lua config loader drops the grave key when registered
-    -- inline, but the same bind works through `hyprctl eval` after reload. Keep
-    -- a tiny watcher around so SUPER+` survives config reloads too.
-    hl.exec_cmd("/bin/sh -lc '" .. pkWiki .. " --watch-binds'")
+-- The cbox desktop daemons are owned by systemd user services (see
+-- nix/modules/hyprland-desktop.nix), each with Restart=always so the still-alive
+-- user manager respawns them if they die. Hyprland's config hooks only keep
+-- their lifecycles in sync with the session: `systemctl --user start` is a no-op
+-- when a service is already active, so re-asserting it on reload is safe.
+local desktopServices = {
+	"hypr-waybar.service",
+	"hypr-blueman-applet.service",
+	"hypr-lxqt-policykit-agent.service",
+	"hypr-nm-applet.service",
+	"hypr-cliphist-text.service",
+	"hypr-cliphist-image.service",
+}
+
+local function syncSessionEnv()
+	-- Keep the Wayland session bus and systemd user environment in sync so
+	-- xdg-desktop-portal and D-Bus-activated helpers see the same desktop.
+	hl.exec_cmd("/usr/bin/dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE XDG_DATA_DIRS PATH")
 end
 
+local function startDesktopServices()
+	-- Idempotent: `systemctl start` is a no-op when already active.
+	for _, service in ipairs(desktopServices) do
+		hl.exec_cmd("systemctl --user start " .. service)
+	end
+end
 
 -------------------
 ---- AUTOSTART ----
@@ -70,34 +88,24 @@ end
 --
 hl.on("hyprland.start", function ()
 --   hl.exec_cmd(terminal)
-	-- Keep the Wayland session bus and systemd user environment in sync so
-	-- xdg-desktop-portal and D-Bus-activated helpers see the same desktop.
-	hl.exec_cmd("/usr/bin/dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE XDG_DATA_DIRS PATH")
+	-- Sync the session bus + systemd user environment, then bring up the
+	-- desktop daemons. Both helpers are idempotent and safe to re-run.
+	syncSessionEnv()
+	startDesktopServices()
 
-	-- Native Wayland clipboard history for Ghostty and other non-XWayland apps.
-	hl.exec_cmd(cliphist)
-
-	-- Dunst is Wayland-aware and registers org.freedesktop.Notifications on
-	-- the current session bus. Without a live notification daemon, Chromium /
-	-- Vivaldi can fall back to app-owned notification windows that Hyprland
-	-- treats like normal tiled windows.
-	hl.exec_cmd(hmBin .. "/dunst")
-
-	-- Desktop applets/agents expected by GUI control panels. Blueman's applet
-	-- provides tray/agent integration for pairing flows; lxqt-policykit-agent
-	-- provides a Wayland-friendly Polkit prompt for privileged desktop actions.
-	hl.exec_cmd(hmBin .. "/blueman-applet")
-	hl.exec_cmd(hmBin .. "/lxqt-policykit-agent")
-	hl.exec_cmd(hmBin .. "/nm-applet")
-	hl.exec_cmd("/usr/bin/waybar")
-	startPkWikiBindWatcher()
+	-- LightDM does not activate graphical-session.target for this session, so
+	-- start the Home Manager-owned grave-key bind watcher explicitly.
+	hl.exec_cmd("systemctl --user start hypr-runtime-binds.service")
 end)
 
+-- Re-sync the environment and re-assert the desktop services when the config is
+-- (re)loaded. This is exactly what the safe-mode "Load config" button does: it
+-- reloads this file WITHOUT re-firing `hyprland.start`. Because the daemons are
+-- systemd user services, this path is what brings them back after a Hyprland
+-- crash respawns in safe mode and the user clicks "Load config".
 hl.on("config.reloaded", function ()
-	-- If the watcher was not started yet (for example right after editing this
-	-- config in an already-running session), start it now. The script takes a
-	-- runtime lock, so duplicate starts are harmless.
-	startPkWikiBindWatcher()
+	syncSessionEnv()
+	startDesktopServices()
 end)
 
 

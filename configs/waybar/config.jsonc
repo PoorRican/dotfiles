@@ -25,7 +25,7 @@
     "hyprland/submap"
   ],
   "modules-center": [
-    "hyprland/window"
+    "custom/active-workspace-title"
   ],
   "modules-right": [
     "idle_inhibitor",
@@ -132,16 +132,13 @@
     "tooltip": false
   },
 
-  "hyprland/window": {
-    "format": "{}",
-    "separate-outputs": true,
-    "max-length": 90,
-    "rewrite": {
-      "(.*) - Vivaldi": "  $1",
-      "(.*) — Mozilla Firefox": "  $1",
-      "(.*) - Ghostty": "  $1",
-      "": "░▒▓ Hyprland ▓▒░"
-    }
+  "custom/active-workspace-title": {
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace title",
+    "return-type": "json",
+    "escape": true,
+    "interval": 1,
+    "signal": 8,
+    "max-length": 90
   },
 
   "idle_inhibitor": {

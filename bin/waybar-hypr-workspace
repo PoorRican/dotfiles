@@ -40,6 +40,21 @@ render_workspace() {
     '{text: $text, tooltip: $tooltip, class: $class}'
 }
 
+render_title() {
+  local title
+
+  title="$(hyprctl -j activeworkspace | jq -r '.lastwindowtitle // empty')"
+
+  case "$title" in
+    (*" - Vivaldi") title="  ${title% - Vivaldi}" ;;
+    (*" — Mozilla Firefox") title="  ${title% — Mozilla Firefox}" ;;
+    (*" - Ghostty") title="  ${title% - Ghostty}" ;;
+    ("") title="░▒▓ Hyprland ▓▒░" ;;
+  esac
+
+  jq -cn --arg text "$title" '{text: $text, tooltip: $text}'
+}
+
 switch_workspace() {
   local ws="$1"
 
@@ -61,11 +76,14 @@ case "${1:-render}" in
   switch)
     switch_workspace "${2:?workspace id required}"
     ;;
+  title)
+    render_title
+    ;;
   refresh)
     refresh_waybar
     ;;
   *)
-    print -u2 "usage: $0 render <1-10> <icon> [tooltip] | switch <1-10> | refresh"
+    print -u2 "usage: $0 render <1-10> <icon> [tooltip] | switch <1-10> | title | refresh"
     exit 2
     ;;
 esac
