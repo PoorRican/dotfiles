@@ -3,18 +3,6 @@ return {
 	event = "VeryLazy",
 	dependencies = {
 		"nvim-tree/nvim-web-devicons",
-		{
-			"SmiteshP/nvim-navic",
-			opts = {
-				lsp = {
-					auto_attach = true,
-					preference = { "pyright", "pylsp" },
-				},
-				highlight = true,
-				separator = " > ",
-				depth_limit = 4,
-			},
-		},
 	},
 	init = function()
 		-- disable until lualine loads
@@ -109,22 +97,6 @@ return {
 				lualine_c = {},
 				lualine_x = {},
 			},
-			winbar = {
-				lualine_a = {},
-				lualine_b = {},
-				lualine_c = {},
-				lualine_x = {},
-				lualine_y = {},
-				lualine_z = {},
-			},
-			inactive_winbar = {
-				lualine_a = {},
-				lualine_b = {},
-				lualine_c = {},
-				lualine_x = {},
-				lualine_y = {},
-				lualine_z = {},
-			},
 		}
 
 		-- insert active component in lualine_c at left section
@@ -147,10 +119,6 @@ return {
 			table.insert(config.inactive_sections.lualine_x, component)
 		end
 
-		-- insert component in winbar lualine_c at left section
-		local function winbar_left(component)
-			table.insert(config.winbar.lualine_c, component)
-		end
 
 		-- dump object contents
 		local function dump(o)
@@ -330,23 +298,6 @@ return {
 			color = { bg = colors.core, fg = colors.fog },
 			separator = { right = "▓▒░" },
 			padding = { left = 0, right = 1 },
-		})
-
-		-- winbar section (code location breadcrumb)
-		winbar_left({
-			function()
-				local navic = require("nvim-navic")
-				if navic.is_available() then
-					return navic.get_location()
-				end
-				return ""
-			end,
-			cond = function()
-				local navic = require("nvim-navic")
-				return navic.is_available() and conditions.hide_in_width_first()
-			end,
-			padding = { left = 1, right = 1 },
-			color = { fg = colors.fog },
 		})
 
 		return config

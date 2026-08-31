@@ -7,34 +7,6 @@ local function LspToggle()
 		print(" lsp toggled")
 end
 
-local function open_location_in_vsplit(item)
-	local bufnr = item.bufnr or vim.fn.bufadd(item.filename)
-	vim.fn.bufload(bufnr)
-	vim.cmd.vsplit()
-	vim.bo[bufnr].buflisted = true
-	vim.api.nvim_win_set_buf(0, bufnr)
-	vim.api.nvim_win_set_cursor(0, { item.lnum, math.max(item.col - 1, 0) })
-	vim.cmd("normal! zv")
-end
-
-local function definition_in_vsplit()
-	vim.lsp.buf.definition({
-		on_list = function(options)
-			if #options.items == 1 then
-				open_location_in_vsplit(options.items[1])
-				return
-			end
-
-			vim.fn.setqflist({}, " ", options)
-			local fzf = require("fzf-lua")
-			fzf.quickfix({
-				jump1 = false,
-				actions = { enter = fzf.actions.file_vsplit },
-			})
-		end,
-	})
-end
-
 local function generate_buf_keymapper(bufnr)
 	return function(type, input, output, description, extraOptions)
 		local options = { buffer = bufnr }
@@ -57,82 +29,89 @@ function X.set_default_on_buffer(client, bufnr)
 	buf_set_option("omnifunc", "v:lua.vim.lsp.omnifunc")
 
 	if cap.definitionProvider then
-		buf_set_keymap("n", "<leader>lD", definition_in_vsplit, "definition in vertical split")
+		buf_set_keymap("n", "<leader>lD", "<cmd>Lspsaga goto_definition<CR>", "go to definition")
+		buf_set_keymap("n", "<leader>ld", "<cmd>Lspsaga peek_definition<CR>", "peek definition")
+	end
+
+	local finder_methods = {
+		"textDocument/definition",
+		"textDocument/references",
+		"textDocument/implementation",
+	}
+	if vim.iter(finder_methods):any(function(method)
+		return client:supports_method(method, bufnr)
+	end) then
+		buf_set_keymap("n", "<leader>lF", "<cmd>Lspsaga finder def+ref+imp<CR>", "LSP finder")
 	end
 
 	if cap.declarationProvider then
-		buf_set_keymap("n", "<leader>ld", function()
-			vim.lsp.buf.declaration({ reuse_win = true })
-		end, "show declaration")
+		buf_set_keymap("n", "gD", vim.lsp.buf.declaration, "go to declaration")
 	end
 
 	if cap.implementationProvider then
-		buf_set_keymap("n", "gi", vim.lsp.buf.implementation, "go to implementation")
-		buf_set_keymap("n", "gI", function()
-			require("fzf-lua").lsp_implementations()
-		end, "search implementations")
+		buf_set_keymap("n", "gi", "<cmd>Lspsaga finder imp<CR>", "find implementations")
+		buf_set_keymap("n", "gri", "<cmd>Lspsaga finder imp<CR>", "find implementations")
 	end
 
 	if cap.referencesProvider then
-		buf_set_keymap("n", "<leader>/r", function()
-			require("fzf-lua").lsp_references()
-		end, "show references")
+		buf_set_keymap("n", "<leader>/r", "<cmd>Lspsaga finder ref<CR>", "find references")
+		buf_set_keymap("n", "grr", "<cmd>Lspsaga finder ref<CR>", "find references")
 	end
 
 	if cap.typeDefinitionProvider then
-		buf_set_keymap("n", "<leader>/t", function()
-			require("fzf-lua").lsp_typedefs()
-		end, "type definition")
+		buf_set_keymap("n", "<leader>/t", "<cmd>Lspsaga peek_type_definition<CR>", "peek type definition")
+		buf_set_keymap("n", "grt", "<cmd>Lspsaga peek_type_definition<CR>", "peek type definition")
 	end
 
 	if cap.hoverProvider then
-		buf_set_keymap("n", "K", vim.lsp.buf.hover, "hover docs")
-		buf_set_keymap("n", "<leader>lh", vim.lsp.buf.hover, "hover docs")
+		buf_set_keymap("n", "K", "<cmd>Lspsaga hover_doc<CR>", "hover docs")
+		buf_set_keymap("n", "<leader>lh", "<cmd>Lspsaga hover_doc<CR>", "hover docs")
 	end
 
 	if cap.codeActionProvider then
-		buf_set_keymap({ "n", "v" }, "<leader>ra", function()
-			local line_count = vim.api.nvim_buf_line_count(bufnr)
-			local range = {
-				start = { line = 1, character = 1 },
-				["end"] = { line = line_count, character = 1 },
-			}
-			vim.lsp.buf.code_action({ range = range.range })
-		end, "code actions")
+		buf_set_keymap({ "n", "v" }, "<leader>ra", "<cmd>Lspsaga code_action<CR>", "code actions")
+		buf_set_keymap({ "n", "v" }, "gra", "<cmd>Lspsaga code_action<CR>", "code actions")
 		r.map_virtual({ "<leader>r", group = "refactor", icon = { icon = " ", hl = "Constant" } })
 	end
 
 	if cap.renameProvider then
-		buf_set_keymap("n", "<leader>rr", ":IncRename", "rename")
+		buf_set_keymap("n", "<leader>rr", "<cmd>Lspsaga rename<CR>", "rename")
+		buf_set_keymap("n", "grn", "<cmd>Lspsaga rename<CR>", "rename")
 	end
 
 	if cap.documentSymbolProvider then
-		buf_set_keymap("n", "<leader>lo", function()
-			require("fzf-lua").lsp_document_symbols()
-		end, "document symbols")
+		buf_set_keymap("n", "<leader>lo", "<cmd>Lspsaga outline<CR>", "document outline")
+		buf_set_keymap("n", "gO", "<cmd>Lspsaga outline<CR>", "document outline")
 	end
 
 	buf_set_keymap("n", "<leader>lI", ":LspInfo<CR>", "lsp info")
 	buf_set_keymap("n", "<leader>ls", vim.lsp.buf.signature_help, "show signature")
-	buf_set_keymap("n", "<leader>lE", vim.diagnostic.open_float, "show line diagnostics")
-	buf_set_keymap("n", "<leader>ll", function () require("lsp_lines").toggle() end, "virtual lines")
+	buf_set_keymap("n", "<leader>lE", "<cmd>Lspsaga show_line_diagnostics<CR>", "show line diagnostics")
+	buf_set_keymap("n", "<leader>lb", "<cmd>Lspsaga show_buf_diagnostics<CR>", "show buffer diagnostics")
+	buf_set_keymap("n", "<leader>lw", "<cmd>Lspsaga show_workspace_diagnostics<CR>", "show workspace diagnostics")
+	buf_set_keymap("n", "[d", "<cmd>Lspsaga diagnostic_jump_prev<CR>", "previous diagnostic")
+	buf_set_keymap("n", "]d", "<cmd>Lspsaga diagnostic_jump_next<CR>", "next diagnostic")
+	buf_set_keymap("n", "<leader>ll", function() require("lsp_lines").toggle() end, "virtual lines")
 	buf_set_keymap("n", "<leader>lt", function() LspToggle() end, "toggle lsp")
 	r.map_virtual({
 		{ "<leader>l", group = "lsp", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>lI", group = "lsp Info", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>ls", group = "show signature", icon = { icon = "󰅨", hl = "Constant" } },
 		{ "<leader>lE", group = "show line diagnostics", icon = { icon = "󰅰", hl = "Constant" } },
-		{ "<leader>lD", group = "show definition", icon = { icon = "", hl = "Constant" } },
-		{ "<leader>lD", group = "virtual lines", icon = { icon = "󱞽", hl = "Constant" } },
-		{ "<leader>/r", group = "show references", icon = { icon = "", hl = "Constant" } },
-		{ "<leader>/t", group = "type definition", icon = { icon = "", hl = "Constant" } },
-		{ "<leader>ra", group = "code actions (range)", icon = { icon = "", hl = "Constant" } },
+		{ "<leader>lb", group = "show buffer diagnostics", icon = { icon = "󰅰", hl = "Constant" } },
+		{ "<leader>lw", group = "show workspace diagnostics", icon = { icon = "󰅰", hl = "Constant" } },
+		{ "<leader>lD", group = "go to definition", icon = { icon = "", hl = "Constant" } },
+		{ "<leader>ld", group = "peek definition", icon = { icon = "", hl = "Constant" } },
+		{ "<leader>lF", group = "LSP finder", icon = { icon = "", hl = "Constant" } },
+		{ "<leader>lh", group = "hover docs", icon = { icon = "󰋖", hl = "Constant" } },
+		{ "<leader>ll", group = "virtual lines", icon = { icon = "󱞽", hl = "Constant" } },
+		{ "<leader>/r", group = "find references", icon = { icon = "", hl = "Constant" } },
+		{ "<leader>/t", group = "peek type definition", icon = { icon = "", hl = "Constant" } },
+		{ "<leader>ra", group = "code actions", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>rr", group = "rename", icon = { icon = "", hl = "Constant" } },
-		{ "<leader>lo", group = "document symbols", icon = { icon = "", hl = "Constant" } },
-		{ "<leader>ld", group = "show declaration", icon = { icon = "", hl = "Constant" } },
+		{ "<leader>lo", group = "document outline", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>lt", group = "toggle lsp", icon = { icon = "", hl = "Constant" } },
-		{ "gi", group = "go to implementation", icon = { icon = "", hl = "Constant" } },
-		{ "gI", group = "search implementations", icon = { icon = "", hl = "Constant" } },
+		{ "gi", group = "find implementations", icon = { icon = "", hl = "Constant" } },
 	})
 end
 

@@ -16,7 +16,6 @@ return {
 		})
 		require("utils.remaps").map_virtual({
 			{ "<leader>t", group = "trouble", icon = { icon = " ", hl = "Constant" } },
-			{ "<leader>ts", group = "symbols", icon = { icon = " ", hl = "Constant" } },
 		})
 	end,
 	keys = {{
@@ -27,10 +26,6 @@ return {
 			"<leader>tT",
 			"<cmd>Trouble diagnostics toggle focus=true<cr>",
 			desc = "project diagnostics",
-		},{
-			"<leader>ts",
-			"<cmd>Trouble symbols toggle focus=true<cr>",
-			desc = "symbols",
 		},
 	},
 }

@@ -26,6 +26,7 @@ require("lazy").setup({
 		require("ui.colorschemes"),
 		require("core.mason"),
 		require("lsp.init"),
+		require("lsp.saga"),
 		require("core.snacks"),
 		require("core.yank"),
 		require("core.blink"),

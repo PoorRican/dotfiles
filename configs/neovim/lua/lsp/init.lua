@@ -5,9 +5,7 @@ return {
 	dependencies = {
 		"b0o/schemastore.nvim",
 		"mason-org/mason-lspconfig.nvim",
-		"smjonas/inc-rename.nvim",
 		"ravibrock/spellwarn.nvim",
-		"dgagn/diagflow.nvim",
 		"https://git.sr.ht/~whynothugo/lsp_lines.nvim",
 	},
 	init = function()
@@ -74,7 +72,6 @@ return {
 			end
 		end
 		vim.lsp.handlers["textDocument/signatureHelp"] = with_lsp_window_options(vim.lsp.handlers.signature_help)
-		vim.lsp.handlers["textDocument/hover"] = with_lsp_window_options(vim.lsp.handlers.hover)
 
 		-- Global LspAttach autocmd replaces per-server on_attach
 		vim.api.nvim_create_autocmd("LspAttach", {
@@ -161,40 +158,6 @@ return {
 		end
 
 		require("lsp_lines").setup()
-		require("inc_rename").setup({
-			hl_group = "Substitute",
-			preview_empty_name = false,
-			show_message = true,
-			save_in_cmdline_history = false,
-			input_buffer_type = "snacks",
-		})
 		require("spellwarn").setup()
-		require("diagflow").setup({
-			enable = true,
-			max_width = 60,
-			max_height = 10,
-			severity_colors = {
-				error = "DiagnosticFloatingError",
-				warning = "DiagnosticFloatingWarn",
-				info = "DiagnosticFloatingInfo",
-				hint = "DiagnosticFloatingHint",
-			},
-			format = function(diagnostic)
-				return diagnostic.message
-			end,
-			gap_size = 1,
-			scope = "line",
-			padding_top = 0,
-			padding_right = 0,
-			text_align = "right",
-			placement = "top",
-			inline_padding_left = 0,
-			toggle_event = {},
-			show_sign = true,
-			update_event = { "DiagnosticChanged", "BufReadPost" },
-			render_event = { "DiagnosticChanged", "CursorMoved" },
-			border_chars = icons.borders.diagflow,
-			show_borders = true,
-		})
 	end,
 }

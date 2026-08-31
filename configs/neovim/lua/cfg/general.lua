@@ -106,13 +106,6 @@ vim.api.nvim_create_autocmd("FocusLost", {
 	command = "silent! wall",
 })
 
--- show diagnostics on cursor hold
-vim.api.nvim_create_autocmd("CursorHold", {
-	callback = function()
-		vim.diagnostic.open_float(nil, { focusable = false })
-	end,
-})
-
 -- redirect focus to editor window after closing tool windows
 local tool_filetypes = {
 	["neo-tree"] = true,
