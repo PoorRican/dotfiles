@@ -7,6 +7,14 @@ local function LspToggle()
 		print(" lsp toggled")
 end
 
+local function code_actions(kind)
+	return function()
+		require("lspsaga.codeaction"):code_action({
+			context = { only = { kind } },
+		})
+	end
+end
+
 local function generate_buf_keymapper(bufnr)
 	return function(type, input, output, description, extraOptions)
 		local options = { buffer = bufnr }
@@ -69,8 +77,11 @@ function X.set_default_on_buffer(client, bufnr)
 	end
 
 	if cap.codeActionProvider then
-		buf_set_keymap({ "n", "v" }, "<leader>ra", "<cmd>Lspsaga code_action<CR>", "code actions")
-		buf_set_keymap({ "n", "v" }, "gra", "<cmd>Lspsaga code_action<CR>", "code actions")
+		local quick_fixes = code_actions(vim.lsp.protocol.CodeActionKind.QuickFix)
+		local refactor_actions = code_actions(vim.lsp.protocol.CodeActionKind.Refactor)
+		buf_set_keymap({ "n", "v" }, "<leader>ra", quick_fixes, "quick fixes")
+		buf_set_keymap({ "n", "v" }, "gra", quick_fixes, "quick fixes")
+		buf_set_keymap({ "n", "v" }, "grA", refactor_actions, "refactor actions")
 		r.map_virtual({ "<leader>r", group = "refactor", icon = { icon = " ", hl = "Constant" } })
 	end
 
@@ -107,7 +118,7 @@ function X.set_default_on_buffer(client, bufnr)
 		{ "<leader>ll", group = "virtual lines", icon = { icon = "󱞽", hl = "Constant" } },
 		{ "<leader>/r", group = "find references", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>/t", group = "peek type definition", icon = { icon = "", hl = "Constant" } },
-		{ "<leader>ra", group = "code actions", icon = { icon = "", hl = "Constant" } },
+		{ "<leader>ra", group = "quick fixes", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>rr", group = "rename", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>lo", group = "document outline", icon = { icon = "", hl = "Constant" } },
 		{ "<leader>lt", group = "toggle lsp", icon = { icon = "", hl = "Constant" } },
