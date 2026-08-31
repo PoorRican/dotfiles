@@ -140,7 +140,6 @@ local pinned_tool_filetypes = {
 }
 
 local function is_tool_window(winid)
-
 	if not vim.api.nvim_win_is_valid(winid) then return false end
 	local bufnr = vim.api.nvim_win_get_buf(winid)
 	local ft = vim.bo[bufnr].filetype
