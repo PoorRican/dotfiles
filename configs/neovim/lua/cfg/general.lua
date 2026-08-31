@@ -123,7 +123,24 @@ local tool_filetypes = {
 	["git"] = true,
 }
 
+-- Only dedicated side panes should refuse buffer replacement.  Fugitive's
+-- commit and diff buffers are interactive editor views; pinning those makes
+-- Telescope and Neo-tree open files in an unrelated window.
+local pinned_tool_filetypes = {
+	["neo-tree"] = true,
+	["Trouble"] = true,
+	["trouble"] = true,
+	["dap-repl"] = true,
+	["dapui_scopes"] = true,
+	["dapui_breakpoints"] = true,
+	["dapui_stacks"] = true,
+	["dapui_watches"] = true,
+	["dapui_console"] = true,
+	["qf"] = true,
+}
+
 local function is_tool_window(winid)
+
 	if not vim.api.nvim_win_is_valid(winid) then return false end
 	local bufnr = vim.api.nvim_win_get_buf(winid)
 	local ft = vim.bo[bufnr].filetype
@@ -174,7 +191,7 @@ vim.api.nvim_create_autocmd("WinEnter", {
 vim.api.nvim_create_autocmd("FileType", {
 	callback = function()
 		local ft = vim.bo.filetype
-		if tool_filetypes[ft] and ft ~= "help" then
+		if pinned_tool_filetypes[ft] then
 			vim.wo.winfixbuf = true
 		end
 	end,
