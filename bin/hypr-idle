@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Starts hypridle in the active Hyprland session's environment.
+#
+# hypridle's exec-once commands (hyprlock, hyprctl dispatch dpms) inherit its
+# environment, so WAYLAND_DISPLAY and XDG_RUNTIME_DIR must be set here. The
+# Hyprland *server* process does not export WAYLAND_DISPLAY (it is set for the
+# session's client processes only), so it is resolved from the wayland-N socket
+# created under XDG_RUNTIME_DIR instead.
+
+run_user="$(id -u)"
+
+hypr_pid="$(pgrep -x Hyprland | head -1 || true)"
+if [[ -z "${hypr_pid}" ]]; then
+  echo "hypr-idle: no Hyprland process found; refusing to start" >&2
+  exit 1
+fi
+
+# Hyprland reads its own XDG_RUNTIME_DIR from /proc/<pid>/environ.
+xdg_runtime="$(tr '\0' '\n' < "/proc/${hypr_pid}/environ" | sed -n 's/^XDG_RUNTIME_DIR=//p' | head -1 || true)"
+if [[ -z "${xdg_runtime}" ]]; then
+  echo "hypr-idle: Hyprland process ${hypr_pid} has no XDG_RUNTIME_DIR" >&2
+  exit 1
+fi
+
+# The server's wayland socket is named wayland-N; the lock files are
+# wayland-N.lock. Single-seat box: one socket.
+wayland_display=""
+for socket in "${xdg_runtime}"/wayland-*; do
+  [[ -S "${socket}" ]] || continue
+  wayland_display="$(basename "${socket}")"
+  break
+done
+if [[ -z "${wayland_display}" ]]; then
+  echo "hypr-idle: no wayland-*. socket found in ${xdg_runtime}" >&2
+  exit 1
+fi
+
+# The Hyprland IPC socket must exist, else hypridle's idle tracking will not
+# work and the lock could fire while the desktop is in use.
+if [[ ! -d "${xdg_runtime}/hypr" ]]; then
+  echo "hypr-idle: Hyprland socket dir ${xdg_runtime}/hypr not found" >&2
+  exit 1
+fi
+
+export WAYLAND_DISPLAY="${wayland_display}"
+export XDG_RUNTIME_DIR="${xdg_runtime}"
+
+exec /usr/bin/hypridle -c "${XDG_CONFIG_HOME:-$HOME/.config}/hypr/hypridle.conf"

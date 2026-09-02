@@ -100,6 +100,15 @@
     hypr-cliphist-image =
       desktopService "${hmBin}/wl-paste --type image --watch cliphist store"
       // { Unit.Description = "cbox Wayland clipboard history watcher (image)"; };
+
+    # Idle-time lock + DPMS. bin/hypr-idle resolves the live Wayland display
+    # from the Hyprland process before exec'ing hypridle with
+    # ~/.config/hypr/hypridle.conf. The hyprlock binary it triggers is the
+    # system (pacman) build, not the Nix one: the Nix-store build ABRTed on
+    # EGL_EXT_platform_base on cbox in Aug 2026.
+    hypr-idle =
+      desktopService "${homeDir}/.local/bin/hypr-idle"
+      // { Unit.Description = "cbox Hyprland idle lock + DPMS (hypridle)"; };
   };
 
   home.sessionVariables = {
@@ -111,6 +120,17 @@
 
   xdg.configFile."hypr/hyprland.lua" = {
     source = dotfiles + "/configs/hypr/hyprland.lua";
+    force = true;
+  };
+  # Lock screen + idle handling. PAM must be installed separately via
+  # bin/cbox-setup-hyprlock-pam (needs root); without it hyprlock falls back
+  # to /etc/pam.d/su -> pam_rootok.so and rejects every non-root password.
+  xdg.configFile."hypr/hyprlock.conf" = {
+    source = dotfiles + "/configs/hypr/hyprlock.conf";
+    force = true;
+  };
+  xdg.configFile."hypr/hypridle.conf" = {
+    source = dotfiles + "/configs/hypr/hypridle.conf";
     force = true;
   };
   xdg.configFile."waybar/config.jsonc" = {
@@ -167,6 +187,14 @@
   };
   home.file.".local/bin/pk-wiki" = {
     source = dotfiles + "/bin/pk-wiki";
+    executable = true;
+  };
+  home.file.".local/bin/cbox-setup-hyprlock-pam" = {
+    source = dotfiles + "/bin/cbox-setup-hyprlock-pam";
+    executable = true;
+  };
+  home.file.".local/bin/hypr-idle" = {
+    source = dotfiles + "/bin/hypr-idle";
     executable = true;
   };
 

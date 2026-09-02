@@ -62,6 +62,7 @@ local desktopServices = {
 	"hypr-nm-applet.service",
 	"hypr-cliphist-text.service",
 	"hypr-cliphist-image.service",
+	"hypr-idle.service",
 }
 
 local function syncSessionEnv()
@@ -347,6 +348,10 @@ hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
+-- Manual lock. hyprlock authenticates via /etc/pam.d/hyprlock (installed by
+-- bin/cbox-setup-hyprlock-pam). Never bind `dispatch dpms` directly: on
+-- Hyprland <= 0.55.3 the DPMS/monitor path crashed the compositor.
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("/usr/bin/hyprlock"))
 hl.bind(mainMod .. " + SHIFT + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit"))

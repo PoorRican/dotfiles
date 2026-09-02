@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# One-shot cbox hyprlock deploy. Stages:
+#   1. targeted pacman install (hyprland upgrade + hyprlock + hypridle)
+#   2. home-manager switch (installs configs + services + bin scripts)
+#   3. install /etc/pam.d/hyprlock
+#   4. start hypr-idle user service
+#   5. verify
+#
+# Run this, watch its output, then finish from the GUI (or re-run step 5's
+# exit command) to restart Hyprland OUT of safe mode:
+#   hyprshutdown          # graceful; LightDM autologin brings back a fresh session
+# Escape hatch at any point: Ctrl+C here; a wedged lock later dies via
+# `pkill -u $(id -u) hyprlock` from a TTY/SSH.
+
+step() { printf '\n== %s ==\n' "$*"; }
+
+step "1/5 targeted pacman install (hyprland, hyprlock, hypridle)"
+sudo pacman -S --noconfirm --needed hyprland hyprlock hypridle
+
+step "2/5 home-manager switch"
+home-manager switch --flake .#cbox
+
+step "3/5 install /etc/pam.d/hyprlock (pam_unix only, no faillock)"
+"${HOME}/.local/bin/cbox-setup-hyprlock-pam"
+
+step "4/5 start hypr-idle user service"
+systemctl --user daemon-reload
+systemctl --user start hypr-idle.service
+sleep 1
+systemctl --user status hypr-idle --no-pager | head -5
+
+step "5/5 verify"
+echo "--- hyprland version (want >= 0.55.4; expect safe-mode process still running until restart)"
+hyprland --version | head -1
+echo "--- hyprlock present"
+command -v hyprlock
+echo "--- PAM file"
+sudo cat /etc/pam.d/hyprlock
+echo "--- hypridle config in place"
+ls -la "${HOME}/.config/hypr/hypridle.conf" "${HOME}/.config/hypr/hyprlock.conf"
+echo "--- Hyprland mode (NOTE: still safe-mode until session restart)"
+ps -eo args | grep -E '[H]yprland' || true
+
+printf '\nDONE. To leave safe mode and activate the Super+L lock bind:\n'
+printf '    hyprshutdown\n'
+printf '(LightDM autologin starts a fresh Hyprland with the full config.)\n'
+printf 'If the lock ever wedges later, from a TTY/SSH:\n'
+printf '    pkill -u %s hyprlock\n' "$(id -u)"

@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Installs /etc/pam.d/hyprlock for the cbox Hyprland lock screen.
+# Managed by the dotfiles repo; run it (it re-uses sudo itself) after
+# `home-manager switch`. Idempotent: no-op when the file is already correct.
+#
+# The file uses pam_unix ONLY. Deliberately no pam_faillock and no pam_deny:
+# a failed unlock must never count toward PAM account lockout (June 2026
+# i3lock incident), and without this file hyprlock falls back to
+# /etc/pam.d/su -> pam_rootok.so, which rejects every non-root password.
+# That fallback is exactly why the Aug 2026 "my password did not work"
+# happened.
+
+if [[ "${EUID}" -ne 0 ]]; then
+  exec sudo "$0" "$@"
+fi
+
+target=/etc/pam.d/hyprlock
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+
+cat > "$tmp" <<'EOF'
+#%PAM-1.0
+# Managed by ~/dotfiles/bin/cbox-setup-hyprlock-pam - do not edit by hand.
+# pam_unix only: no pam_faillock, no pam_deny. Failed unlocks must not
+# trigger PAM account lockout.
+auth       required     pam_unix.so
+account    required     pam_unix.so
+EOF
+
+if cmp -s "$tmp" "$target"; then
+  echo "pam.d/hyprlock: already correct, nothing to do"
+  exit 0
+fi
+
+install -m 0444 -o root -g root "$tmp" "$target"
+echo "pam.d/hyprlock: installed (pam_unix only)"
