@@ -1,5 +1,5 @@
 # cbox server
-{ lib, ... }:
+{ lib, pkgs, ... }:
 
 {
   imports = [
@@ -21,4 +21,11 @@
   # config tree.
   programs.neovim.enable = lib.mkForce false;
   programs.agent-skills.host = "cbox";
+
+  home.packages = with pkgs; [
+		noto-fonts
+		noto-fonts-cjk-sans
+		noto-fonts-emoji
+		noto-fonts-extra
+	];
 }
