@@ -43,7 +43,10 @@ let
     # Hermes 0.12 makes croniter a core dependency and leaves the cron extra empty.
     # uv2nix/pyproject-nix omit empty extras from uv.lock, so requesting "cron"
     # makes virtualenv resolution fail even though runtime cron support is present.
-    "cli"
+
+		# as of 2026-09-02, "cli" seems to no longer be a recognized package or skill
+    #"cli"
+
     # Hermes no longer exposes a separate `pty` extra; PTY support is covered by
     # the core/CLI install now. Requesting the stale extra breaks uv2nix eval.
     # `dev` already pulls `mcp`, but keep it explicit because local MCP servers are
