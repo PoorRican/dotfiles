@@ -37,5 +37,8 @@
 		# misc
 		helix
 		rclone
+
+		jujutsu
+		jjui
   ];
 }
