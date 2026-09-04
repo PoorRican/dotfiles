@@ -89,9 +89,11 @@ end
 --
 hl.on("hyprland.start", function ()
 --   hl.exec_cmd(terminal)
-	-- Sync the session bus + systemd user environment, then bring up the
-	-- desktop daemons. Both helpers are idempotent and safe to re-run.
+	-- Sync the session environment first, then lock the autologin session as
+	-- early as Hyprland permits. Do not repeat this from `config.reloaded`, since
+	-- routine config reloads must not unexpectedly lock the desktop.
 	syncSessionEnv()
+	hl.exec_cmd("/usr/bin/hyprlock")
 	startDesktopServices()
 
 	-- LightDM does not activate graphical-session.target for this session, so
