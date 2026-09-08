@@ -6,8 +6,9 @@ with runtime edits: a key removed from Nix disappears on the next
 `home-manager switch`. Runtime learning stays runtime-owned.
 
 The runtime comes from the upstream package; profile management uses this local
-adapter rather than `inputs.hermes-agent.homeManagerModules.default`. Internal
-Python helpers live in `scripts/hermes/` and use Hermes' packaged interpreter:
+adapter rather than `inputs.hermes-agent.homeManagerModules.default`. The seed
+helper and its tests live in `scripts/hermes/`; the existing renderer and cron
+helper remain in `nix/modules/hermes/`. All three use Hermes' packaged interpreter.
 `render-config.py` runs at build time; `seed-file.py` and `reconcile-cron.py` run
 during activation. The renderer adds the installed schema version and rejects
 unknown top-level settings; it is not a separate Hermes installation.

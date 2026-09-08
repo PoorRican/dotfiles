@@ -287,7 +287,7 @@ let
       } ''
         export HERMES_HOME="$TMPDIR/hermes-home"
         export ${pythonPathEnv}
-        ${venvPython} ${dotfiles + "/scripts/hermes/render-config.py"} "$settingsJsonPath" "$out"
+        ${venvPython} ${./hermes/render-config.py} "$settingsJsonPath" "$out"
       '';
 
   documentTree = name: documents:
@@ -360,7 +360,7 @@ let
         ''
       ) profile.seedFiles)}
       run env HERMES_HOME=${home} HERMES_MANAGED=home-manager ${pythonPathEnv} \
-        ${venvPython} ${dotfiles + "/scripts/hermes/reconcile-cron.py"} ${cronSpec name profile}
+        ${venvPython} ${./hermes/reconcile-cron.py} ${cronSpec name profile}
     '';
 
   # ── Gateway services ──────────────────────────────────────────────────────
