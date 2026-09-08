@@ -18,15 +18,12 @@
     # Keeps pyrefly current without updating every package from the primary nixpkgs.
     pyrefly-nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
-    # Private halves of the Hermes agents (personas, private skills, cron), kept
-    # out of this repository. Pinned to a local clone so the lock records only a
-    # file URL, commit and narHash. Inputs are fetched lazily: only the hosts
-    # that compose it below need the clone, but lock-touching commands
-    # (`nix flake update|lock|check|metadata`) resolve every input and must run
-    # on one of those hosts.
+    # Private Hermes modules (personas, skills, memory seeds, cron). The
+    # dependency-free flake exports homeManagerModules for selected hosts.
+    # Keep its Git pin local; after committing private changes, update only
+    # agent-profiles from a host with this clone.
     agent-profiles = {
       url = "git+file:///home/swe/kairos/agent-profiles";
-      flake = false;
     };
   };
 
@@ -146,7 +143,7 @@
         homeDirectory = "/home/swe";
         modules = [
           ./nix/hosts/cbox.nix
-          (inputs.agent-profiles + "/home/cbox.nix")
+          inputs.agent-profiles.homeManagerModules.cbox
         ];
       };
       wst = mkHome {

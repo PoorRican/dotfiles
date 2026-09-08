@@ -1,10 +1,10 @@
 # Hermes Agent — upstream package plus a thin multi-profile Home Manager adapter.
 #
-# Nix owns every non-secret part of a profile: config.yaml (replaced on each
-# activation, never merged), SOUL.md, extra files, the immutable skill view,
-# cron job definitions, launchers and gateway units. Credentials (.env,
-# auth.json), sessions, memories and the mutable $HERMES_HOME/skills stay
-# outside the store and are never touched.
+# Nix owns declared configuration: config.yaml (replaced on each activation,
+# never merged), SOUL.md, extra files, the immutable skill view, cron job
+# definitions, launchers and gateway units. seedFiles initializes missing
+# runtime files only; existing memories and other runtime state are preserved.
+# Credentials (.env, auth.json) must never be included in store-backed sources.
 #
 # `profiles.default` is the root home (~/.hermes). Every other attribute name
 # is a real Hermes named profile at ~/.hermes/profiles/<name>, reachable with
@@ -79,6 +79,8 @@ let
   settingsType = lib.types.attrsOf lib.types.anything;
 
   fileSource = lib.types.either lib.types.str lib.types.path;
+
+  pathsOverlap = a: b: a == b || lib.hasPrefix "${a}/" b || lib.hasPrefix "${b}/" a;
 
   cronJobType = lib.types.submodule {
     options = {
@@ -199,7 +201,21 @@ let
       files = lib.mkOption {
         type = lib.types.attrsOf fileSource;
         default = { };
-        description = "Extra files installed below HERMES_HOME, keyed by relative path (mode 0600).";
+        description = "Extra Nix-owned files replaced on every activation below HERMES_HOME (mode 0600). Use seedFiles for runtime-owned initial snapshots.";
+        example = lib.literalExpression ''{ "instructions.txt" = ./instructions.txt; }'';
+      };
+
+      seedFiles = lib.mkOption {
+        type = lib.types.attrsOf fileSource;
+        default = { };
+        description = ''
+          Initial snapshots for runtime-owned files, keyed by relative path.
+          Only absent files are seeded (mode 0600); existing files are never
+          overwritten or removed. Activation reports matches and differences;
+          verbose activation also prints a snapshot-to-runtime text diff.
+          Parent directories, including home ancestors, must not be symlinks.
+          Sources enter the Nix store: do not include secrets.
+        '';
         example = lib.literalExpression ''{ "memories/USER.md" = ./USER.md; }'';
       };
 
@@ -271,7 +287,7 @@ let
       } ''
         export HERMES_HOME="$TMPDIR/hermes-home"
         export ${pythonPathEnv}
-        ${venvPython} ${./hermes/render-config.py} "$settingsJsonPath" "$out"
+        ${venvPython} ${dotfiles + "/scripts/hermes/render-config.py"} "$settingsJsonPath" "$out"
       '';
 
   documentTree = name: documents:
@@ -280,10 +296,11 @@ let
         mkdir -p "$out"
       ''
       + lib.concatStringsSep "\n" (lib.mapAttrsToList (relative: value: ''
-        mkdir -p "$out/$(dirname ${lib.escapeShellArg relative})"
+        destination="$out"/${lib.escapeShellArg relative}
+        mkdir -p "$(dirname "$destination")"
         ${if builtins.isPath value || lib.isStorePath value
-          then ''cp ${value} "$out/${relative}"''
-          else ''cp ${pkgs.writeText "hermes-file" value} "$out/${relative}"''}
+          then ''cp ${lib.escapeShellArg "${value}"} "$destination"''
+          else ''cp ${pkgs.writeText "hermes-file" value} "$destination"''}
       '') documents)
     );
 
@@ -302,6 +319,7 @@ let
       home = lib.escapeShellArg profile.home;
       documents = profile.files // lib.optionalAttrs (profile.soul != null) { "SOUL.md" = profile.soul; };
       tree = documentTree name documents;
+      seeds = documentTree "${name}-seeds" profile.seedFiles;
       marker = lib.escapeShellArg profile.home + "/.no-bundled-skills";
     in ''
       # ${name}: ${profile.home}
@@ -329,8 +347,20 @@ let
           run install -m "$mode" -D ${source} ${home}/${lib.escapeShellArg relative}
         ''
       ) documents)}
+      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (relative: _:
+        let
+          command = "${venvPython} ${dotfiles + "/scripts/hermes/seed-file.py"} ${lib.escapeShellArg "${seeds}/${relative}"} ${lib.escapeShellArg "${profile.home}/${relative}"}";
+        in ''
+          if [[ -v DRY_RUN ]]; then
+            # Read-only comparison still runs during dry-run, including diffs.
+            ${command} --dry-run ''${VERBOSE+--verbose}
+          else
+            run ${command} ''${VERBOSE+--verbose}
+          fi
+        ''
+      ) profile.seedFiles)}
       run env HERMES_HOME=${home} HERMES_MANAGED=home-manager ${pythonPathEnv} \
-        ${venvPython} ${./hermes/reconcile-cron.py} ${cronSpec name profile}
+        ${venvPython} ${dotfiles + "/scripts/hermes/reconcile-cron.py"} ${cronSpec name profile}
     '';
 
   # ── Gateway services ──────────────────────────────────────────────────────
@@ -462,6 +492,14 @@ in {
       let
         catalog = profileCatalog profile;
         label = "programs.hermes.profiles.${name}";
+        seedPaths = lib.attrNames profile.seedFiles;
+        # files may spell the same target with ./ or repeated separators.
+        ownedPaths = map (path: lib.removePrefix "./" (lib.path.subpath.normalise path)) (
+          [ "config.yaml" ".managed" ".no-bundled-skills" "cron/jobs.json" ]
+          ++ lib.optional (name == "default") "profiles"
+          ++ lib.attrNames profile.files
+          ++ lib.optional (profile.soul != null) "SOUL.md"
+        );
       in
         skillsLib.catalogAssertions { inherit catalog label; }
         ++ [
@@ -473,6 +511,23 @@ in {
           {
             assertion = !(profile.settings ? _config_version);
             message = "${label}: _config_version is set from the installed package; do not declare it.";
+          }
+          {
+            assertion = lib.all (path:
+              path != "" && lib.all (part: !(builtins.elem part [ "" "." ".." ]))
+                (lib.splitString "/" path)
+            ) seedPaths;
+            message = "${label}: seedFiles paths must be normalized relative file paths without empty, . or .. components.";
+          }
+          {
+            assertion = lib.all (seed: !(lib.any (pathsOverlap seed) ownedPaths)) seedPaths;
+            message = "${label}: seedFiles must not overlap Nix-owned files, cron/jobs.json or the default home's profiles subtree.";
+          }
+          {
+            assertion = lib.all (seed:
+              !(lib.any (other: seed != other && pathsOverlap seed other) seedPaths)
+            ) seedPaths;
+            message = "${label}: seedFiles paths must not nest beneath another seeded file.";
           }
         ]
     ) enabledProfiles);
