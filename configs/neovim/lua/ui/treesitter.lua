@@ -14,6 +14,7 @@ local parsers = {
 	"lua",
 	"markdown",
 	"markdown_inline",
+	"nix",
 	"php",
 	"python",
 	"query",
@@ -49,6 +50,22 @@ return {
 		local r = require("utils.remaps")
 		local treesitter = require("nvim-treesitter")
 		treesitter.setup()
+
+		-- The `master` branch compiled parsers into the plugin checkout; `main`
+		-- installs them with their queries under site/parser, which is all
+		-- get_installed() inspects. A master-era parser left in the checkout
+		-- still wins the runtimepath race and highlights nothing because its
+		-- queries never shipped. Surface it instead of deleting inside a plugin
+		-- directory on every start; the fix is a one-time `rm -r` of that path.
+		local ok_lazy, lazy_config = pcall(require, "lazy.core.config")
+		local plugin = ok_lazy and lazy_config.plugins["nvim-treesitter"]
+		local legacy_parsers = plugin and plugin.dir .. "/parser"
+		if legacy_parsers and vim.uv.fs_stat(legacy_parsers) then
+			vim.notify(
+				"nvim-treesitter: stale master-branch parsers shadow installed ones; remove " .. legacy_parsers,
+				vim.log.levels.WARN
+			)
+		end
 
 		local installed = {}
 		for _, parser in ipairs(treesitter.get_installed()) do
