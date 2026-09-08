@@ -1,5 +1,5 @@
 # cbox server
-{ lib, pkgs, ... }:
+{ lib, pkgs, dotfiles, ... }:
 
 {
   imports = [
@@ -24,6 +24,15 @@
 
   # The default profile serves Discord here; Nix owns hermes-gateway.service.
   programs.hermes.profiles.default.gateway.enable = true;
+
+  # k-research-agent: public half (policy, public skills, gateway). The
+  # private agent-profiles input composed in flake.nix adds the persona and
+  # private skills to this same profile.
+  programs.hermes.profiles.k-research-agent = {
+    settings = import (dotfiles + "/configs/hermes/k-research-agent/config.nix") { };
+    skills.names = import (dotfiles + "/configs/hermes/k-research-agent/skills.nix");
+    gateway.enable = true;
+  };
 
   # cbox's default profile ran against the LAN vLLM box before Nix owned the
   # config; keep that behavior. Flip `model` back to the portable default

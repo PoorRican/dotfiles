@@ -18,6 +18,16 @@
     # Keeps pyrefly current without updating every package from the primary nixpkgs.
     pyrefly-nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
+    # Private halves of the Hermes agents (personas, private skills, cron), kept
+    # out of this repository. Pinned to a local clone so the lock records only a
+    # file URL, commit and narHash. Inputs are fetched lazily: only the hosts
+    # that compose it below need the clone, but lock-touching commands
+    # (`nix flake update|lock|check|metadata`) resolve every input and must run
+    # on one of those hosts.
+    agent-profiles = {
+      url = "git+file:///home/swe/kairos/agent-profiles";
+      flake = false;
+    };
   };
 
   outputs = { nixpkgs, home-manager, hermes-agent, ... }@inputs:
@@ -134,7 +144,10 @@
         system = "x86_64-linux";
         username = "swe";
         homeDirectory = "/home/swe";
-        modules = [ ./nix/hosts/cbox.nix ];
+        modules = [
+          ./nix/hosts/cbox.nix
+          (inputs.agent-profiles + "/home/cbox.nix")
+        ];
       };
       wst = mkHome {
         system = "x86_64-linux";
@@ -143,16 +156,5 @@
         modules = [ ./nix/hosts/wst.nix ];
       };
     };
-
-    # Reusable pieces for a private flake that extends one of the homes above,
-    # for example with privileged Hermes profiles:
-    #   dotfiles.homeConfigurations.wst.extendModules { modules = [ ./hermes.nix ]; }
-    # The extending module gets the same `dotfiles` and `inputs` special args.
-    homeManagerModules = {
-      hermes = ./nix/modules/hermes.nix;
-      agent-skills = ./nix/modules/agent-skills.nix;
-    };
-
-    lib.agentSkills = ./nix/lib/agent-skills.nix;
   };
 }

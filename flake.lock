@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "agent-profiles": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788863346,
+        "narHash": "sha256-X1rrJlYl0RM82FlY3M0T0/VoHri4yjPZYZWCLnuwqwk=",
+        "ref": "refs/heads/master",
+        "rev": "ef022dde246287d5aef6526ced7e3bf5dc94ddea",
+        "revCount": 1,
+        "type": "git",
+        "url": "file:///home/swe/kairos/agent-profiles"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/swe/kairos/agent-profiles"
+      }
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": [
@@ -194,6 +210,7 @@
     },
     "root": {
       "inputs": {
+        "agent-profiles": "agent-profiles",
         "hermes-agent": "hermes-agent",
         "home-manager": "home-manager_2",
         "nixpkgs": "nixpkgs",
