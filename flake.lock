@@ -2,11 +2,11 @@
   "nodes": {
     "agent-profiles": {
       "locked": {
-        "lastModified": 1788887936,
-        "narHash": "sha256-fIqpTjZ2zbzgPEwJDfJRr9DGeXu1wqVON2q5pP1u/qk=",
+        "lastModified": 1788888657,
+        "narHash": "sha256-rWtGpUCrAZnjL0/XW++gaGq2bfRyiff/jSzxWMSW6zc=",
         "ref": "refs/heads/master",
-        "rev": "ac80d9e5c7a434ef953898b4acd136e17d944109",
-        "revCount": 4,
+        "rev": "345dee4c0b82ff312412813cdb39cfba625ff8da",
+        "revCount": 5,
         "type": "git",
         "url": "file:///home/swe/kairos/agent-profiles"
       },
