@@ -10,6 +10,9 @@
 		#../profiles/dev-extra.nix
 		# not used at this moment
 		#../layers/knowledge-tools.nix
+    # Hermes without the rest of dev-extra; the private flake extends this
+    # host with the privileged k-system-admin profile.
+    ../modules/hermes.nix
   ];
 
   programs.hermes.enable = lib.mkDefault true;

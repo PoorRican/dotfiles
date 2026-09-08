@@ -1,5 +1,5 @@
 # macOS (MacBook Pro) host-specific settings
-{ pkgs, config, ... }:
+{ pkgs, config, lib, dotfiles, ... }:
 {
   imports = [
     ../profiles/minimal.nix
@@ -12,7 +12,21 @@
 		../modules/taskwarrior.nix
   ];
 
-  programs.hermes.profile = "mbp";
+  programs.hermes.profiles.default = {
+    settings = {
+      # macOS keeps the Apple skills that the portable policy hides.
+      skills.disabled = lib.mkForce (lib.remove "apple"
+        (import (dotfiles + "/configs/hermes/default/config.nix") { }).skills.disabled);
+      mcp_servers = {
+        motion.command = "${config.programs.hermes.profiles.default.home}/bin/motion-mcp-hermes";
+        rescuetime.command = "${config.programs.hermes.profiles.default.home}/bin/rescuetime-mcp-hermes";
+      };
+    };
+    files = {
+      "bin/motion-mcp-hermes" = dotfiles + "/configs/hermes/mbp/motion-mcp-hermes";
+      "bin/rescuetime-mcp-hermes" = dotfiles + "/configs/hermes/mbp/rescuetime-mcp-hermes";
+    };
+  };
   programs.agent-skills.host = "mbp";
   programs.claude-code.autoUpdate = true;
 

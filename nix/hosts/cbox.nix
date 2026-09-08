@@ -22,6 +22,33 @@
   programs.neovim.enable = lib.mkForce false;
   programs.agent-skills.host = "cbox";
 
+  # The default profile serves Discord here; Nix owns hermes-gateway.service.
+  programs.hermes.profiles.default.gateway.enable = true;
+
+  # cbox's default profile ran against the LAN vLLM box before Nix owned the
+  # config; keep that behavior. Flip `model` back to the portable default
+  # (gpt-5.5 via openai-codex) by removing the mkForce block.
+  programs.hermes.profiles.default.settings = {
+    model = lib.mkForce {
+      default = "RadixArk/Qwen3.8-27B-NVFP4";
+      provider = "custom";
+      base_url = "http://spark-a0c2.home.local:8000/v1";
+    };
+    custom_providers = [
+      {
+        name = "Spark(vllm)";
+        base_url = "http://spark-a0c2.home.local:8000/v1";
+        model = "RadixArk/Qwen3.8-27B-NVFP4";
+        models."Qwen3.6-27B".context_length = 130000;
+      }
+      {
+        name = "lmstudio";
+        base_url = "http://localhost:1234/v1";
+        model = "google/gemma-4-12b-qat";
+      }
+    ];
+  };
+
   home.packages = with pkgs; [
 		noto-fonts
 		noto-fonts-cjk-sans
