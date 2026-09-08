@@ -1,7 +1,8 @@
 # Explicit distribution collections for the centralized skill catalog.
 #
 # `coding` is the complete set shared by coding agents.
-# `hermes` is additive: Hermes receives coding ++ hermes.
+# `hermes` is additive: the default Hermes profile receives coding ++ hermes.
+# Named Hermes profiles select their own names (programs.hermes.profiles.<name>.skills.names).
 # Host collections are additive to their corresponding global collection.
 {
   coding = [

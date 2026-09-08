@@ -123,6 +123,7 @@ nix-instantiate --parse flake.nix
 ├── nix/                         # nix infrastructure
 │   ├── hosts/                   # per-host configurations
 │   ├── modules/                 # home-manager modules
+│   ├── lib/                     # pure helpers shared by modules (skill catalog)
 │   ├── profiles/                # composable package sets
 │   └── layers/                  # cross-cutting feature layers
 ├── docs/                        # documentation

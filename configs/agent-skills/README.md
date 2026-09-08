@@ -30,18 +30,23 @@ references, scripts, templates, assets, executable bits, and intentional links.
 
 ## Distribution
 
-`nix/modules/agent-skills.nix` recursively scans the selected categorized trees.
+`nix/lib/agent-skills.nix` scans the categorized trees; `nix/modules/agent-skills.nix`
+publishes the coding collection, and `nix/modules/hermes.nix` builds one
+categorized view per Hermes profile from the same roots.
 
 `collections.nix` separates catalog storage from distribution:
 
 - `coding` is the explicit allowlist shared by coding agents.
-- `hermes` is additive; Hermes receives `coding` plus the Hermes-specific list.
+- `hermes` is additive; the default Hermes profile receives `coding` plus this list.
 - `hosts.<name>` adds narrowly scoped skills for one machine.
 
-- **Hermes** receives an immutable categorized Nix-store view through
-  `skills.external_dirs`. Its mutable `$HERMES_HOME/skills` directory remains local
-  runtime state, and `.no-bundled-skills` prevents Hermes updates from reseeding the
-  bundled catalog.
+- **Hermes** profiles receive an immutable categorized Nix-store view through
+  `skills.external_dirs`, selected by `programs.hermes.profiles.<name>.skills.names`.
+  Named profiles (including private ones from another flake) pick their own
+  names and may add private roots; nothing is inherited automatically. The
+  mutable `$HERMES_HOME/skills` directory remains local runtime state, and
+  `.no-bundled-skills` prevents Hermes from reseeding the bundled catalog.
+  See `configs/hermes/README.md`.
 - **Claude Code** receives a Nix-built flat union under `~/.claude/skills`.
 - **Codex** receives a Nix-built flat union under `~/.codex/skills`.
 - **Pi** receives a Nix-built flat union under `~/.pi/agent/skills`.
