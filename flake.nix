@@ -140,11 +140,19 @@
         system = "x86_64-linux";
         username = "swe";
         homeDirectory = "/home/swe";
-        modules = [ 
-					./nix/hosts/wst.nix
-					./nix/modules/hermes.nix
-				];
+        modules = [ ./nix/hosts/wst.nix ];
       };
     };
+
+    # Reusable pieces for a private flake that extends one of the homes above,
+    # for example with privileged Hermes profiles:
+    #   dotfiles.homeConfigurations.wst.extendModules { modules = [ ./hermes.nix ]; }
+    # The extending module gets the same `dotfiles` and `inputs` special args.
+    homeManagerModules = {
+      hermes = ./nix/modules/hermes.nix;
+      agent-skills = ./nix/modules/agent-skills.nix;
+    };
+
+    lib.agentSkills = ./nix/lib/agent-skills.nix;
   };
 }
