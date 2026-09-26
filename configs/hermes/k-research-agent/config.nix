@@ -101,7 +101,4 @@ in {
     mode = "manual";
     timeout = 60;
   };
-
-  # Research sessions span days; never reset them on a schedule.
-  session_reset.mode = "none";
 }

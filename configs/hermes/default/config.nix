@@ -97,12 +97,6 @@ in {
     timeout = 60;
   };
 
-  session_reset = {
-    mode = "both";
-    idle_minutes = 1440;
-    at_hour = 4;
-  };
-
   skills = {
     creation_nudge_interval = 15;
     # Bundled skills seeded into ~/.hermes/skills before the catalog was
