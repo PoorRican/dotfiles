@@ -43,17 +43,25 @@
 
     # Shared shape for the cbox desktop daemons. Each one owns a single long-lived
     # process; the user manager respawns it on death. StartLimit* keeps a
-    # flapping applet from tight-looping on the GPU after a wedged reset.
-    desktopService = exec: {
+    # flapping applet from tight-looping on the GPU after a wedged reset; both
+    # StartLimit keys live in [Unit], not [Service] (systemd rejects them there
+    # with "Unknown key 'StartLimitIntervalSec' in section [Service]", leaving
+    # the daemons with no rate limit at all).
+    #
+    # The description is an argument rather than an `// { Unit.Description = }`
+    # override: `//` replaces the whole Unit attrset, which would drop PartOf
+    # and the StartLimit keys.
+    desktopService = description: exec: {
       Unit = {
+        Description = description;
         PartOf = [ "graphical-session.target" ];
+        StartLimitIntervalSec = 30;
+        StartLimitBurst = 5;
       };
       Service = {
         ExecStart = exec;
         Restart = "always";
         RestartSec = 3;
-        StartLimitIntervalSec = 30;
-        StartLimitBurst = 5;
       };
       Install.WantedBy = [ "default.target" ];
     };
@@ -76,30 +84,29 @@
     };
 
     hypr-waybar =
-      desktopService "/usr/bin/waybar"
-      // { Unit.Description = "cbox Hyprland status bar (waybar)"; };
+      desktopService "cbox Hyprland status bar (waybar)" "/usr/bin/waybar";
 
     hypr-blueman-applet =
-      desktopService (hmBin + "/blueman-applet")
-      // { Unit.Description = "cbox Bluetooth applet (blueman-applet)"; };
+      desktopService "cbox Bluetooth applet (blueman-applet)"
+      (hmBin + "/blueman-applet");
 
     hypr-lxqt-policykit-agent =
-      desktopService (hmBin + "/lxqt-policykit-agent")
-      // { Unit.Description = "cbox Wayland Polkit agent (lxqt-policykit-agent)"; };
+      desktopService "cbox Wayland Polkit agent (lxqt-policykit-agent)"
+      (hmBin + "/lxqt-policykit-agent");
 
     hypr-nm-applet =
-      desktopService (hmBin + "/nm-applet")
-      // { Unit.Description = "cbox NetworkManager applet (nm-applet)"; };
+      desktopService "cbox NetworkManager applet (nm-applet)"
+      (hmBin + "/nm-applet");
 
     # Native Wayland clipboard history. Two long-lived watch processes
     # (text + image) instead of the previous one-shot hypr-start-cliphist.
     hypr-cliphist-text =
-      desktopService "${hmBin}/wl-paste --type text --watch cliphist store"
-      // { Unit.Description = "cbox Wayland clipboard history watcher (text)"; };
+      desktopService "cbox Wayland clipboard history watcher (text)"
+      "${hmBin}/wl-paste --type text --watch cliphist store";
 
     hypr-cliphist-image =
-      desktopService "${hmBin}/wl-paste --type image --watch cliphist store"
-      // { Unit.Description = "cbox Wayland clipboard history watcher (image)"; };
+      desktopService "cbox Wayland clipboard history watcher (image)"
+      "${hmBin}/wl-paste --type image --watch cliphist store";
 
     # Idle-time lock + DPMS. bin/hypr-idle resolves the live Wayland display
     # from the Hyprland process before exec'ing hypridle with
@@ -107,8 +114,8 @@
     # system (pacman) build, not the Nix one: the Nix-store build ABRTed on
     # EGL_EXT_platform_base on cbox in Aug 2026.
     hypr-idle =
-      desktopService "${homeDir}/.local/bin/hypr-idle"
-      // { Unit.Description = "cbox Hyprland idle lock + DPMS (hypridle)"; };
+      desktopService "cbox Hyprland idle lock + DPMS (hypridle)"
+      "${homeDir}/.local/bin/hypr-idle";
   };
 
   home.sessionVariables = {
