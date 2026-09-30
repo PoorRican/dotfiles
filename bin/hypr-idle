@@ -3,8 +3,8 @@ set -euo pipefail
 
 # Starts hypridle in the active Hyprland session's environment.
 #
-# hypridle's exec-once commands (hyprlock, hyprctl dispatch dpms) inherit its
-# environment, so WAYLAND_DISPLAY and XDG_RUNTIME_DIR must be set here. The
+# hypridle's listener commands (hyprlock, hyprctl dispatch hl.dsp.dpms) inherit
+# its environment, so WAYLAND_DISPLAY and XDG_RUNTIME_DIR must be set here. The
 # Hyprland *server* process does not export WAYLAND_DISPLAY (it is set for the
 # session's client processes only), so it is resolved from the wayland-N socket
 # created under XDG_RUNTIME_DIR instead.
