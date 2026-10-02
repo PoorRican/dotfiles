@@ -24,36 +24,6 @@ let
   hostCollections = lib.attrByPath [ "hosts" agentSkills.host ] { coding = [ ]; hermes = [ ]; } collections;
 
   upstreamPackage = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
-  sitePackages = pkgs.python312.sitePackages;
-
-  # Hermes' pyproject py-modules list lags the top-level modules its own code
-  # imports (hermes_state_holders and hermes_state_registry as of 0.21), so the
-  # sealed uv2nix venv omits them. Ship whichever top-level modules the venv
-  # lacks; once upstream lists them all this directory is empty.
-  missingTopLevelModules = venv: pkgs.runCommand "hermes-missing-modules" { } ''
-    site="$out/${sitePackages}"
-    mkdir -p "$site"
-    for module in ${inputs.hermes-agent}/*.py; do
-      name="$(basename "$module")"
-      [ "$name" = setup.py ] && continue
-      if [ ! -e "${venv}/${sitePackages}/$name" ]; then
-        install -m 0444 "$module" "$site/$name"
-      fi
-    done
-  '';
-  withMissingModules = package:
-    let
-      shim = missingTopLevelModules package.hermesVenv;
-    in
-      package.overrideAttrs (old: {
-        nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
-        postFixup = (old.postFixup or "") + ''
-          for program in hermes hermes-agent hermes-acp; do
-            wrapProgram "$out/bin/$program" --suffix PYTHONPATH : "${shim}/${sitePackages}"
-          done
-        '';
-        passthru = (old.passthru or { }) // { moduleShim = shim; };
-      });
 
   defaultExtras = [
     "dev"
@@ -67,11 +37,9 @@ let
     "web"
   ];
 
-  # Interpreter that sees the sealed venv plus the module shim; used for the
-  # build-time renderer and the activation-time cron reconciler. A custom
-  # `package` must expose the upstream `hermesVenv` passthru.
+  # Use Hermes' sealed interpreter for build-time rendering and activation helpers.
+  # A custom `package` must expose the upstream `hermesVenv` passthru.
   venvPython = "${cfg.package.hermesVenv}/bin/python3";
-  pythonPathEnv = "PYTHONPATH=${lib.optionalString (cfg.package ? moduleShim) "${cfg.package.moduleShim}/${sitePackages}"}";
 
   # Attribute sets from several module definitions merge per key, so a host or
   # an extending flake can add one key without restating the whole profile.
@@ -286,7 +254,6 @@ let
         passAsFile = [ "settingsJson" ];
       } ''
         export HERMES_HOME="$TMPDIR/hermes-home"
-        export ${pythonPathEnv}
         ${venvPython} ${./hermes/render-config.py} "$settingsJsonPath" "$out"
       '';
 
@@ -359,7 +326,7 @@ let
           fi
         ''
       ) profile.seedFiles)}
-      run env HERMES_HOME=${home} HERMES_MANAGED=home-manager ${pythonPathEnv} \
+      run env HERMES_HOME=${home} HERMES_MANAGED=home-manager \
         ${venvPython} ${./hermes/reconcile-cron.py} ${cronSpec name profile}
     '';
 
@@ -474,9 +441,9 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    programs.hermes.package = lib.mkDefault (withMissingModules (
+    programs.hermes.package = lib.mkDefault (
       upstreamPackage.override { extraDependencyGroups = cfg.extras; }
-    ));
+    );
 
     # The default profile carries the dotfiles policy; hosts and extending
     # flakes add to it or declare named profiles beside it.

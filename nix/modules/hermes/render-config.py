@@ -12,7 +12,7 @@ snapshot key fails the build instead of riding along silently.
 import json
 import sys
 
-import yaml
+import hermes_yaml as yaml
 from hermes_cli.config import _EXTRA_KNOWN_ROOT_KEYS
 from hermes_cli.config_defaults import DEFAULT_CONFIG
 

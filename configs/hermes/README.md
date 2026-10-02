@@ -12,6 +12,8 @@ helper remain in `nix/modules/hermes/`. All three use Hermes' packaged interpret
 `render-config.py` runs at build time; `seed-file.py` and `reconcile-cron.py` run
 during activation. The renderer adds the installed schema version and rejects
 unknown top-level settings; it is not a separate Hermes installation.
+The renderer uses Hermes' own YAML compatibility module, keeping its YAML
+read/write policy aligned with the installed runtime without adding PyYAML.
 
 | Nix owns (replaced on activation) | Runtime owns (preserved after initialization) |
 |---|---|
