@@ -19,22 +19,9 @@
   # Data work and backtesting.
   "analyzing-backtests"
   "jupyter-live-kernel"
-  "local-columnar-data-inspection"
+  "data-inspection"
   "marimo-pair"
   "using-nautilus-trader"
-
-  # Kairos domain procedures.
-  "kairos-collector-performance-baseline"
-  "kairos-crypto-hunt-safety"
-  "kairos-emc-disk-growth-assessment"
-  "kairos-hotswap-disk-transfer-leg"
-  "kairos-ideation-slate-workflow"
-  "kairos-kalshi-direct-soak"
-  "kairos-lake-characterization-campaign"
-  "kairos-new-lake-ingestion-family"
-  "kalshi-backtest-artifact-controls"
-  "kalshi-delta-replay-dislocation-timing"
-  "kde-mixture-experiment-forensics"
 
   # Model training, evaluation and serving.
   "evaluating-llms-harness"

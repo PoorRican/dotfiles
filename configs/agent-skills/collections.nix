@@ -6,29 +6,20 @@
 # Host collections are additive to their corresponding global collection.
 {
   coding = [
-		"brainstorm"
-    "brainstorming"
-    "code-review"  # provenance
-    "conventional-commits"
-    "github-code-review"
-    "github-issues"
-    "github-pr-workflow"
-    "linux-system-debugging"
-    "local-columnar-data-inspection"
+    "agent-orchestration"
+    "analysis-judgement"
+    "code-liveness-and-refactoring"
+    "data-inspection"
+    "debugging"
+    "documentation-curation"
+    "git-and-github"
     "marimo-pair"
-    "package-skill"
-    "python-debugpy"
-    "requesting-code-review"
-		"prose-writing-style"
-    "simplify-code"
-    "spike"
-    "stacked-issues"
-    "stacked-prs"
-    "subagent-driven-development"
-    "systematic-debugging"
-    "test-driven-development"
+    "performance-and-throughput"
+    "prose-writing-style"
+    "rust-engineering"
     "using-nautilus-trader"
-    "writing-plans"
+    "verification-and-evidence"
+    "workstation-and-agent-tooling"
   ];
 
   hermes = [

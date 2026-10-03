@@ -28,7 +28,7 @@ Use for prompts such as:
 - RAM, swap, zram, CPU, disk/process pressure, browser/Electron renderer, service/container/user-slice resource attribution.
 - A Linux desktop/server feels slow, locked out, or has a device that works partially through CLI/kernel state but fails through GUI/session state.
 
-For pure package-management/AUR setup or repair, use `arch-aur-package-management`; for local Parquet/SQLite dataset inspection, use `local-columnar-data-inspection`.
+For pure package-management/AUR setup or repair, use `arch-aur-package-management`; for local Parquet/SQLite dataset inspection, use `data-inspection`.
 
 ## Universal debugging posture
 
