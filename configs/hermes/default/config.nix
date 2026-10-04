@@ -30,7 +30,7 @@ let
   ];
 in {
   model = {
-    default = "gpt-5.5";
+    default = "gpt-6.1-sol";
     provider = "openai-codex";
     base_url = "https://chatgpt.com/backend-api/codex";
   };

@@ -24,10 +24,13 @@ read/write policy aligned with the installed runtime without adding PyYAML.
 | `~/.local/bin/<profile>` launchers, gateway units | |
 | `seedFiles.*` supplies initial snapshots only | existing seed destinations, even when empty or different |
 
-`.managed` puts the profile in Hermes' managed mode: `hermes setup`,
-`hermes config set`, `hermes model`, `hermes gateway install` and `hermes update`
-refuse to run and name Home Manager instead. Secrets go into `$HERMES_HOME/.env`
-by hand; `hermes login` still writes `auth.json`.
+`.managed` puts the profile in Hermes' managed mode: commands that persist
+configuration, including model selection, refuse writes and name Home Manager
+instead. Change model policy in Nix and apply it with `home-manager switch`;
+`hermes model --refresh` refreshes the runtime-owned model catalog, not the
+declared model configuration. OAuth credentials remain runtime-owned:
+`hermes auth refresh openai-codex` refreshes a pooled Codex credential.
+Secrets go into `$HERMES_HOME/.env` by hand.
 
 ## Profiles
 
@@ -68,6 +71,12 @@ The default profile's policy lives in `default/config.nix` and `default/SOUL.md`
 its skills are `coding ++ hermes` (plus the host overlays) from
 `configs/agent-skills/collections.nix`. Hosts add to it in `nix/hosts/<host>.nix`
 (see `mbp.nix` for MCP servers and `cbox.nix` for LAN providers and the gateway).
+
+The shared default is `gpt-6.1-sol` through `openai-codex` at the ChatGPT Codex
+endpoint. cbox retains LM Studio as an optional custom provider; its former
+Spark/RadixArk Qwen entry is disabled. Keep the model, provider, and endpoint
+together when changing policy: a mismatched current model can appear in the
+wrong provider's picker.
 
 ## Runtime seeds
 
