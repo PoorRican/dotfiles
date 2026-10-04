@@ -112,7 +112,10 @@ dotfiles keeps the **policy** — model, toolsets, limits, public catalog picks,
 gateway — in `nix/hosts/<host>.nix` and `configs/hermes/<profile>/`. The
 private repository (`~/kairos/agent-profiles`) supplies the persona, private
 skill bundles *and their names*, initial memory snapshots, and scheduled work; none of that appears in
-this repository. `k-research-agent` on cbox is the first profile built this way.
+this repository. It also links its private skills into its project's
+repositories for coding agents, and adds those link paths to the global
+gitignore through `my.git.extraIgnores` (`nix/modules/git.nix`).
+`k-research-agent` on cbox is the first profile built this way.
 
 ### How the private repository is composed
 
