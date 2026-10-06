@@ -1,125 +1,129 @@
-// cbox Hyprland Waybar config — dark rounded bar with Polybar-ish density.
+// cbox Hyprland Waybar config — HANCORE V6.ce layout, "solid gold" colours.
+// Upstream: https://github.com/HANCORE-linux/waybar-themes/tree/main/config/V6.ce
+// Omarchy-only indicators are dropped; workspaces stay on the custom Lua path.
 {
   "layer": "top",
   "position": "top",
-  "height": 34,
-  "spacing": 8,
-  "margin-top": 8,
-  "margin-left": 10,
-  "margin-right": 10,
+  "exclusive": true,
   "reload_style_on_change": true,
+  "height": 0,
+  "width": 1200,
+  "spacing": 0,
+  "margin-top": 0,
+  "margin-bottom": 0,
 
   "modules-left": [
-    "custom/command-center",
-    "custom/ws1",
-    "custom/ws2",
-    "custom/ws3",
-    "custom/ws4",
-    "custom/ws5",
-    "custom/ws-separator",
-    "custom/ws6",
-    "custom/ws7",
-    "custom/ws8",
-    "custom/ws9",
-    "custom/ws10",
+    "clock",
+    "custom/separator",
+    "group/workspaces",
+    "custom/separator",
+    "idle_inhibitor",
     "hyprland/submap"
   ],
   "modules-center": [
-    "custom/active-workspace-title"
+    "mpris"
   ],
   "modules-right": [
-    "idle_inhibitor",
+    "group/tray-expander",
     "pulseaudio",
-    "bluetooth",
-    "network",
-    "cpu",
     "memory",
-    "disk",
-    "clock",
-    "tray",
-    "custom/power"
+    "cpu"
   ],
 
-  "custom/command-center": {
-    "format": "░▒▓ 󰣇 ▓▒░",
-    "tooltip": "cbox command center\nLeft: sysadmin Zellij\nRight: remember keybindings",
-    "on-click": "/home/swe/.local/bin/sysadmin --toggle",
-    "on-click-right": "/home/swe/.local/bin/hypr-keybindings-menu"
+  "custom/separator": {
+    "format": "|",
+    "tooltip": false
   },
 
   // Waybar's built-in hyprland/workspaces click path sends legacy
   // `dispatch workspace N`, which Hyprland's Lua config parser rejects. Use
   // tiny custom modules so clicks call the Lua dispatcher directly while still
-  // showing all ten desktop slots.
+  // showing all ten desktop slots. The group gives them V6.ce's shared strip.
+  "group/workspaces": {
+    "orientation": "inherit",
+    "modules": [
+      "custom/ws1",
+      "custom/ws2",
+      "custom/ws3",
+      "custom/ws4",
+      "custom/ws5",
+      "custom/ws-separator",
+      "custom/ws6",
+      "custom/ws7",
+      "custom/ws8",
+      "custom/ws9",
+      "custom/ws10"
+    ]
+  },
   "custom/ws1": {
-    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 1 '' 'd1 scrolling'",
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 1 '1' 'd1 scrolling'",
     "return-type": "json",
     "interval": 1,
     "signal": 8,
     "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 1"
   },
   "custom/ws2": {
-    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 2 '' 'd2 browser'",
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 2 '2' 'd2 browser'",
     "return-type": "json",
     "interval": 1,
     "signal": 8,
     "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 2"
   },
   "custom/ws3": {
-    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 3 '' 'd3 reading/research'",
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 3 '3' 'd3 reading/research'",
     "return-type": "json",
     "interval": 1,
     "signal": 8,
     "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 3"
   },
   "custom/ws4": {
-    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 4 '' 'd4 terminal'",
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 4 '4' 'd4 terminal'",
     "return-type": "json",
     "interval": 1,
     "signal": 8,
     "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 4"
   },
   "custom/ws5": {
-    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 5 '' 'd5 ide'",
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 5 '5' 'd5 ide'",
     "return-type": "json",
     "interval": 1,
     "signal": 8,
     "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 5"
   },
   "custom/ws-separator": {
-    "format": "│",
+    "format": "·",
     "tooltip": false
   },
   "custom/ws6": {
-    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 6 '' 'd6 generic'",
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 6 '6' 'd6 generic'",
     "return-type": "json",
     "interval": 1,
     "signal": 8,
     "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 6"
   },
   "custom/ws7": {
-    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 7 '' 'd7 generic'",
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 7 '7' 'd7 generic'",
     "return-type": "json",
     "interval": 1,
     "signal": 8,
     "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 7"
   },
   "custom/ws8": {
-    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 8 '' 'd8 wiki'",
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 8 '8' 'd8 wiki'",
     "return-type": "json",
     "interval": 1,
     "signal": 8,
     "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 8"
   },
   "custom/ws9": {
-    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 9 '' 'd9 generic'",
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 9 '9' 'd9 generic'",
     "return-type": "json",
     "interval": 1,
     "signal": 8,
     "on-click": "/home/swe/.local/bin/waybar-hypr-workspace switch 9"
   },
   "custom/ws10": {
-    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 10 '' 'd0 generic'",
+    "exec": "/home/swe/.local/bin/waybar-hypr-workspace render 10 '0' 'd0 generic'",
     "return-type": "json",
     "interval": 1,
     "signal": 8,
@@ -127,99 +131,110 @@
   },
 
   "hyprland/submap": {
-    "format": "MODE: {}",
+    "format": "-- {} --",
     "max-length": 24,
     "tooltip": false
   },
 
-  "custom/active-workspace-title": {
-    "exec": "/home/swe/.local/bin/waybar-hypr-workspace title",
-    "return-type": "json",
-    "escape": true,
-    "interval": 1,
-    "signal": 8,
-    "max-length": 90
+  "clock": {
+    "interval": 30,
+    "format": "{:%H:%M}",
+    "format-alt": "{:%a %Y-%m-%d W%V %H:%M}",
+    "tooltip-format": "<tt>{calendar}</tt>",
+    "calendar": {
+      "mode": "month",
+      "format": {
+        "months": "<b>{}</b>",
+        "weekdays": "<b>{}</b>",
+        "today": "<b><u>{}</u></b>"
+      }
+    }
   },
 
   "idle_inhibitor": {
     "format": "{icon}",
     "format-icons": {
-      "activated": "",
-      "deactivated": ""
+      "activated": "",
+      "deactivated": "󰾫"
     },
-    "tooltip": true
+    "tooltip-format-activated": "idle inhibited",
+    "tooltip-format-deactivated": "idle allowed"
   },
 
-  "pulseaudio": {
-    "format": "{icon} {volume}%",
-    "format-muted": "󰖁 muted",
-    "format-bluetooth": "{icon} {volume}%",
-    "format-icons": {
-      "headphone": "",
-      "hands-free": "󰋎",
-      "headset": "󰋎",
-      "phone": "",
-      "portable": "",
-      "car": "",
-      "default": ["", "", ""]
+  "mpris": {
+    "format": " {artist} - {title}",
+    "format-paused": "{status_icon} {artist} - {title}",
+    "max-length": 75,
+    "status-icons": {
+      "paused": "󰝛"
     },
-    "scroll-step": 2,
-    "on-click": "/home/swe/.local/state/nix/profiles/home-manager/home-path/bin/pavucontrol",
-    "tooltip-format": "{desc}"
+    "ignored-players": ["firefox", "chromium", "brave", "vivaldi"]
   },
 
+  // Tray drawer: hover the chevron to reveal the tray and connectivity.
+  "group/tray-expander": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 600,
+      "children-class": "tray-group-item"
+    },
+    "modules": [
+      "custom/expand-icon",
+      "tray",
+      "custom/separator",
+      "network",
+      "bluetooth",
+      "disk",
+      "custom/separator"
+    ]
+  },
+  "custom/expand-icon": {
+    "format": "",
+    "tooltip": false
+  },
+  "tray": {
+    "icon-size": 12,
+    "spacing": 4
+  },
+  "network": {
+    "interval": 3,
+    "format-wifi": "net {essid}",
+    "format-ethernet": "net {ifname}",
+    "format-linked": "net {ifname}",
+    "format-disconnected": "net --",
+    "tooltip-format": "{ifname} {ipaddr}/{cidr} via {gwaddr}\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-disconnected": "disconnected"
+  },
   "bluetooth": {
-    "format": " {status}",
-    "format-disabled": " off",
-    "format-off": " off",
+    "format": "bt {status}",
+    "format-disabled": "bt off",
+    "format-off": "bt off",
     "format-no-controller": "",
-    "format-connected": " {device_alias}",
-    "format-connected-battery": " {device_alias} {device_battery_percentage}%",
+    "format-connected": "bt {device_alias}",
+    "format-connected-battery": "bt {device_alias} {device_battery_percentage}%",
     "on-click": "/home/swe/.local/state/nix/profiles/home-manager/home-path/bin/blueman-manager",
     "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected"
   },
-
-  "network": {
-    "format-wifi": " {essid}",
-    "format-ethernet": " {ipaddr}",
-    "format-linked": " {ifname}",
-    "format-disconnected": "󰖪 offline",
-    "format-alt": "{ifname}: {ipaddr}/{cidr}",
-    "tooltip-format": "{ifname} via {gwaddr}"
-  },
-
-  "cpu": {
-    "interval": 2,
-    "format": " {usage}%",
-    "tooltip": false
-  },
-
-  "memory": {
-    "interval": 2,
-    "format": "󰍛 {}%"
-  },
-
   "disk": {
     "interval": 30,
     "path": "/",
-    "format": " {free}"
+    "format": "dsk {free}"
   },
 
-  "clock": {
-    "interval": 30,
-    "format": "░▒▓ {:%a %Y-%m-%d  %H:%M} ▓▒░",
-    "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>",
-    "format-alt": "{:%H:%M}"
+  "pulseaudio": {
+    "format": "vol {volume}%",
+    "format-muted": "vol --",
+    "scroll-step": 2,
+    "on-click": "/home/swe/.local/state/nix/profiles/home-manager/home-path/bin/pavucontrol",
+    "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "tooltip-format": "{desc} at {volume}%"
   },
-
-  "tray": {
-    "icon-size": 18,
-    "spacing": 8
+  "memory": {
+    "interval": 5,
+    "format": "mem {used:0.1f}G"
   },
-
-  "custom/power": {
-    "format": "⏻",
-    "tooltip": "Exit Hyprland",
-    "on-click": "hyprctl dispatch exit"
+  "cpu": {
+    "interval": 5,
+    "format": "cpu {usage}%"
   }
 }

@@ -13,4 +13,5 @@ configuration {
   sorting-method: "fzf";
 }
 
-@theme "sourcerer"
+// Selected by my.desktop.theme (nix/modules/desktop-theme.nix).
+@theme "desktop"

@@ -8,8 +8,8 @@ set $local_bin /home/swe/.local/bin
 set $terminal /usr/bin/ghostty
 # i3 variable expansion is not recursive: variables used inside another `set`
 # value remain literal when the outer variable is expanded. Keep these absolute.
-set $launcher /home/swe/.local/state/nix/profiles/home-manager/home-path/bin/rofi -show combi -show-icons
-set $run_launcher /home/swe/.local/state/nix/profiles/home-manager/home-path/bin/rofi -show run
+set $launcher /usr/bin/rofi -show combi -show-icons
+set $run_launcher /usr/bin/rofi -show run
 set $locker /home/swe/.local/bin/i3-lock
 
 # Borders / appearance

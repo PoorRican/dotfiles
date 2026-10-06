@@ -1,116 +1,91 @@
-/* cbox Hyprland Waybar theme: compact, rounded, screenshot-ish glass. */
-@define-color bg rgba(12, 13, 18, 0.72);
-@define-color bg-solid #101218;
-@define-color bg-alt rgba(35, 38, 52, 0.88);
-@define-color fg #fdf6e3;
-@define-color muted #8b93a7;
-@define-color cyan #16a085;
-@define-color blue #7aa2f7;
-@define-color magenta #bb9af7;
-@define-color red #e5201d;
-@define-color yellow #e0af68;
-@define-color green #9ece6a;
+/* cbox Hyprland Waybar theme: HANCORE V6.ce geometry. Colours come from
+ * theme.css, rendered from my.desktop.theme by nix/modules/desktop-theme.nix
+ * (@background, @background-alt, @edge, @foreground, @muted, @accent,
+ * @accent-dim, @urgent). */
+@import url("theme.css");
 
 * {
   border: none;
   border-radius: 0;
+  padding: 0;
   min-height: 0;
-  font-family: "JetBrainsMono Nerd Font", "Font Awesome 7 Free", "Font Awesome 7 Brands", sans-serif;
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-weight: 900;
   font-size: 13px;
-  font-weight: 700;
+  transition: background-color 0.3s ease-out;
 }
 
 window#waybar {
-  background: transparent;
-  color: @fg;
+  background-color: transparent;
+  color: @foreground;
+}
+
+window#waybar > box {
+  margin: 2px;
+  background-color: @background;
+  border: 1px solid @accent-dim;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 1);
 }
 
 tooltip {
-  background: alpha(@bg-solid, 0.96);
-  border: 1px solid alpha(@cyan, 0.75);
-  border-radius: 12px;
-  color: @fg;
+  padding: 4px;
+  background: @background;
+  border: 1px solid @accent;
 }
 
 tooltip label {
-  color: @fg;
+  color: @foreground;
+  font-size: 12px;
+  font-weight: normal;
 }
 
-.modules-left,
-.modules-center,
-.modules-right {
-  background: @bg;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 3px 6px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-}
-
-#custom-command-center,
-#workspaces,
-#custom-ws1,
-#custom-ws2,
-#custom-ws3,
-#custom-ws4,
-#custom-ws5,
-#custom-ws-separator,
-#custom-ws6,
-#custom-ws7,
-#custom-ws8,
-#custom-ws9,
-#custom-ws10,
-#submap,
-#custom-active-workspace-title,
-#idle_inhibitor,
-#pulseaudio,
-#bluetooth,
-#network,
-#cpu,
-#memory,
-#disk,
+/* --- shared module spacing (V6.ce) --- */
 #clock,
+#idle_inhibitor,
+#submap,
+#mpris,
+#custom-expand-icon,
 #tray,
-#custom-power {
-  margin: 0 3px;
-  padding: 0 10px;
-  border-radius: 12px;
-  color: @fg;
-  background: transparent;
-}
-
-#custom-command-center {
-  color: @bg-solid;
-  background: linear-gradient(90deg, @cyan, @blue, @magenta);
-  padding: 0 14px;
-}
-
-#workspaces {
-  padding: 0 4px;
-}
-
-#workspaces button {
+#network,
+#bluetooth,
+#disk,
+#pulseaudio,
+#memory,
+#cpu {
+  min-width: 12px;
+  padding: 2px 6px;
   margin: 0 2px;
-  padding: 0 8px;
-  border-radius: 10px;
-  color: @muted;
-  background: transparent;
-  transition: all 160ms ease-in-out;
+  color: @foreground;
+  opacity: 0.75;
 }
 
-#workspaces button:hover {
-  color: @fg;
-  background: alpha(@blue, 0.18);
+#clock:hover,
+#idle_inhibitor:hover,
+#custom-expand-icon:hover,
+#network:hover,
+#bluetooth:hover,
+#disk:hover,
+#pulseaudio:hover,
+#memory:hover,
+#cpu:hover {
+  opacity: 1;
+  color: @accent;
 }
 
-#workspaces button.active {
-  color: @bg-solid;
-  background: linear-gradient(90deg, @cyan, @blue);
-  padding: 0 13px;
+#clock {
+  color: @accent;
+  opacity: 1;
 }
 
-#workspaces button.urgent {
-  color: @fg;
-  background: @red;
+#custom-separator {
+  color: @accent-dim;
+  padding: 0 3px;
+}
+
+/* --- workspaces strip --- */
+#workspaces {
+  margin: 3px 6px;
+  background-color: @background-alt;
 }
 
 #custom-ws1,
@@ -123,39 +98,25 @@ tooltip label {
 #custom-ws8,
 #custom-ws9,
 #custom-ws10 {
-  margin: 0 2px;
-  padding: 0 8px;
-  border-radius: 10px;
+  padding: 1px 6px;
+  margin: 0;
+  color: @foreground;
+  background-color: @background-alt;
+  border-bottom: 1px solid transparent;
+}
+
+#custom-ws1.empty,
+#custom-ws2.empty,
+#custom-ws3.empty,
+#custom-ws4.empty,
+#custom-ws5.empty,
+#custom-ws6.empty,
+#custom-ws7.empty,
+#custom-ws8.empty,
+#custom-ws9.empty,
+#custom-ws10.empty {
   color: @muted;
-  background: transparent;
-  transition: all 160ms ease-in-out;
-}
-
-#custom-ws1:hover,
-#custom-ws2:hover,
-#custom-ws3:hover,
-#custom-ws4:hover,
-#custom-ws5:hover,
-#custom-ws6:hover,
-#custom-ws7:hover,
-#custom-ws8:hover,
-#custom-ws9:hover,
-#custom-ws10:hover {
-  color: @fg;
-  background: alpha(@blue, 0.18);
-}
-
-#custom-ws1.occupied,
-#custom-ws2.occupied,
-#custom-ws3.occupied,
-#custom-ws4.occupied,
-#custom-ws5.occupied,
-#custom-ws6.occupied,
-#custom-ws7.occupied,
-#custom-ws8.occupied,
-#custom-ws9.occupied,
-#custom-ws10.occupied {
-  color: @fg;
+  background-color: @background;
 }
 
 #custom-ws1.active,
@@ -168,98 +129,98 @@ tooltip label {
 #custom-ws8.active,
 #custom-ws9.active,
 #custom-ws10.active {
-  color: @bg-solid;
-  background: linear-gradient(90deg, @cyan, @blue);
-  padding: 0 13px;
+  color: @background;
+  background-color: @accent;
+  border-bottom: 1px solid @accent;
+}
+
+#custom-ws1:hover,
+#custom-ws2:hover,
+#custom-ws3:hover,
+#custom-ws4:hover,
+#custom-ws5:hover,
+#custom-ws6:hover,
+#custom-ws7:hover,
+#custom-ws8:hover,
+#custom-ws9:hover,
+#custom-ws10:hover {
+  color: @accent;
+  border-bottom: 1px solid @accent;
 }
 
 #custom-ws-separator {
-  color: @muted;
-  margin: 0 1px;
-  padding: 0 2px;
-  background: transparent;
+  padding: 0 3px;
+  color: @accent-dim;
+  background-color: @background;
 }
 
+/* --- modal submap: inverse video, vim style --- */
 #submap {
-  color: @bg-solid;
-  background: @yellow;
+  color: @background;
+  background-color: @accent;
+  opacity: 1;
 }
 
-#custom-active-workspace-title {
-  color: @fg;
-  padding: 0 16px;
+#idle_inhibitor {
+  opacity: 0.4;
 }
 
-#clock {
-  color: @fg;
-  background: alpha(@bg-alt, 0.96);
-  border: 1px solid alpha(@cyan, 0.35);
+#idle_inhibitor.activated {
+  color: @accent;
+  opacity: 1;
 }
 
-#cpu,
-#memory,
-#disk,
-#network,
-#pulseaudio,
-#bluetooth,
-#idle_inhibitor,
+/* --- now playing: slow phosphor pulse (V6.ce) --- */
+#mpris {
+  color: @accent;
+  opacity: 1;
+  animation-name: phosphor;
+  animation-duration: 3s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+#mpris.paused {
+  color: @muted;
+  animation: none;
+}
+
+@keyframes phosphor {
+  to {
+    color: @accent-dim;
+  }
+}
+
+/* --- tray drawer --- */
+#custom-expand-icon {
+  margin-right: 0;
+  opacity: 0.4;
+  font-size: 14px;
+}
+
 #tray {
-  background: alpha(@bg-alt, 0.84);
+  opacity: 1;
 }
 
-#cpu {
-  color: @green;
-}
-
-#memory {
-  color: @magenta;
-}
-
-#disk {
-  color: @blue;
-}
-
-#network {
-  color: @cyan;
+#tray > .needs-attention {
+  -gtk-icon-effect: highlight;
+  background-color: @urgent;
 }
 
 #network.disconnected,
 #bluetooth.off,
-#bluetooth.disabled {
-  color: @muted;
-}
-
-#pulseaudio {
-  color: @yellow;
-}
-
+#bluetooth.disabled,
 #pulseaudio.muted {
   color: @muted;
 }
 
-#bluetooth {
-  color: @blue;
+#cpu.warning,
+#memory.warning {
+  color: @accent;
 }
 
-#idle_inhibitor {
-  color: @muted;
-}
-
-#idle_inhibitor.activated {
-  color: @green;
-}
-
-#tray {
-  padding: 0 8px;
-}
-
-#custom-power {
-  color: @red;
-  background: alpha(@red, 0.12);
-  padding: 0 12px;
-}
-
-#custom-power:hover {
-  color: @fg;
-  background: @red;
+#cpu.critical,
+#memory.critical {
+  color: @urgent;
 }

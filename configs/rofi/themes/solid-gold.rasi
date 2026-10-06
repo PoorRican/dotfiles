@@ -1,0 +1,115 @@
+/* "solid gold": xero's sourcerer greys with Amber Gold accents. Keep the
+ * palette in sync with configs/waybar/style.css and configs/hypr/hyprland.lua. */
+* {
+  bg: #1E1D1A;
+  bg-alt: #2A2823;
+  edge: #3A3730;
+  fg: #C2C2B0;
+  muted: #6C6858;
+  gold: #FFBF00;
+  gold-dim: #9D7122;
+  urgent: #AA4450;
+
+  background-color: transparent;
+  text-color: @fg;
+  font: "JetBrainsMono Nerd Font 12";
+}
+
+window {
+  location: center;
+  anchor: center;
+  width: 42%;
+  border: 3px;
+  border-color: @gold;
+  border-radius: 0;
+  background-color: @bg;
+}
+
+mainbox {
+  spacing: 0;
+  padding: 0;
+  background-color: @bg;
+}
+
+inputbar {
+  padding: 0;
+  spacing: 0;
+  background-color: @bg-alt;
+  border: 0 0 1px 0;
+  border-color: @gold-dim;
+  children: [ prompt, textbox-sep, entry ];
+}
+
+prompt {
+  padding: 10px 12px;
+  background-color: @gold;
+  text-color: @bg;
+  font: "JetBrainsMono Nerd Font ExtraBold 12";
+}
+
+textbox-sep {
+  expand: false;
+  str: "┄┄─";
+  padding: 10px 8px 10px 10px;
+  text-color: @gold-dim;
+}
+
+entry {
+  padding: 10px 12px 10px 0;
+  placeholder: "type to launch";
+  placeholder-color: @muted;
+  cursor: text;
+}
+
+message {
+  padding: 8px 12px;
+  background-color: @bg-alt;
+  border: 0 0 1px 0;
+  border-color: @edge;
+}
+
+textbox {
+  text-color: @muted;
+}
+
+listview {
+  lines: 10;
+  columns: 1;
+  fixed-height: false;
+  padding: 6px 0;
+  spacing: 0;
+  scrollbar: false;
+  background-color: @bg;
+}
+
+element {
+  padding: 6px 12px;
+  spacing: 10px;
+  background-color: @bg;
+  text-color: @fg;
+  border: 0 0 0 3px;
+  border-color: @bg;
+}
+
+element alternate {
+  background-color: @bg;
+}
+
+element selected {
+  background-color: @bg-alt;
+  text-color: @gold;
+  border-color: @gold;
+}
+
+element urgent {
+  text-color: @urgent;
+}
+
+element-icon {
+  size: 1.2em;
+}
+
+element-text {
+  vertical-align: 0.5;
+  highlight: bold underline #FFBF00;
+}

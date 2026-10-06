@@ -1,0 +1,9 @@
+# Ghostty on the cbox Hyprland desktop. macOS hosts use configs/ghostty/config.
+# Selected by my.desktop.theme (nix/modules/desktop-theme.nix).
+theme = desktop
+window-padding-x = 6
+window-padding-y = 6
+window-padding-color = background
+cursor-style = block
+# Shift+Enter sends ESC CR so TUI agents insert a newline instead of submitting.
+keybind = shift+enter=text:\x1b\r

@@ -44,7 +44,9 @@ local nixBin      = nixProfile .. "/bin"
 local terminal    = "/usr/bin/ghostty"
 local browser     = "/usr/bin/vivaldi-stable"
 local fileManager = "ranger"
-local menu        = hmBin .. "/rofi -show drun -show-icons"
+-- pacman's rofi: the nixpkgs build's older fontconfig rejects Arch's
+-- /etc/fonts/conf.d (see nix/modules/hyprland-desktop.nix).
+local menu        = "/usr/bin/rofi -show drun -show-icons"
 local clipMenu    = home .. "/.local/bin/hypr-clipboard-menu"
 local proseSymbolMenu = home .. "/.local/bin/hypr-prose-symbol-picker"
 local symbolMenu  = home .. "/.local/bin/hypr-symbol-picker"
@@ -155,16 +157,33 @@ hl.env("MOZ_ENABLE_WAYLAND", "1")
 -----------------------
 
 -- Refer to https://wiki.hypr.land/Configuring/Basics/Variables/
+--
+-- Colours come from my.desktop.theme (nix/modules/desktop-theme.nix). A
+-- missing or broken theme file must not stop the rest of this config (binds),
+-- so fall back to plain greys and say so.
+local themeFile = home .. "/.config/hypr/desktop-theme.lua"
+local themeOk, palette = pcall(dofile, themeFile)
+if not themeOk or type(palette) ~= "table" then
+    palette = {
+        bg = "rgb(202020)", bgAlt = "rgb(303030)", edge = "rgb(505050)",
+        fg = "rgb(d0d0d0)", muted = "rgb(808080)", accent = "rgb(ffffff)",
+        accentDim = "rgb(a0a0a0)", urgent = "rgb(ff0000)",
+    }
+    hl.exec_cmd("notify-send -u critical 'Hyprland theme' 'Could not load " .. themeFile .. "'")
+end
+
 hl.config({
     general = {
         gaps_in  = 5,
         gaps_out = 20,
 
-        border_size = 2,
+        border_size = 3,
 
         col = {
-            active_border   = { colors = {"rgba(33ccffee)", "rgba(00ff99ee)"}, angle = 45 },
-            inactive_border = "rgba(595959aa)",
+            active_border          = palette.accent,
+            inactive_border        = palette.edge,
+            nogroup_border_active  = palette.accent,
+            nogroup_border         = palette.edge,
         },
 
         -- Set to true to enable resizing windows by clicking and dragging on borders and gaps
@@ -177,7 +196,8 @@ hl.config({
     },
 
     decoration = {
-        rounding       = 10,
+        -- Square, flat frames: no rounding and no drop shadow.
+        rounding       = 0,
         rounding_power = 2,
 
         -- Change transparency of focused and unfocused windows
@@ -185,10 +205,7 @@ hl.config({
         inactive_opacity = 1.0,
 
         shadow = {
-            enabled      = true,
-            range        = 4,
-            render_power = 3,
-            color        = 0xee1a1a1a,
+            enabled = false,
         },
 
         blur = {
@@ -196,6 +213,34 @@ hl.config({
             size      = 3,
             passes    = 1,
             vibrancy  = 0.1696,
+        },
+    },
+
+    -- Grouped (tabbed) windows: accent for the focused group, the urgent
+    -- colour when the group is locked, and a flat text tab bar.
+    group = {
+        col = {
+            border_active          = palette.accent,
+            border_inactive        = palette.edge,
+            border_locked_active   = palette.urgent,
+            border_locked_inactive = palette.edge,
+        },
+        groupbar = {
+            font_family         = "JetBrainsMono Nerd Font",
+            font_size           = 10,
+            height              = 16,
+            gradients           = true,
+            rounding            = 0,
+            gradient_rounding   = 0,
+            indicator_height    = 0,
+            text_color          = palette.bg,
+            text_color_inactive = palette.fg,
+            col = {
+                active          = palette.accent,
+                inactive        = palette.bgAlt,
+                locked_active   = palette.urgent,
+                locked_inactive = palette.bgAlt,
+            },
         },
     },
 

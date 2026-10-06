@@ -7,6 +7,9 @@ let
   };
 in
 {
+  # Shares the cbox desktop theme (rofi colours) with the Hyprland session.
+  imports = [ ./desktop-theme.nix ];
+
   fonts.fontconfig.enable = true;
 
   home.packages = with pkgs; [
@@ -16,7 +19,7 @@ in
     xss-lock
     imagemagick
     alacritty
-    rofi
+    # rofi comes from pacman; see the note in hyprland-desktop.nix.
     rofi-emoji
     clipmenu
     dunst
@@ -40,7 +43,6 @@ in
   xdg.configFile."i3/config".source = dotfiles + "/configs/i3/config";
   xdg.configFile."rofi/config.rasi".source = dotfiles + "/configs/rofi/config.rasi";
   xdg.configFile."rofi/symbols.tsv".source = dotfiles + "/configs/rofi/symbols.tsv";
-  xdg.configFile."rofi/themes/sourcerer.rasi".source = dotfiles + "/configs/rofi/themes/sourcerer.rasi";
 
   home.file.".local/bin/i3-natural-scroll" = {
     source = dotfiles + "/bin/i3-natural-scroll";

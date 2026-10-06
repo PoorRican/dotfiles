@@ -2,11 +2,19 @@
 # OS-level login/display-manager configuration is installed by
 # bin/cbox-switch-to-hyprland-os; Home Manager owns user config and tools.
 { config, dotfiles, lib, pkgs, ... }:
+let
+  p = config.my.desktop.palette;
+in
 {
+  imports = [ ./desktop-theme.nix ];
+
   fonts.fontconfig.enable = true;
 
+  # rofi itself comes from pacman (bin/cbox-switch-to-hyprland-os): the
+  # nixpkgs build links an older fontconfig that cannot parse Arch's
+  # /etc/fonts/conf.d and prints a page of warnings on every launch.
+  # rofi-emoji stays for its emoji database (rofi-emoji/all_emojis.txt).
   home.packages = with pkgs; [
-    rofi
     rofi-emoji
     wl-clipboard
     cliphist
@@ -25,7 +33,57 @@
   # Run the notification daemon as a user service instead of tying it to a
   # one-shot compositor start event. This also gives D-Bus a stable owner for
   # org.freedesktop.Notifications after Hyprland config reloads.
-  services.dunst.enable = true;
+  # Styled from `my.desktop.palette`: square frame in the accent colour, dimmed
+  # low urgency, urgent-colour frame for critical.
+  services.dunst = {
+    enable = true;
+    settings = {
+      global = {
+        font = "JetBrainsMono Nerd Font 11";
+        origin = "top-right";
+        # Clear the Waybar strip (reserved height) plus Hyprland's outer gap.
+        offset = "(20, 53)";
+        width = 380;
+        height = "(0, 240)";
+        notification_limit = 5;
+        padding = 10;
+        horizontal_padding = 12;
+        text_icon_padding = 10;
+        gap_size = 6;
+        frame_width = 2;
+        corner_radius = 0;
+        separator_color = "frame";
+        markup = "full";
+        format = "<b>%s</b>\\n%b";
+        alignment = "left";
+        ellipsize = "end";
+        icon_position = "left";
+        max_icon_size = 32;
+        progress_bar_frame_width = 1;
+        progress_bar_corner_radius = 0;
+        highlight = "#${p.accent}";
+      };
+      urgency_low = {
+        background = "#${p.bg}";
+        foreground = "#${p.muted}";
+        frame_color = "#${p.edge}";
+        timeout = 5;
+      };
+      urgency_normal = {
+        background = "#${p.bg}";
+        foreground = "#${p.fg}";
+        frame_color = "#${p.accent}";
+        timeout = 8;
+      };
+      urgency_critical = {
+        background = "#${p.bg}";
+        foreground = "#${p.fg}";
+        frame_color = "#${p.urgent}";
+        highlight = "#${p.urgent}";
+        timeout = 0;
+      };
+    };
+  };
 
   # Desktop daemons that must survive a Hyprland crash/respawn. Hyprland's
   # `hyprland.start` hook fires only on a fresh compositor process start, so it
@@ -151,7 +209,12 @@
   xdg.configFile."rofi/config.rasi".source = lib.mkDefault (dotfiles + "/configs/rofi/config.rasi");
   xdg.configFile."rofi/symbols.tsv".source = lib.mkDefault (dotfiles + "/configs/rofi/symbols.tsv");
   xdg.configFile."rofi/prose-symbols.tsv".source = lib.mkDefault (dotfiles + "/configs/rofi/prose-symbols.tsv");
-  xdg.configFile."rofi/themes/sourcerer.rasi".source = lib.mkDefault (dotfiles + "/configs/rofi/themes/sourcerer.rasi");
+
+  # Ghostty is the Hyprland terminal; it replaces the hand-written local config.
+  xdg.configFile."ghostty/config" = {
+    source = dotfiles + "/configs/ghostty/hyprland-config";
+    force = true;
+  };
 
   # Replace the smoke-test tty autostart with a neutral login profile. LightDM
   # owns Hyprland startup once the OS-level switch script has been run.
