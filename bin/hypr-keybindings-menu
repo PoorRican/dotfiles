@@ -34,13 +34,27 @@ Super+Ctrl+, / Super+Ctrl+.  Scrolling layout: focus neighboring column
 Super+Shift+, / Super+Shift+. Scrolling layout: swap column
 Super+Ctrl+I                 Scrolling layout: consume into previous column
 Super+Ctrl+O                 Scrolling layout: expel into own column
-Super+1..9 / Super+0         Switch to desktop d1..d9/d0
-Super+Shift+1..9 / Shift+0   Move window to desktop d1..d9/d0
+Super+1..9 / Super+0         Switch to desktops 1..10
+Super+Shift+1..9 / Super+Shift+0 Move window to desktops 1..10
 Super+S                      Toggle magic scratchpad workspace
 Super+Shift+S                Move window to magic scratchpad workspace
 Super+Mouse1 drag            Move floating/tiled window
 Super+Mouse2 drag            Resize floating/tiled window
 Audio/Brightness keys        Volume, mute, player, and brightness controls
+Super+W                      Enter modal window controls (passive help)
+  H/J/K/L                    Focus window left/down/up/right
+  M, then H/J/K/L            Move focused window
+  R, then H/J/K/L            Resize focused window by 40 px
+  F / T                      Toggle fullscreen / floating
+  Y / B                      Cycle layout / toggle workspace border
+  G                          Enter per-workspace gap controls
+    I/O, then -/=             Select inner/outer; decrease/increase 1 px
+    0                         Toggle selected gap off/on (restore saved values)
+  Shift+/ (?)                Show full passive modal help
+  /                          Open the searchable list of all keybindings
+  S                          Toggle sysadmin terminal
+  Escape / unmapped key      Exit mode and clear help notification
+Super+F and Super+/ fullscreen remain available outside modal mode
 KEYS
 }
 

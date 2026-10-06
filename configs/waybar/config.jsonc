@@ -2,15 +2,19 @@
 // Upstream: https://github.com/HANCORE-linux/waybar-themes/tree/main/config/V6.ce
 // Omarchy-only indicators are dropped; workspaces stay on the custom Lua path.
 {
-  "layer": "top",
+  "layer": "overlay",
   "position": "top",
+  "output": "HDMI-A-1",
   "exclusive": true,
   "reload_style_on_change": true,
-  "height": 0,
+  "height": 33,
   "width": 1200,
   "spacing": 0,
   "margin-top": 0,
   "margin-bottom": 0,
+  "on-sigusr1": "hide",
+  // SIGUSR2 now shows the bar instead of reloading config; restart Waybar to preview config edits.
+  "on-sigusr2": "show",
 
   "modules-left": [
     "clock",

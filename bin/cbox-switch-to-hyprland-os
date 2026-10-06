@@ -66,6 +66,11 @@ export XDG_CURRENT_DESKTOP=Hyprland
 export XDG_SESSION_DESKTOP=Hyprland
 export XDG_SESSION_TYPE=wayland
 
+# --config is canonicalized by Hyprland at startup, pinning Home Manager's
+# login-time Nix store file. The environment path is kept unresolved, so each
+# reload follows the current Home Manager symlink instead.
+export HYPRLAND_CONFIG="$HOME/.config/hypr/hyprland.lua"
+
 mkdir -p "$HOME/.cache"
 log="$HOME/.cache/cbox-hyprland-session.log"
 exec >>"$log" 2>&1
@@ -75,7 +80,7 @@ printf 'PATH=%s\n' "$PATH"
 printf 'Hyprland=%s\n' "$(command -v Hyprland || true)"
 printf 'start-hyprland=%s\n' "$(command -v start-hyprland || true)"
 
-exec /usr/bin/start-hyprland -- --config "$HOME/.config/hypr/hyprland.lua"
+exec /usr/bin/start-hyprland
 EOF
 chmod 0755 "$starter"
 

@@ -1,0 +1,319 @@
+#!/usr/bin/env python3
+"""Hide the HDMI-A-1 Waybar during true fullscreen; reveal it at the top edge."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import time
+from typing import Any
+
+
+DEFAULT_OUTPUT = "HDMI-A-1"
+BAR_WIDTH = 1200
+BAR_HEIGHT = 33
+EDGE_TOLERANCE = 1
+WAYBAR_REFRESH_SECONDS = 0.5
+IPC_TIMEOUT_SECONDS = 0.2
+
+
+class HyprctlError(RuntimeError):
+    pass
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", default=DEFAULT_OUTPUT,
+                        help=f"Waybar's configured Hyprland output (default: {DEFAULT_OUTPUT})")
+    parser.add_argument("--interval", type=float, default=0.15,
+                        help="poll interval in seconds (0.1–0.2; default: 0.15)")
+    parser.add_argument("--waybar-unit", default="hypr-waybar.service",
+                        help="systemd user unit whose MainPID is the Waybar process")
+    args = parser.parse_args()
+    if not 0.1 <= args.interval <= 0.2:
+        parser.error("--interval must be between 0.1 and 0.2 seconds")
+    if not args.output:
+        parser.error("--output must not be empty")
+    if args.waybar_unit and args.waybar_unit.startswith("-"):
+        parser.error("--waybar-unit must be a unit name, not an option")
+    return args
+
+
+def runtime_hypr_dir() -> Path:
+    runtime_dir = os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
+    return Path(runtime_dir) / "hypr"
+
+
+def candidate_instances() -> list[str]:
+    root = runtime_hypr_dir()
+    candidates: list[str] = []
+    inherited = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
+    if inherited and (root / inherited / ".socket.sock").exists():
+        candidates.append(inherited)
+    try:
+        for path in sorted(root.iterdir()):
+            if path.is_dir() and (path / ".socket.sock").exists() and path.name not in candidates:
+                candidates.append(path.name)
+    except OSError:
+        pass
+    return candidates
+
+
+def hyprctl(signature: str, command: str) -> Any:
+    env = os.environ.copy()
+    # Set this explicitly even when inherited from a stale shell/session.
+    env["HYPRLAND_INSTANCE_SIGNATURE"] = signature
+    try:
+        result = subprocess.run(
+            ["hyprctl", "-j", command],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=IPC_TIMEOUT_SECONDS,
+            env=env,
+        )
+        return json.loads(result.stdout)
+    except (OSError, subprocess.SubprocessError, json.JSONDecodeError) as error:
+        raise HyprctlError(f"hyprctl {command} failed: {error}") from error
+
+
+def snapshot() -> tuple[str, list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+    # Resolve an instance explicitly if this service did not inherit the
+    # compositor's environment; rediscovery also recovers after a compositor restart.
+    for signature in candidate_instances():
+        try:
+            monitors = hyprctl(signature, "monitors")
+            clients = hyprctl(signature, "clients")
+            cursor = hyprctl(signature, "cursorpos")
+            if not isinstance(monitors, list) or not isinstance(clients, list) or not isinstance(cursor, dict):
+                continue
+            return signature, monitors, clients, cursor
+        except HyprctlError:
+            continue
+    raise HyprctlError("no responsive Hyprland instance")
+
+
+def number(value: Any) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return float(value)
+
+
+def int_value(value: Any) -> int | None:
+    result = number(value)
+    if result is None or not result.is_integer():
+        return None
+    return int(result)
+
+
+def bar_footprint(monitor: dict[str, Any]) -> tuple[float, float, float, float] | None:
+    x = number(monitor.get("x"))
+    y = number(monitor.get("y"))
+    width = number(monitor.get("width"))
+    height = number(monitor.get("height"))
+    scale = number(monitor.get("scale"))
+    transform = int_value(monitor.get("transform"))
+    if (x is None or y is None or width is None or height is None or scale is None
+            or width <= 0 or height <= 0 or scale <= 0):
+        return None
+    # Hyprland reports monitor mode pixels; cursor coordinates and Waybar sizes
+    # use scaled layout units. Odd transforms swap the layout axes.
+    if transform is not None and transform % 2:
+        width, height = height / scale, width / scale
+    else:
+        width, height = width / scale, height / scale
+    actual_width = min(float(BAR_WIDTH), width)
+    left = x + (width - actual_width) / 2
+    return left, y, actual_width, min(float(BAR_HEIGHT), height)
+
+
+def fullscreen_on_monitor(
+    monitor: dict[str, Any], clients: list[dict[str, Any]]
+) -> bool:
+    monitor_id = int_value(monitor.get("id"))
+    active_workspace = monitor.get("activeWorkspace")
+    if monitor_id is None or not isinstance(active_workspace, dict):
+        return False
+    visible_workspaces = {int_value(active_workspace.get("id"))}
+    special_workspace = monitor.get("specialWorkspace")
+    if isinstance(special_workspace, dict) and special_workspace.get("name"):
+        visible_workspaces.add(int_value(special_workspace.get("id")))
+    visible_workspaces.discard(None)
+
+    for client in clients:
+        workspace = client.get("workspace")
+        if not isinstance(workspace, dict):
+            continue
+        mode = int_value(client.get("fullscreen"))
+        # Hyprland 0.56.2 reports the internal mode here: 1 is maximize-only;
+        # 2 is fullscreen and 3 is fullscreen+maximize.
+        if mode not in (2, 3):
+            continue
+        if int_value(client.get("monitor")) != monitor_id:
+            continue
+        if int_value(workspace.get("id")) not in visible_workspaces:
+            continue
+        if client.get("mapped", True) is False or client.get("hidden", False) is True:
+            continue
+        return True
+    return False
+
+
+def point_in_bar(cursor: dict[str, Any], footprint: tuple[float, float, float, float]) -> bool:
+    x = number(cursor.get("x"))
+    y = number(cursor.get("y"))
+    left, top, width, height = footprint
+    return x is not None and y is not None and left <= x < left + width and top <= y < top + height
+
+def at_reveal_edge(cursor: dict[str, Any], footprint: tuple[float, float, float, float]) -> bool:
+    x = number(cursor.get("x"))
+    y = number(cursor.get("y"))
+    left, top, width, _height = footprint
+    return (x is not None and y is not None and left <= x < left + width
+            and top <= y <= top + EDGE_TOLERANCE)
+
+
+
+def wanted_visibility(
+    output: str,
+    monitors: list[dict[str, Any]],
+    clients: list[dict[str, Any]],
+    cursor: dict[str, Any],
+    previous_fullscreen_revealed: bool,
+) -> bool:
+    monitor = next((item for item in monitors if item.get("name") == output), None)
+    if monitor is None:
+        # Fail open: do not hide a bar if the configured output is unavailable.
+        return True
+    if not fullscreen_on_monitor(monitor, clients):
+        return True
+    footprint = bar_footprint(monitor)
+    if footprint is None:
+        return True
+    if previous_fullscreen_revealed:
+        # Keep the fullscreen reveal usable, then hide it as soon as the pointer leaves.
+        return point_in_bar(cursor, footprint)
+    # While hidden (including startup or entry from nonfullscreen), require
+    # the pointer to reach the top edge.
+    return at_reveal_edge(cursor, footprint)
+
+
+def process_identity(pid: int) -> tuple[int, str] | None:
+    proc = Path("/proc") / str(pid)
+    try:
+        if proc.stat().st_uid != os.getuid():
+            return None
+        if (proc / "comm").read_text().strip() != "waybar":
+            return None
+        fields = (proc / "stat").read_text().rsplit(")", 1)[1].split()
+        # stat starts this suffix at field 3 (state); starttime is field 22.
+        start_time = fields[19]
+        return pid, start_time
+    except (OSError, IndexError):
+        return None
+
+
+class WaybarTracker:
+    def __init__(self, unit: str) -> None:
+        self.unit = unit
+        self.processes: tuple[tuple[int, str], ...] = ()
+        self.refresh_at = 0.0
+
+    def current(self, now: float) -> tuple[tuple[int, str], ...]:
+        cached_alive = all(process_identity(pid) == (pid, start_time)
+                           for pid, start_time in self.processes)
+        if now < self.refresh_at and cached_alive:
+            return self.processes
+        self.refresh_at = now + WAYBAR_REFRESH_SECONDS
+        try:
+            result = subprocess.run(
+                ["systemctl", "--user", "show", "--property=MainPID", "--value", self.unit],
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=IPC_TIMEOUT_SECONDS,
+            )
+            pid = int(result.stdout.strip())
+            identity = process_identity(pid) if pid > 0 else None
+            self.processes = (identity,) if identity is not None else ()
+        except (OSError, ValueError, subprocess.SubprocessError):
+            self.processes = ()
+        return self.processes
+
+
+def signal_waybar(processes: tuple[tuple[int, str], ...], visible: bool) -> None:
+    signum = signal.SIGUSR2 if visible else signal.SIGUSR1
+    for pid, start_time in processes:
+        if process_identity(pid) != (pid, start_time):
+            continue
+        try:
+            os.kill(pid, signum)
+        except ProcessLookupError:
+            continue
+    action = "show" if visible else "hide"
+    print(f"Waybar visibility: {action}", flush=True)
+
+
+def run() -> int:
+    args = parse_args()
+    tracker = WaybarTracker(args.waybar_unit)
+    previous_visibility: bool | None = None
+    previous_fullscreen_revealed = False
+    previous_processes: tuple[tuple[int, str], ...] | None = None
+
+    def stop_watcher(_signum: int, _frame: Any) -> None:
+        # systemctl stop must not leave the explicitly hidden bar stranded.
+        if previous_visibility is not True:
+            processes = tracker.current(time.monotonic())
+            if processes:
+                signal_waybar(processes, True)
+        raise SystemExit(0)
+
+    signal.signal(signal.SIGTERM, stop_watcher)
+    signal.signal(signal.SIGINT, stop_watcher)
+
+    while True:
+        started = time.monotonic()
+        try:
+            _signature, monitors, clients, cursor = snapshot()
+            visible = wanted_visibility(
+                args.output, monitors, clients, cursor, previous_fullscreen_revealed
+            )
+            monitor = next((item for item in monitors if item.get("name") == args.output), None)
+            previous_fullscreen_revealed = (
+                monitor is not None
+                and fullscreen_on_monitor(monitor, clients)
+                and bar_footprint(monitor) is not None
+                and visible
+            )
+        except HyprctlError:
+            # A compositor that is starting/restarting is not a reason to strand
+            # the user's bar hidden. Discovery will be retried on the next tick.
+            visible = True
+            previous_fullscreen_revealed = False
+
+        processes = tracker.current(time.monotonic())
+        if processes and (visible != previous_visibility or processes != previous_processes):
+            signal_waybar(processes, visible)
+        previous_visibility = visible
+        previous_processes = processes
+
+        delay = args.interval - (time.monotonic() - started)
+        if delay > 0:
+            time.sleep(delay)
+
+
+def main() -> int:
+    try:
+        return run()
+    except KeyboardInterrupt:
+        return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

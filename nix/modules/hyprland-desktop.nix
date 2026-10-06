@@ -144,6 +144,10 @@ in
     hypr-waybar =
       desktopService "cbox Hyprland status bar (waybar)" "/usr/bin/waybar";
 
+    hypr-waybar-visibility =
+      desktopService "cbox fullscreen Waybar edge reveal"
+      "${homeDir}/.local/bin/hypr-waybar-visibility --waybar-unit hypr-waybar.service";
+
     hypr-blueman-applet =
       desktopService "cbox Bluetooth applet (blueman-applet)"
       (hmBin + "/blueman-applet");
@@ -187,6 +191,8 @@ in
     source = dotfiles + "/configs/hypr/hyprland.lua";
     force = true;
   };
+  xdg.configFile."hypr/window-controls.lua".source =
+    dotfiles + "/configs/hypr/window-controls.lua";
   # Lock screen + idle handling. PAM must be installed separately via
   # bin/cbox-setup-hyprlock-pam (needs root); without it hyprlock falls back
   # to /etc/pam.d/su -> pam_rootok.so and rejects every non-root password.
@@ -249,6 +255,12 @@ in
   };
   home.file.".local/bin/waybar-hypr-workspace" = {
     source = dotfiles + "/bin/waybar-hypr-workspace";
+    executable = true;
+  };
+  home.file.".local/bin/hypr-waybar-visibility" = {
+    source = pkgs.writeShellScript "hypr-waybar-visibility" ''
+      exec ${pkgs.python313}/bin/python3 ${dotfiles + "/bin/hypr-waybar-visibility"} "$@"
+    '';
     executable = true;
   };
   home.file.".local/bin/sysadmin" = {
