@@ -77,10 +77,121 @@ and build outputs, and distinct-inode files sharing a single data extent.
 
 These observations support namespace/copy amplification as a major metadata
 source; they do not prove pathological fragmentation of the shared file data.
-The original copying command and exact physical metadata attribution per
-folder were not established. A read-only follow-up audit is examining OMP's
-current footprint and copy implementation; it has not changed OMP settings or
-established that OMP caused the rebound.
+The historical copying command and exact physical metadata attribution per
+folder remain unestablished. The completed read-only follow-up below verifies
+an amplification mechanism in the identified installed release, not the cause
+of the measured rebound.
+
+### Completed read-only follow-up
+
+The bounded native traversal on October 6, approximately 08:40–08:48 MST,
+observed an inode lower bound of **18,173,845 including `~/.omp` itself**. Only
+42 of 49 immediate worktree roots obtained complete counts. The full traversal
+and namespace search timed out; seven roots remained uncounted. These live
+observations are not an atomic snapshot, and the lower bound must not be
+compared with the older complete 26,974,790 census as though the difference
+were cleanup or growth.
+
+The largest **completed** worktree-root counts were:
+
+| Root under `~/.omp/wt` | Inodes, including directories |
+| --- | ---: |
+| `kdp-step0-elevation-wt` | 7,109,836 |
+| `kdp-step0.partial-incomplete-2` | 4,705,971 |
+| `kdp-step0-elevation` | 2,583,653 |
+| `sme-ds2-postseason` | 1,067,255 |
+
+The separate complete census excluding `wt` counted 101,378 inodes, including
+`~/.omp` and its direct files: `agent` 79,730; `plugins` 20,428; `logs` 470;
+`cache` 10; `puppeteer` 2. Worktree copies dominate the observed inode footprint,
+not the small top-level cache/log namespaces. Namespace counts are not physical
+metadata-byte attribution; a large database also need not have a large inode
+count.
+
+The partial directory search found 974 `.venv`, 115 `.worktrees` directories
+(including 99 below another `.worktrees`), 909 `target` and 1,890 `build`
+directories. Each matching directory had a distinct device/inode identity.
+Names do not establish disposable contents. All 49 surviving root identities
+matched the earlier 50-root inventory; only the audited empty `gist-jes` root
+was absent. Stable root identities do not imply stable descendant contents.
+
+GNU `du` used its default hardlink deduplication **within each invocation**,
+included directories/root entries and did not follow symlink targets. The
+18,173,845 lower bound was reconstructed from nonoverlapping completed children
+of the initial invocation only. Counts from separate invocations must not be
+summed as a globally unique inode census. No new FIEMAP or fragmentation
+measurement was performed. Individual expensive scans stayed below 180 seconds,
+but the namespace audit exceeded its six-minute total target; the recorded
+479-second observation window and incomplete scope are retained in evidence.
+
+### Installed-release provenance and copy paths
+
+The live `~/.bun/bin/omp` ELF matched the published **v18.4.8 `omp-linux-x64`**
+asset by SHA-256 and size. Its digest was
+`1b88f7a0da3f61edda915d836e11f63f20f2b56aeac2ddfa4ece0faa726f31c2`.
+That release maps to immutable upstream commit
+`717f97f4d22b3d65c4a4eef6a744255d46f4d1a6`. The adjacent globally installed
+v17.2.13 package is an older source candidate, not the source baseline for this
+ELF. This is published-release identity, not reproducible-build attestation.
+The native cache's version/hash were checked, but its full mapped device/inode
+identity and equality to the embedded release library were not established.
+Active settings, process environments and actual isolation backend calls were
+not inspected, and OMP/native code was not executed for this audit.
+
+Two separate release-pinned static paths can amplify copied namespaces:
+
+- **Isolated subagents:** `ensureIsolation` calls native `isoStart`, then
+  detaches Git administration to preserve private task state. The Linux
+  per-file reflink backend creates new files/directories and traverses every
+  ordinary child directory; it does not prune `.worktrees`, `.venv`,
+  `node_modules`, build outputs or Git-ignored paths. It reproduces symlinks
+  without traversing their targets.
+- **Clone-first linked Git worktrees:** `worktree.clone` defaults true in this
+  release. The clone path skips only the source root's `.git`; recursive
+  descent receives no skip list. Ignored artifacts are intentionally carried
+  over. Setting `worktree.clone:false` for new linked worktrees would not alter
+  the separate isolated-subagent `isoStart` path.
+
+Per-file reflinks share data extents but still create independent namespace and
+file metadata. Existing nested workspace/environment trees can consequently be
+cloned again. This source-supported mechanism fits the observed recursive
+namespaces; it is not proof of which historical operation created them, which
+backend an active task resolved, pathological extent fragmentation, or OMP's
+share of the 6.65 GiB metadata rebound.
+
+The traced reflink walker also lacks a source/destination ancestry guard. A
+destination beneath its source can discover its own newly created destination
+and copy copies-of-copies. This is an unexercised algorithmic inference, not a
+reproduced event on this host. External destination placement prevents that
+self-inclusion, but not copying nested worktrees already present in the source.
+
+Prevention directions are **recommendations only**, not implemented changes:
+keep destinations outside every source checkout; consider disabling clone-first
+carryover for new linked worktrees; preserve required task isolation and its
+private Git state; and evaluate a Git-aware or overlay task backend only with
+later authorized runtime validation. Backend selection is a preference with
+fallbacks, not fail-closed enforcement. Do not enable `worktree.cleanSource`
+for this purpose or replace writable isolation with shared hardlinks. A durable
+upstream fix needs ancestry rejection before creation and approved exclusions
+applied before descent at every depth. Ignored artifacts may contain unique
+work and are not automatically disposable.
+
+Pinned implementation references:
+
+- [Release identity](https://github.com/can1357/oh-my-pi/releases/tag/v18.4.8)
+- [Per-file reflink start and recursive traversal](https://github.com/can1357/oh-my-pi/blob/717f97f4d22b3d65c4a4eef6a744255d46f4d1a6/crates/pi-iso/src/linux_reflink.rs#L93-L233)
+- [Linked-worktree clone exclusions](https://github.com/can1357/oh-my-pi/blob/717f97f4d22b3d65c4a4eef6a744255d46f4d1a6/crates/pi-vcs/src/git/mutate.rs#L650-L701)
+- [Separate isolation and worktree settings](https://github.com/can1357/oh-my-pi/blob/717f97f4d22b3d65c4a4eef6a744255d46f4d1a6/packages/coding-agent/src/task/settings.ts#L23-L99)
+- [Task isolation and backend fallback](https://github.com/can1357/oh-my-pi/blob/717f97f4d22b3d65c4a4eef6a744255d46f4d1a6/packages/coding-agent/src/task/worktree.ts#L538-L586)
+- [Btrfs reflink explanation](https://btrfs.readthedocs.io/en/stable/Reflink.html)
+
+The parent verifier checked 20 namespace artifact hashes, 85 source-evidence
+hashes, all 50 source files against immutable Git blobs, and 61 exact source
+snippets. Independent bounded upstream reads reconfirmed the release digest and
+three critical implementation files. All 110 locally archived evidence members
+were read back and hash-verified; raw path metadata and evidence stay outside
+Git. No OMP settings, installation, worktree contents, sessions or active jobs
+were changed or deleted by this follow-up.
 
 OMP is the primary coding agent. Preserve its active work, unique outputs,
 private Git administration and configuration. Do not blanket-delete `~/.omp`
@@ -145,6 +256,14 @@ outside Git; only this curated record is committed. Durable reports are under
 - `20261006-cache-investigation/`
 - `20261006-final-review-failure/`
 - `20261006-metadata-status-075749.json`
+- `20261006-omp-metadata-audit/`: local-only verified evidence archive and
+  member-hash manifest. The archive SHA-256 is
+  `ca612b3d79aee87edf6bf33031a641d3e4e7ff7184bd5abba54d37576bd48cd9`.
+  Its namespace/source report digests are respectively
+  `820e1b38e1bfedf95cefc27812bf94c1be500d70c67b1443f4274d0e8b4cee58`
+  and `a979803aa21e374d82a8c7519aecbce5acc0204ab9c02e6c1892f402fbf197b9`.
+  The archive includes the parent verifier and receipt; it does not include
+  OMP executable/native binaries or configuration/session/database bodies.
 
 Detailed pre-cleanup and diagnostic evidence is also retained in
 `~/.hermes/cache/scratch/btrfs-metadata-20261005-2334/`,
