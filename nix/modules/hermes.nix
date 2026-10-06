@@ -226,8 +226,10 @@ let
       };
     };
 
-    config.home =
-      if name == "default" then cfg.root else "${cfg.root}/profiles/${name}";
+    config = {
+      home = if name == "default" then cfg.root else "${cfg.root}/profiles/${name}";
+      settings.display.busy_input_mode = lib.mkDefault "steer";
+    };
   });
 
   enabledProfiles = lib.filterAttrs (_: profile: profile.enable) cfg.profiles;

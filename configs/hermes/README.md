@@ -81,6 +81,14 @@ Spark/RadixArk Qwen entry is disabled. Keep the model, provider, and endpoint
 together when changing policy: a mismatched current model can appear in the
 wrong provider's picker.
 
+All profiles default to `display.busy_input_mode = "steer"`: plain messages
+submitted while Hermes is working steer the current run after the next tool
+call without interrupting it. Use `/queue <message>` (or `/q <message>`) to
+explicitly queue a prompt for the next turn. Image-containing submissions or
+messages the agent cannot accept as steering fall back to queueing.
+Override `programs.hermes.profiles.<name>.settings.display.busy_input_mode`
+in Nix to choose another mode; `/busy status` reports the active setting.
+
 ## Runtime seeds
 
 Use `seedFiles`, not `files`, for an initial memory snapshot:
