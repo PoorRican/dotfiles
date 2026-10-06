@@ -1,5 +1,5 @@
 # cbox server
-{ lib, pkgs, dotfiles, ... }:
+{ lib, pkgs, dotfiles, inputs, ... }:
 
 {
   imports = [
@@ -21,6 +21,10 @@
   # config tree.
   programs.neovim.enable = lib.mkForce false;
   programs.agent-skills.host = "cbox";
+
+  # This host composes the private profile flake; other hosts leave capture
+  # provenance unset and do not force this local-only input.
+  programs.hermes.capture.sourceRevisions."agent-profiles" = inputs.agent-profiles.rev or null;
 
   # The default profile serves Discord here; Nix owns hermes-gateway.service.
   programs.hermes.profiles.default.gateway.enable = true;

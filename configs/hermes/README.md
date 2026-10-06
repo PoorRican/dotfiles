@@ -6,12 +6,15 @@ with runtime edits: a key removed from Nix disappears on the next
 `home-manager switch`. Runtime learning stays runtime-owned.
 
 The runtime comes from the upstream package; profile management uses this local
-adapter rather than `inputs.hermes-agent.homeManagerModules.default`. The seed
-helper and its tests live in `scripts/hermes/`; the existing renderer and cron
-helper remain in `nix/modules/hermes/`. All three use Hermes' packaged interpreter.
-`render-config.py` runs at build time; `seed-file.py` and `reconcile-cron.py` run
-during activation. The renderer adds the installed schema version and rejects
-unknown top-level settings; it is not a separate Hermes installation.
+adapter rather than `inputs.hermes-agent.homeManagerModules.default`. The
+seed-file and review-only capture helpers and their tests live in
+`scripts/hermes/`; the renderer and cron helper remain in
+`nix/modules/hermes/`. All use Hermes' packaged interpreter. `render-config.py`
+runs at build time; `seed-file.py` and `reconcile-cron.py` run during
+activation. `hermes-profile-capture` is an explicit review-only command; it
+does not run during activation. The renderer adds the installed schema version
+and rejects unknown top-level settings; it is not a separate Hermes
+installation.
 The renderer uses Hermes' own YAML compatibility module, keeping its YAML
 read/write policy aligned with the installed runtime without adding PyYAML.
 
@@ -110,6 +113,118 @@ these public configs. **Private does not mean secret:** seed sources enter the
 locally readable Nix store, and verbose diffs may expose personal information
 in terminal logs. Never put credentials in a seed.
 
+## Review-only profile captures
+
+`hermes-profile-capture` is installed alongside Hermes on every Hermes-enabled
+host. Its wrapper runs the capture command with Hermes' sealed Python interpreter
+and provides Git for read-only source provenance. It reads the current host's
+Nix-generated deployment-info file, so `--profile` must name an enabled profile
+on that host; `k-research-agent` is currently enabled on cbox.
+
+Capture the runtime state of that profile for review:
+
+```sh
+hermes-profile-capture --profile k-research-agent
+```
+
+To also import the private skill source for comparison with the deployed view,
+select that source explicitly:
+
+```sh
+hermes-profile-capture --profile k-research-agent \
+  --source private-skills="$HOME/kairos/agent-profiles/skills"
+```
+
+Each `--source` is a deliberate `LABEL=PATH` selection; prefer a narrow skill
+root rather than the whole private repository. In a Git repository the capture
+includes selected tracked and untracked, non-ignored regular files, but never
+`.git` or ignored files. It records scoped Git status and revision information
+without staging, editing, checking out, committing, or otherwise changing the
+source tree. The private repository's working changes remain untouched.
+
+The command prints the created snapshot path. By default it creates a new
+directory under
+`$XDG_STATE_HOME/hermes/captures/<hostname>/k-research-agent/<UTC-timestamp-and-unique-suffix>`
+(`$HOME/.local/state` is used when `XDG_STATE_HOME` is unset). `--output PATH`
+selects an exact destination directory, which must not already exist. The
+capture is built in private staging, the destination is exclusively created,
+and `manifest.json` is written last as the completion marker. An existing
+destination is never overwritten; a failed publication removes only the
+destination/staging it created.
+
+The snapshot is a review artifact, not a promotion path. Its manifest separates
+runtime state (`runtime/skills/` overlay and mutation ledger, runtime
+skill-history blobs, memories, and `SOUL.md`), explicitly selected source trees
+(`sources/LABEL/`), and the deployed skill view (bundle/file hashes inventoried
+from the profile's actual `skills.external_dirs`). Old
+`runtime/skills/.curator_backups/` snapshots are not copied; skill history is
+limited to `runtime/skill-history/`. History blobs require matching content hashes
+and non-credential path references in the captured mutation ledger; blobs linked
+to excluded credential paths or lacking verifiable references are omitted.
+Malformed ledgers and corrupt or missing referenced blobs abort capture; a
+missing ledger omits history. It also records the declared package and flake-input
+revisions, declared versus live config hashes, and declared versus actual skill
+directories. Config drift is a byte-level comparison, so formatting
+changes can differ even when settings are equivalent. Package metadata describes
+the Nix declaration, not an attestation of a running gateway process. The
+store-backed deployment-info contains only paths and revision metadata: it does
+not serialize profile settings or full `config.yaml`. The capture records only an
+integer live config version; other version values are treated as unknown rather
+than exported as configuration payloads.
+
+The Hermes package revision comes from the shared `hermes-agent` input.
+Additional input revisions are opt-in through
+`programs.hermes.capture.sourceRevisions` and appear in the optional
+`source_revisions` map. cbox declares `agent-profiles` because it composes that
+private input; `agent_profiles_revision` mirrors the map entry. Other hosts
+leave the map empty, so they do not force the local-only private input during
+evaluation.
+
+Snapshots can still contain sensitive persona, memory, skill, and other user
+text; capture is not a general content redactor. Its case-insensitive secret
+filename exclusions include `.env`/`.env.*`, `auth.json`, `vault.key`,
+`vault.json.enc`, `credentials.json`/`credentials.*`, `id_rsa`, `id_ed25519`,
+and `.key`, `.pem`, `.p12`, or `.pfx` files; `.git` is also excluded. Review
+the result before sharing or committing it. Keep captures private. Do not use
+Hermes full-backup or curator backup commands as a substitute: those have
+separate backup/retention behavior.
+
+Import is not promotion. The capture command does not modify the runtime profile,
+selected source files, their Git index, or the flake lock. Its only writes are
+the new review snapshot and any missing destination directories. An explicitly
+selected output can live in a separate review area of a repository, but cannot
+overlap an input tree. Review the snapshot first. If changes should become a
+durable source snapshot, make and commit those changes in the private repository
+as a separate manual action. Updating the `agent-profiles` pin in dotfiles is
+another separate manual action, and applying it with Home Manager is a further
+explicit action.
+None of these steps is performed by capture:
+
+1. Review the capture before deciding whether any source change should be
+   promoted.
+2. If intentionally promoting reviewed source changes, commit those changes in
+   the private repository:
+
+   ```sh
+   cd "$HOME/kairos/agent-profiles"
+   git status --short
+   git add <reviewed-paths>
+   git commit
+   ```
+
+3. Separately update the private input pin in dotfiles:
+
+   ```sh
+   cd "$HOME/dotfiles"
+   nix flake update agent-profiles
+   ```
+
+4. Separately apply the reviewed pin/configuration:
+
+   ```sh
+   home-manager switch --flake .#cbox
+   ```
+
 ## Privileged profiles: public policy, private knowledge
 
 A profile can be declared here and completed from a private repository,
@@ -155,13 +270,30 @@ flake conversion; it is not evidence for clone-absent lock operations here.
 
 ### Changing the private half
 
-```sh
-# in ~/kairos/agent-profiles
-git commit …
-# in ~/dotfiles, on a host with the clone
-nix flake update agent-profiles
-home-manager switch --flake .#cbox
-```
+Review and commit private source changes, update the dotfiles pin, and apply
+that pin as separate manual steps. Capture performs none of them.
+
+1. Commit only the reviewed private source paths:
+
+   ```sh
+   cd "$HOME/kairos/agent-profiles"
+   git status --short
+   git add <reviewed-paths>
+   git commit
+   ```
+
+2. Separately update the private input pin from a host with the clone:
+
+   ```sh
+   cd "$HOME/dotfiles"
+   nix flake update agent-profiles
+   ```
+
+3. Separately apply that reviewed pin/configuration:
+
+   ```sh
+   home-manager switch --flake .#cbox
+   ```
 
 To try uncommitted private changes first:
 

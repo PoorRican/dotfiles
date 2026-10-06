@@ -257,6 +257,36 @@ let
         ${venvPython} ${./hermes/render-config.py} "$settingsJsonPath" "$out"
       '';
 
+  # Public provenance metadata only: paths and revisions, never profile settings
+  # or credential/config contents. The JSON references the exact declared
+  # configuration and skill view for every profile enabled on this host.
+  captureDeploymentInfo = pkgs.writeText "hermes-capture-deployment.json" (
+    builtins.toJSON ({
+      schema_version = 1;
+      package = toString cfg.package;
+      hermes_revision = inputs.hermes-agent.rev or null;
+      agent_profiles_revision = cfg.capture.sourceRevisions."agent-profiles" or null;
+      profiles = lib.mapAttrs (name: profile: {
+        home = profile.home;
+        config_file = toString (configFile name profile);
+        skills_directory = toString (skillView name profile);
+      }) enabledProfiles;
+    } // lib.optionalAttrs (cfg.capture.sourceRevisions != { }) {
+      source_revisions = cfg.capture.sourceRevisions;
+    })
+  );
+
+  hermesProfileCapture = pkgs.writeShellApplication {
+    name = "hermes-profile-capture";
+    # Git is needed only for read-only source provenance. Keep it a native
+    # runtime dependency on both Linux and Darwin.
+    runtimeInputs = [ pkgs.git ];
+    text = ''
+      exec ${venvPython} ${dotfiles + "/scripts/hermes/capture-profile.py"} \
+        --deployment-info ${lib.escapeShellArg (toString captureDeploymentInfo)} "$@"
+    '';
+  };
+
   documentTree = name: documents:
     pkgs.runCommand "hermes-files-${name}" { } (
       ''
@@ -433,6 +463,12 @@ in {
       description = "Hermes package to install; defaults to the upstream flake package with `extras` and the module repair applied.";
     };
 
+    capture.sourceRevisions = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.nullOr lib.types.str);
+      default = { };
+      description = "Input revisions to include as capture provenance, keyed by input name.";
+    };
+
     profiles = lib.mkOption {
       type = lib.types.attrsOf profileType;
       default = { };
@@ -499,7 +535,7 @@ in {
         ]
     ) enabledProfiles);
 
-    home.packages = [ cfg.package ] ++ lib.concatMap (profile: profile.extraPackages) (lib.attrValues enabledProfiles);
+    home.packages = [ cfg.package hermesProfileCapture ] ++ lib.concatMap (profile: profile.extraPackages) (lib.attrValues enabledProfiles);
 
     home.file = lib.mapAttrs' (name: _:
       lib.nameValuePair ".local/bin/${name}" {
