@@ -1,6 +1,12 @@
 # cbox server
-{ lib, pkgs, dotfiles, inputs, ... }:
-
+{ config, lib, pkgs, dotfiles, inputs, ... }:
+let
+  upstreamHermes = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  hindsight = import (dotfiles + "/configs/hermes/k-research-agent/hindsight.nix") {
+    inherit pkgs;
+    python = upstreamHermes.python;
+  };
+in
 {
   imports = [
     ../profiles/minimal.nix
@@ -29,11 +35,31 @@
   # The default profile serves Discord here; Nix owns hermes-gateway.service.
   programs.hermes.profiles.default.gateway.enable = true;
 
+  # The optional memory plugin augments the same sealed runtime used by CLI
+  # and gateways; only k-research-agent receives its code and connection config.
+  programs.hermes.package = assert inputs.hermes-agent.rev == hindsight.hermesIdentity.revision;
+    (upstreamHermes.override {
+    inherit (hindsight.hermesIdentity) version distance;
+    extraDependencyGroups = config.programs.hermes.extras;
+    extraPythonPackages = hindsight.pythonPackages;
+  }).overrideAttrs (old: {
+    passthru = (old.passthru or { }) // {
+      hindsightDependencyNames = map (package: package.pname) hindsight.pythonPackages;
+    };
+  });
+
+  systemd.user.services.hindsight-tunnel-k-research-agent = hindsight.tunnelService;
+  systemd.user.services.hermes-gateway-k-research-agent.Unit = {
+    Requires = [ "hindsight-tunnel-k-research-agent.service" ];
+    After = [ "hindsight-tunnel-k-research-agent.service" ];
+  };
+
   # k-research-agent: public half (policy, public skills, gateway). The
   # private agent-profiles input composed in flake.nix adds the persona and
   # private skills to this same profile.
   programs.hermes.profiles.k-research-agent = {
     settings = import (dotfiles + "/configs/hermes/k-research-agent/config.nix") { };
+    files = hindsight.files;
     skills.names = import (dotfiles + "/configs/hermes/k-research-agent/skills.nix");
     gateway.enable = true;
   };

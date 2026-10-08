@@ -46,6 +46,13 @@ let
     "web"
   ];
 in {
+  memory = {
+    provider = "hindsight";
+    # Preserve the markdown files for rollback, but use Hindsight as the store.
+    memory_enabled = false;
+    user_profile_enabled = false;
+  };
+
   model = {
     default = "gpt-6-astra";
     provider = "openai-codex";
