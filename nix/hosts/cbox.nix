@@ -17,6 +17,7 @@ in
     ../profiles/dev-core.nix
     ../profiles/dev-extra.nix
     ../profiles/pkm.nix
+    ../modules/btrfs-watch.nix
     # not used at this moment
     #../layers/knowledge-tools.nix
   ];
