@@ -29,8 +29,15 @@
   "huggingface-hub"
   "weights-and-biases"
 
-  # Planning and writing.
+  # Visual explanations and diagrams.
+  "archify"
   "architecture-diagram"
+  "concept-diagrams"
+  "excalidraw"
+  "manim-video"
+  "p5js"
+
+  # Planning and writing.
   "brainstorming"
   "ideation"
   "plan"
