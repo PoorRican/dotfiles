@@ -19,6 +19,9 @@ class BtrfsWatchNixTests(unittest.TestCase):
     def test_host_imports_monitor(self):
         self.assertIn("../modules/btrfs-watch.nix", (REPO / "nix/hosts/cbox.nix").read_text())
 
+    def test_host_excludes_suspended_retention(self):
+        self.assertNotIn("../modules/storage-retention.nix", (REPO / "nix/hosts/cbox.nix").read_text())
+
     def test_actual_home_manager_units(self):
         self.assertTrue(MODULE.is_file(), "alert-only module has not been implemented")
         expression = '''let
@@ -29,6 +32,9 @@ class BtrfsWatchNixTests(unittest.TestCase):
           timer = c.systemd.user.timers.cbox-btrfs-watch;
           serviceFile = toString c.home.file."${c.xdg.configHome}/systemd/user/cbox-btrfs-watch.service".source;
           timerFile = toString c.home.file."${c.xdg.configHome}/systemd/user/cbox-btrfs-watch.timer".source;
+          retentionServices = builtins.filter (n: builtins.match "cbox-retention-.*" n != null) (builtins.attrNames c.systemd.user.services);
+          retentionTimers = builtins.filter (n: builtins.match "cbox-retention-.*" n != null) (builtins.attrNames c.systemd.user.timers);
+          retentionFiles = builtins.filter (n: builtins.match ".*cbox-retention-.*" n != null) (builtins.attrNames c.home.file);
         }''' % REPO
         result = subprocess.run(
             ["nix", "eval", "--offline", "--impure", "--no-write-lock-file", "--json", "--expr", expression],
@@ -60,6 +66,9 @@ class BtrfsWatchNixTests(unittest.TestCase):
         self.assertIn("timers.target", timer["Install"]["WantedBy"])
         self.assertTrue(units["serviceFile"].startswith("/nix/store/"))
         self.assertTrue(units["timerFile"].startswith("/nix/store/"))
+        self.assertEqual(units["retentionServices"], [], "Suspended cleanup services must not be installed")
+        self.assertEqual(units["retentionTimers"], [], "Suspended cleanup timers must not be installed")
+        self.assertEqual(units["retentionFiles"], [], "Suspended cleanup unit links must not be installed")
 
 
 if __name__ == "__main__":

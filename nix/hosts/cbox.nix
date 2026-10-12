@@ -17,6 +17,7 @@ in
     ../profiles/dev-core.nix
     ../profiles/dev-extra.nix
     ../profiles/pkm.nix
+    # Keep the suspended cleanup prototype out of activation until independently approved.
     ../modules/btrfs-watch.nix
     # not used at this moment
     #../layers/knowledge-tools.nix
