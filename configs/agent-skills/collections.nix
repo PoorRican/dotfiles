@@ -1,6 +1,7 @@
 # Explicit distribution collections for the centralized skill catalog.
 #
 # `coding` is the complete set shared by coding agents.
+# `omp` is additive: only OMP receives coding ++ omp.
 # `hermes` is additive: the default Hermes profile receives coding ++ hermes.
 # Named Hermes profiles select their own names (programs.hermes.profiles.<name>.skills.names).
 # Host collections are additive to their corresponding global collection.
@@ -20,6 +21,10 @@
     "using-nautilus-trader"
     "verification-and-evidence"
     "workstation-and-agent-tooling"
+  ];
+
+  omp = [
+    "anatomy"
   ];
 
   hermes = [

@@ -24,16 +24,19 @@ let
   catalog = skillsLib.mkCatalog cfg.catalogRoots;
   codingNames = lib.unique (collections.coding ++ hostCollections.coding);
   codingSkills = catalog.select codingNames;
+  ompNames = lib.unique (codingNames ++ (collections.omp or [ ]));
+  ompSkills = catalog.select ompNames;
 
   codingView = skillsLib.mkFlatView { name = "coding-${label}"; skills = codingSkills; };
+  ompView = skillsLib.mkFlatView { name = "omp-${label}"; skills = ompSkills; };
 
-  mkAgentFiles = target:
+  mkAgentFiles = target: view: skills:
     lib.listToAttrs (map (skill:
       lib.nameValuePair "${target}/${skill.name}" {
-        source = codingView + "/${skill.name}";
+        source = view + "/${skill.name}";
         force = cfg.force;
       }
-    ) codingSkills);
+    ) skills);
 
   managedSkillNames = lib.concatMapStringsSep " "
     (skill: lib.escapeShellArg skill.name)
@@ -90,17 +93,22 @@ in {
           names = codingNames;
           label = "programs.agent-skills coding collection";
         })
+        (skillsLib.selectionAssertion {
+          inherit catalog;
+          names = ompNames;
+          label = "programs.agent-skills OMP collection";
+        })
       ] ++ skillsLib.catalogAssertions {
         inherit catalog;
         label = "programs.agent-skills";
       };
 
       home.file = lib.mkMerge [
-        (lib.mkIf cfg.agents.claude (mkAgentFiles ".claude/skills"))
-        (lib.mkIf cfg.agents.codex (mkAgentFiles ".codex/skills"))
-        (lib.mkIf cfg.agents.pi (mkAgentFiles ".pi/agent/skills"))
-        (lib.mkIf cfg.agents.omp (mkAgentFiles ".omp/agent/skills"))
-        (lib.mkIf cfg.agents.opencode (mkAgentFiles ".config/opencode/skills"))
+        (lib.mkIf cfg.agents.claude (mkAgentFiles ".claude/skills" codingView codingSkills))
+        (lib.mkIf cfg.agents.codex (mkAgentFiles ".codex/skills" codingView codingSkills))
+        (lib.mkIf cfg.agents.pi (mkAgentFiles ".pi/agent/skills" codingView codingSkills))
+        (lib.mkIf cfg.agents.omp (mkAgentFiles ".omp/agent/skills" ompView ompSkills))
+        (lib.mkIf cfg.agents.opencode (mkAgentFiles ".config/opencode/skills" codingView codingSkills))
       ];
 
       home.activation.prepareAgentSkillRoots = lib.hm.dag.entryBetween

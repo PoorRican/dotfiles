@@ -30,6 +30,7 @@
   "weights-and-biases"
 
   # Visual explanations and diagrams.
+  "anatomy"
   "archify"
   "architecture-diagram"
   "concept-diagrams"
