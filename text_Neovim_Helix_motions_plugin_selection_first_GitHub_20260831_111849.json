@@ -1,0 +1,52 @@
+[
+  {
+    "title": "GitHub - luiscassih/AniMotion.nvim: A Neovim plugin that implements ...",
+    "href": "https://github.com/luiscassih/AniMotion.nvim",
+    "body": "A Neovim plugin that implements selection-first text editing, similar to Helix and Kakoune editors. Lets you see your selection as you travel, allowing quick operations like change, delete, or yank. Works in normal mode without entering visual mode and several configurable selection modes."
+  },
+  {
+    "title": "GitHub - 00sapo/visual.nvim: First select, then edit. A helix/kakoune ...",
+    "href": "https://github.com/00sapo/visual.nvim",
+    "body": "Features Selection first mode New \"serendipity\" mode: discover motion errors by chance! Surrounding commands (change, delete, add) that operate over selections Repeat motions Compatible with treesitter-textobjects Compatible with leap.nvim and flit.nvim (and most of similar plugins)"
+  },
+  {
+    "title": "Helix motions in NVIM? : r/HelixEditor - Reddit",
+    "href": "https://www.reddit.com/r/HelixEditor/comments/16nbk82/helix_motions_in_nvim/",
+    "body": "That being said I like NeoVim much more anyway and Helix will have to come a long way before I would ever consider switching. Maybe once the plugin functionality is released."
+  },
+  {
+    "title": "Tutorials - Helix",
+    "href": "https://noraincheck.github.io/helix.html",
+    "body": "Moving to Helix Helix (hx) is a modern modal editor built in Rust. Unlike Vim/Neovim, Helix ships with a built-in LSP client, tree-sitter integration, and multiple cursor support out of the box — no plugins required. Why Helix over Vim/Neovim? Zero-config LSP — language servers are detected and configured automatically from your project."
+  },
+  {
+    "title": "First select, then edit: Kakoune/Helix mode for neovim",
+    "href": "https://www.reddit.com/r/neovim/comments/151xlo4/first_select_then_edit_kakounehelix_mode_for/",
+    "body": "I'm actually start to follow \"first select\" philosopher before I learn Helix by wildfire and incremental_selection from treesitter. Can this plugin also work with text object, say if I have a text object \"if\" then \"f\" will select like \"vif\"?"
+  },
+  {
+    "title": "Motion - Neovim docs",
+    "href": "https://neovim.io/doc/user/motion/",
+    "body": "If the motion is exclusive, the end of the motion is in column 1 and the start of the motion was at or before the first non-blank in the line, the motion becomes linewise. Example: If a paragraph begins with some blanks and you do \"d}\" while standing on the first non-blank, all the lines of the paragraph are deleted, including the blanks."
+  },
+  {
+    "title": "Helix",
+    "href": "https://helix-editor.com/",
+    "body": "Post-modern?! It's a joke. If Neovim is the modern Vim, then Helix is post-modern. Is it any good? Yes. Are there plans for a GUI frontend? Eventually, yes! We'd like to prototype a WebGPU-based alternative frontend. See the discussion on GitHub. What about plugins? While there is currently no plugin system available, we do intend to eventually ..."
+  },
+  {
+    "title": "On Neovim and Helix",
+    "href": "https://tonisagrista.com/blog/2024/on-neovim-and-helix/",
+    "body": "In Helix you'd do ebd (eb for end-beginning selection, as in Helix movements imply selections, and d to delete). In both Neovim and Helix we have NORMAL, INSERT, and VISUAL modes, with the : command mode on top. Additionally, Helix has some minor modes, or sub-modes, that are accessible from normal mode and revert back to it after one command."
+  },
+  {
+    "title": "Vim Motions - saberzero1.github.io",
+    "href": "https://saberzero1.github.io/motions/",
+    "body": "A polished, Neovim-native experience inside Obsidian. Markdown-aware text objects, structural navigation, EasyMotion, workspace control, and more."
+  },
+  {
+    "title": "Making my Nvim Feel More Like Helix with Mini.nvim",
+    "href": "https://evantravers.com/articles/2024/09/17/making-my-nvim-act-more-like-helix-with-mini-nvim/",
+    "body": "It's much easier to see on my older intel mac, but less plugins == speed. Thanks to mini.clue and some refactoring of bindings, the way I interact with the LSP is roughly the same muscle memory on Helix or nvim, so I have a choice whether to use Helix's interesting new modal model, or nvim's tried and true ecosystem."
+  }
+]

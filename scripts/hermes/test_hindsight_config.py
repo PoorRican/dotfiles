@@ -2,7 +2,9 @@
 import json
 from pathlib import Path
 import subprocess
+import tempfile
 import unittest
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -20,6 +22,8 @@ class HindsightConfigTests(unittest.TestCase):
         in {
           memory = p.settings.memory or {};
           files = builtins.attrNames p.files;
+          pluginManifest = toString p.files."plugins/hindsight/plugin.yaml";
+          pluginProject = toString p.files."plugins/hindsight/pyproject.toml";
           connection = if p.files ? "hindsight/config.json"
             then builtins.fromJSON p.files."hindsight/config.json" else {};
           defaultMemory = c.programs.hermes.profiles.default.settings.memory or {};
@@ -35,6 +39,44 @@ class HindsightConfigTests(unittest.TestCase):
             check=True, capture_output=True, text=True, timeout=120,
         )
         cls.config = json.loads(result.stdout)
+        files_attr = uri + "#homeConfigurations.cbox.config.programs.hermes.profiles.k-research-agent.files."
+        subprocess.run(
+            ["nix", "build", "--no-link", "--no-write-lock-file",
+             files_attr + '"plugins/hindsight/plugin.yaml"', files_attr + '"plugins/hindsight/pyproject.toml"'],
+            check=True, capture_output=True, text=True, timeout=120,
+        )
+
+    def test_nix_owns_plugin_python_runtime(self):
+        from pm.plugin_declarations import read_python_declaration
+
+        with tempfile.TemporaryDirectory(prefix="hermes-hindsight-test-") as directory:
+            plugin = Path(directory)
+            (plugin / "plugin.yaml").write_bytes(Path(self.config["pluginManifest"]).read_bytes())
+            (plugin / "pyproject.toml").write_bytes(Path(self.config["pluginProject"]).read_bytes())
+            declaration = read_python_declaration(plugin)
+            self.assertTrue(declaration.external)
+            self.assertFalse(declaration.is_member)
+            # Keep the upstream requirements as evidence for Nix's dependency closure.
+            self.assertTrue(declaration.requirements)
+
+    def test_dashboard_setup_does_not_sync_nix_owned_dependencies(self):
+        from hermes_cli.memory_setup import memory_provider_dependency_inputs, prepare_memory_provider_dependencies
+        from hermes_cli.web_server_memory import _memory_provider_setup_info
+
+        with tempfile.TemporaryDirectory(prefix="hermes-hindsight-test-") as directory:
+            plugin = Path(directory)
+            (plugin / "plugin.yaml").write_bytes(Path(self.config["pluginManifest"]).read_bytes())
+            (plugin / "pyproject.toml").write_bytes(Path(self.config["pluginProject"]).read_bytes())
+            with patch("plugins.memory.find_provider_dir", return_value=plugin), \
+                    patch("pm.venv_is_current", side_effect=AssertionError("Nix must own currency checks")) as currency, \
+                    patch("pm.sync_venv", side_effect=AssertionError("Nix must own dependency installation")) as sync:
+                _manifest, inputs = memory_provider_dependency_inputs("hindsight")
+                self.assertEqual(inputs, {})
+                self.assertTrue(_memory_provider_setup_info("hindsight")["dependencies_installed"])
+                _manifest, status = prepare_memory_provider_dependencies("hindsight")
+                self.assertIsNone(status)
+                currency.assert_not_called()
+                sync.assert_not_called()
 
     def test_package_identity_meets_plugin_minimum(self):
         # 0.0.0 is a packaging fallback, not the release lineage of this pin.

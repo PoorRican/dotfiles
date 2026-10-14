@@ -1,0 +1,52 @@
+[
+  {
+    "title": "I fully expect Helix to replace Vim, Neovim, and Kakoune for ...",
+    "href": "https://news.ycombinator.com/item",
+    "body": "Oct 10, 2022 · I fully expect Helix to replace Vim, Neovim, and Kakoune for most users in the long run. I feel like I am definitely not in the \"most users\" ..."
+  },
+  {
+    "title": "First select, then edit: Kakoune/Helix mode for neovim - Reddit",
+    "href": "https://www.reddit.com/r/neovim/comments/151xlo4/first_select_then_edit_kakounehelix_mode_for/",
+    "body": "Jul 17, 2023 · The quick answer is to look for videos about helix/kakoune. The underlyyidea is the same. Just remove multiple selections. The mappings are ... AniMotion.nvim - A selection-first approach plugin ... Match Helix editor keymaps and keybindings : r/neovim More results from www.reddit.com"
+  },
+  {
+    "title": "GitHub - 00sapo/visual.nvim: First select, then edit. A helix/kakoune-like editing in neovim · GitHub",
+    "href": "https://github.com/00sapo/visual.nvim",
+    "body": "First select, then edit. A helix/kakoune-like editing in neovim - 00sapo/visual.nvim"
+  },
+  {
+    "title": "Neovim vs Helix: Which is the best Vi/Vim style modal editor? | Else Web Development",
+    "href": "https://elsewebdevelopment.com/neovim-vs-helix-which-is-the-best-vi-vim-style-modal-editor/",
+    "body": "February 27, 2023 - Kakoune uses the selection → action model. This means that whatever you are going to act on (a word, a paragraph, a line etc.) is selected first and the action itself (delete, change, yank etc.) comes second."
+  },
+  {
+    "title": "GitHub - rokonio/helix-vim: A helix editor fork with vim keybindings · GitHub",
+    "href": "https://github.com/rokonio/helix-vim",
+    "body": "A helix fork to bring most keybindings from vim. A Kakoune / Neovim inspired editor, written in Rust. The editing model is very heavily based on Kakoune; during development I found myself agreeing with most of Kakoune's design decisions."
+  },
+  {
+    "title": "On Neovim and Helix - Langur Monkey",
+    "href": "https://tonisagrista.com/blog/2024/on-neovim-and-helix/",
+    "body": "October 12, 2024 - You see, Helix has a different approach to functionality, as it ships with LSP, autocompletion, treesitter, fuzzy search, surround, multiple selections and much more by default. This means that it strives to offer a much more complete experience off-the-shelf, when compared to the others, with minimal configuration. In Neovim, the editing mode is action → object, or action → selection."
+  },
+  {
+    "title": "GitHub - mirlge/kak.nvim: [Read-only mirror] Select -> action. Kakoune workflow and most keybinds for Neovim. · GitHub",
+    "href": "https://github.com/mirlge/kak.nvim",
+    "body": "Changes keybinds in Neovim to use the Kakoune workflow"
+  },
+  {
+    "title": "My Take on Helix and Neovim | kidoni.dev",
+    "href": "https://kidoni.dev/posts/helix-vs-neovim/",
+    "body": "June 14, 2025 - In other words, you specify the action, such as ‘change’ (c) and then you specify what to perform the action on - the ‘selection’ (e.g. w). In Helix it’s the opposite - you select what you want to operate on, and then you specify the action … selection -> action."
+  },
+  {
+    "title": "Helix Editor – 90% of Neovim With Kakoune | rockyourcode",
+    "href": "https://www.rockyourcode.com/helix-editor-90-percent-of-neovim-with-kakoune/",
+    "body": "July 23, 2023 - Helix uses the same model as Kakoune. The idea is that you always start by making a selection first (that way it’s interactive and you see that you selected the right thing), then you operate on it."
+  },
+  {
+    "title": "Are you happy with helix's keybinding model? [User Opinions] · helix-editor/helix · Discussion #1511",
+    "href": "https://github.com/helix-editor/helix/discussions/1511",
+    "body": "A vim-esque keymap would be near impossible to add without significant changes to the core system because of one fundamental difference - the selection first, action second in helix borrowed from kakoune."
+  }
+]

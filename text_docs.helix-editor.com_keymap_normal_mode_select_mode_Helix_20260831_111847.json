@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Keymap",
+    "href": "https://docs.helix-editor.com/keymap.html",
+    "body": "Accessed by typing m in normal mode. Please refer to the relevant sections for detailed explanations about surround and textobjects. TODO: Mappings for selecting syntax nodes (a superset of [)."
+  },
+  {
+    "title": "Editor",
+    "href": "https://docs.helix-editor.com/editor.html",
+    "body": "[keys.normal] tab = \"move_parent_node_end\" S-tab = \"move_parent_node_start\" [keys.insert] S-tab = \"move_parent_node_start\" [keys.select] tab = \"extend_parent_node_end\" S-tab = \"extend_parent_node_start\""
+  },
+  {
+    "title": "Helix Docs",
+    "href": "https://docs.helix-editor.com/",
+    "body": "See the usage section for a quick overview of the editor, keymap section for all available keybindings and the configuration section for defining custom keybindings, setting themes, etc."
+  },
+  {
+    "title": "Helix mode in other software",
+    "href": "https://docs.helix-editor.com/master/other-software.html",
+    "body": "Helix’ keymap and interaction model (Using Helix) is easier to adopt if it can be used consistently in many editing contexts. Yet, certain use cases cannot easily be addressed directly in Helix."
+  },
+  {
+    "title": "Commands",
+    "href": "https://docs.helix-editor.com/commands.html",
+    "body": "Typable commands are used from command mode and may take arguments. Command mode can be activated by pressing :. The built-in typable commands are: · Static commands take no arguments and can be bound to keys. Static commands can also be executed from the command picker (?). The built-in ..."
+  },
+  {
+    "title": "Helix",
+    "href": "https://docs.helix-editor.com/master/",
+    "body": "See the usage section for a quick overview of the editor, keymap section for all available keybindings and the configuration section for defining custom keybindings, setting themes, etc."
+  },
+  {
+    "title": "Configuration - helix-editor.com",
+    "href": "https://docs.helix-editor.com/configuration.html?highlight=auto-format",
+    "body": "💡 You can easily open the config file by typing :config-open within Helix normal mode. Example config: theme = \"onedark\" [editor] line-number = \"relative\" mouse = false [editor.cursor-shape] insert = \"bar\" normal = \"block\" select = \"underline\" [editor.file-picker] hidden = false ·"
+  },
+  {
+    "title": "Command line",
+    "href": "https://docs.helix-editor.com/command-line.html",
+    "body": "[keys.normal] # Print the current line's git blame information to the statusline."
+  }
+]
