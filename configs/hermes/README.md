@@ -235,21 +235,33 @@ None of these steps is performed by capture:
    home-manager switch --flake .#cbox
    ```
 
-## Privileged profiles: public policy, private knowledge
+## Private profile declarations
 
-A profile can be declared here and completed from a private repository,
-because every option of `programs.hermes.profiles.<name>` merges across
-modules: `skills.names` and `skills.roots` concatenate, `cron.jobs` merges by
-name, `settings` merges per key (`lib.mkForce` overrides a public leaf).
+The generic `programs.hermes.profiles` adapter is public, but the complete
+`k-research-agent` and `executive-assistant` declarations live in the private
+`~/kairos/agent-profiles` repository. Their model/tool policies, SOUL files,
+skill selections, memory integrations, profile-specific services, memory seeds,
+and scheduled declarations are private. Public dotfiles installs the shared
+package/adapter and composes the private module; it does not carry separate
+public policy halves for those profiles.
 
-dotfiles keeps the **policy** — model, toolsets, limits, public catalog picks,
-gateway — in `nix/hosts/<host>.nix` and `configs/hermes/<profile>/`. The
-private repository (`~/kairos/agent-profiles`) supplies the persona, private
-skill bundles *and their names*, initial memory snapshots, and scheduled work; none of that appears in
-this repository. It also links its private skills into its project's
-repositories for coding agents, and adds those link paths to the global
-gitignore through `my.git.extraIgnores` (`nix/modules/git.nix`).
-`k-research-agent` on cbox is the first profile built this way.
+Options still compose normally: `skills.names` and `skills.roots` concatenate,
+`cron.jobs` merges by name, and `settings` merges per key (`lib.mkForce` resolves
+a deliberately conflicting leaf). A private module can declare an entire named
+profile without a public profile-specific block.
+
+The private module supplies any supplemental package dependencies needed by its
+profiles while preserving the single shared sealed Hermes package. Initial
+memory snapshots remain absent-only seeds; credentials, learned memories,
+sessions, and agent-created jobs stay runtime-owned. Do not put secrets or
+business documents in Nix sources: private Git contents can enter the locally
+readable store.
+
+The private repository also links its skill bundles into project repositories
+and adds those links to global Git ignores through the generic
+`my.git.extraIgnores` integration. The public default profile remains a separate
+shared baseline.
+
 
 ### How the private repository is composed
 

@@ -36,10 +36,6 @@ class AnatomySkillAssignmentTests(unittest.TestCase):
             ) targets;
             managed = builtins.filter
               (key: lib.hasInfix ".omp/agent/managed-skills" key) keys;
-            profiles = builtins.mapAttrs (_: profile: {
-              inherit (profile) enable;
-              inherit (profile.skills) names;
-            }) c.programs.hermes.profiles;
           }
         ) f.homeConfigurations'''.replace("REPO_PATH", str(REPO))
         result = subprocess.run(
@@ -55,27 +51,18 @@ class AnatomySkillAssignmentTests(unittest.TestCase):
         )
         cls.hosts = json.loads(result.stdout)
 
-    def test_research_profile_selects_anatomy(self):
-        profile = self.hosts["cbox"]["profiles"]["k-research-agent"]
-        self.assertTrue(profile["enable"])
-        self.assertEqual(profile["names"].count("anatomy"), 1)
-
     def test_each_enabled_omp_receives_anatomy(self):
         for host, config in self.hosts.items():
             with self.subTest(host=host):
                 if config["ompEnabled"]:
                     self.assertEqual(config["agents"]["omp"].count("anatomy"), 1)
 
-    def test_other_agents_and_profiles_do_not_receive_anatomy(self):
+    def test_other_agents_do_not_receive_anatomy(self):
         for host, config in self.hosts.items():
             for agent, names in config["agents"].items():
                 if agent != "omp":
                     with self.subTest(host=host, agent=agent):
                         self.assertNotIn("anatomy", names)
-            for profile, settings in config["profiles"].items():
-                if profile != "k-research-agent":
-                    with self.subTest(host=host, profile=profile):
-                        self.assertNotIn("anatomy", settings["names"])
 
     def test_existing_shared_coding_selection_is_preserved(self):
         for host, config in self.hosts.items():

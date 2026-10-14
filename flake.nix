@@ -18,7 +18,7 @@
     # Keeps pyrefly current without updating every package from the primary nixpkgs.
     pyrefly-nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
-    # Private Hermes modules (personas, skills, memory seeds, cron). The
+    # Complete private Hermes declarations (policy, personas, integrations). The
     # dependency-free flake exports homeManagerModules for selected hosts.
     # Keep its Git pin local; after committing private changes, update only
     # agent-profiles from a host with this clone.
