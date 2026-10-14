@@ -32,7 +32,6 @@ let
     # `dev` already pulls `mcp`; keep it explicit because local MCP servers are
     # a core part of this repo's Hermes workflow.
     "mcp"
-    "homeassistant"
     "acp"
     "web"
   ];
