@@ -290,7 +290,7 @@ cannot supply it; use the path override below while reviewing uncommitted work.
 The earlier clone-absence command matrix covered the non-flake input, not this
 flake conversion; it is not evidence for clone-absent lock operations here.
 
-### Changing the private half
+### Changing private declarations
 
 Review and commit private source changes, update the dotfiles pin, and apply
 that pin as separate manual steps. Capture performs none of them.
