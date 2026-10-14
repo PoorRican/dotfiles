@@ -57,12 +57,20 @@ in {
     };
     Install.WantedBy = [ "default.target" ];
   };
-  files = pkgs.lib.mapAttrs' (name: hash: pkgs.lib.nameValuePair "plugins/hindsight/${name}"
-    (pkgs.fetchurl {
-      name = "hindsight-${name}";
-      url = "https://raw.githubusercontent.com/vectorize-io/hindsight/${revision}/hindsight-integrations/hermes/${name}";
-      inherit hash;
-    })) sourceHashes // {
+  files = pkgs.lib.mapAttrs' (name: hash:
+    let
+      source = pkgs.fetchurl {
+        name = "hindsight-${name}";
+        url = "https://raw.githubusercontent.com/vectorize-io/hindsight/${revision}/hindsight-integrations/hermes/${name}";
+        inherit hash;
+      };
+    in pkgs.lib.nameValuePair "plugins/hindsight/${name}" (
+      if name == "plugin.yaml" then pkgs.writeText "hindsight-plugin-external.yaml" ''
+        ${builtins.readFile source}
+        # Nix supplies the Python closure; Hermes PM must not sync this plugin.
+        python_runtime: external
+      '' else source
+    )) sourceHashes // {
     "hindsight/config.json" = builtins.toJSON {
       mode = "local_external";
       api_url = "http://127.0.0.1:18888";

@@ -17,6 +17,8 @@ and rejects unknown top-level settings; it is not a separate Hermes
 installation.
 The renderer uses Hermes' own YAML compatibility module, keeping its YAML
 read/write policy aligned with the installed runtime without adding PyYAML.
+Home Assistant is now an official upstream plugin, not a Python package extra;
+the adapter does not request the removed `homeassistant` extra.
 
 | Nix owns (replaced on activation) | Runtime owns (preserved after initialization) |
 |---|---|
