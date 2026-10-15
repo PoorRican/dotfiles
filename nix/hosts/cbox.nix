@@ -32,6 +32,11 @@
 
   # Keep LM Studio available alongside the portable Codex default.
   programs.hermes.profiles.default.settings = {
+    # Preserve this host's approved live behavior on declarative activation.
+    gateway.multiplex_profiles = false;
+    approvals.destructive_slash_confirm = false;
+    display.busy_input_mode = "interrupt";
+
     custom_providers = [
       {
         name = "lmstudio";
