@@ -33,9 +33,14 @@
   # Keep LM Studio available alongside the portable Codex default.
   programs.hermes.profiles.default.settings = {
     # Preserve this host's approved live behavior on declarative activation.
-    gateway.multiplex_profiles = false;
+    gateway.multiplex_profiles = true;
     approvals.destructive_slash_confirm = false;
     display.busy_input_mode = "interrupt";
+    # The default profile's webhook listener owns port 8644 and forwards /p/<profile>/ routes.
+    platforms.webhook = {
+      enabled = true;
+      extra.port = 8644;
+    };
 
     custom_providers = [
       {
