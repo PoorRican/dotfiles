@@ -36,10 +36,40 @@
     gateway.multiplex_profiles = true;
     approvals.destructive_slash_confirm = false;
     display.busy_input_mode = "interrupt";
-    # The default profile's webhook listener owns port 8644 and forwards /p/<profile>/ routes.
+    # One listener on 8644 serves every profile's webhook routes at /p/<profile>/webhooks/<route>.
     platforms.webhook = {
       enabled = true;
-      extra.port = 8644;
+      extra = {
+        port = 8644;
+        routes.kairos-alerts = {
+          # Runs under the kairos-ops profile: its SOUL, skills, and toolsets.
+          profile = "kairos-ops";
+          # Resolved from ~/.hermes/.env at gateway start; never written here.
+          secret = "\${KAIROS_ALERTS_WEBHOOK_SECRET}";
+          deliver = "discord";
+          toolsets = [ "file" "session_search" "skills" "terminal" "todo" "web" ];
+          # Alertmanager's groupKey is stable per alert group and each notification
+          # carries the group's full current alert set, so the newest event supersedes
+          # older ones within the same group without dropping other groups.
+          coalesce = {
+            key = "{groupKey}";
+            window_seconds = 30;
+            max_wait_seconds = 300;
+          };
+          prompt = ''
+            Alertmanager notification ({status}) from receiver {receiver}.
+            Alert: {commonLabels.alertname}   Severity: {commonLabels.severity}
+            Group labels: {groupLabels}
+            Summary: {commonAnnotations.summary}
+            Description: {commonAnnotations.description}
+            Alertmanager: {externalURL}
+
+            Triage this per your SOUL.md procedure and reply with the Discord report.
+            Full notification payload (JSON, truncated):
+            {__raw__}
+          '';
+        };
+      };
     };
 
     custom_providers = [
