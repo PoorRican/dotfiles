@@ -445,15 +445,21 @@ def alert_due(severity, previous, now, previous_severity):
 
 def alert_body(measurement, reasons):
     meta = measurement["metadata"]
-    body = (f"Metadata used {meta['used_percent']:.2f}% ({meta['bytes_used'] / GIB:.2f} GiB logical); "
-            f"effective margin {meta['effective_margin_bytes'] / GIB:.2f} GiB; "
-            f"device-unallocated {measurement['device_unallocated_bytes'] / GIB:.2f} GiB. "
-            f"Reasons: {', '.join(reasons)}. ")
-    if measurement["growth"] is not None:
+    body = (f"Metadata: {meta['used_percent']:.1f}% used, "
+            f"{meta['effective_margin_bytes'] / GIB:.1f} GiB margin\n"
+            f"Device unallocated: {measurement['device_unallocated_bytes'] / GIB:.1f} GiB")
+    if "metadata_growth_warning" in reasons:
         growth = measurement["growth"]
-        body += (f"Metadata growth {growth['bytes_per_hour'] / GIB:.2f} GiB/hour "
-                 f"over {growth['span_seconds'] / 60:.1f} minutes. ")
-    return body + PRESSURE_NOTE
+        body += (f"\nGrowth: {growth['bytes_per_hour'] / GIB:+.1f} GiB/h "
+                 f"over {growth['span_seconds'] / 60:.0f} min.")
+    conditions = []
+    if "read_only_mount" in reasons:
+        conditions.append("Filesystem read-only")
+    if "recorded_device_errors" in reasons:
+        conditions.append("recorded device errors")
+    if conditions:
+        body += "\n" + "; ".join(conditions) + "."
+    return body
 
 
 class Parser(argparse.ArgumentParser):
@@ -539,7 +545,8 @@ def main(argv=None):
         if args is not None and not args.print_only and not args.no_notify and stage in ("state", "query"):
             try:
                 status["failure_notification"] = notify(args, "critical", "Btrfs Watch monitor failure",
-                                                        "Monitor could not complete; filesystem condition is unknown. " + status["error"])
+                                                        "Check failed; filesystem health unknown. "
+                                                        "See the Btrfs Watch service journal.")
             except (MonitorError, OSError, ValueError) as alert_exc:
                 status["failure_notification"] = {"status": "failed", "id": None, "error": str(alert_exc)}
                 print("Btrfs Watch failure notification failed: " + str(alert_exc), file=sys.stderr)

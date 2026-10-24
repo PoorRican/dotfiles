@@ -26,12 +26,12 @@ in {
     };
   };
   systemd.user.timers.cbox-btrfs-watch = {
-    Unit.Description = "Check Btrfs metadata and allocation headroom every five minutes";
+    Unit.Description = "Check Btrfs metadata and allocation headroom at 08:00 and 20:00";
     Timer = {
-      OnStartupSec = "1min";
-      OnUnitActiveSec = "5min";
+      OnCalendar = "*-*-* 08,20:00:00";
+      Persistent = false;
       AccuracySec = "10s";
-      RandomizedDelaySec = "20s";
+      RandomizedDelaySec = "0";
       Unit = "cbox-btrfs-watch.service";
     };
     Install.WantedBy = [ "timers.target" ];

@@ -268,6 +268,7 @@ class BtrfsWatchCLI(unittest.TestCase):
         self.assertFalse((self.state_dir / "state.json").exists())
         call = self.notifications()[-1]["argv"]
         self.assertEqual(call[-2], "Btrfs Watch monitor failure")
+        self.assertEqual(call[-1], "Check failed; filesystem health unknown. See the Btrfs Watch service journal.")
         self.assertNotIn("ENOSPC", call[-1])
         self.assertEqual(result["failure_notification"]["id"], "42")
 
@@ -484,7 +485,9 @@ class BtrfsWatchCLI(unittest.TestCase):
         self.assertEqual(result["notification"], {"status": "accepted", "id": "42"})
         expected = ["--print-id", "--app-name", "Btrfs Watch", "--urgency", "normal", "--expire-time", "0"]
         self.assertEqual(self.notifications()[0]["argv"][:-2], expected)
-        self.assertIn("not guaranteed writable bytes", self.notifications()[0]["argv"][-1])
+        self.assertEqual(self.notifications()[0]["argv"][-1],
+                         "Metadata: 85.0% used, 30.0 GiB margin\nDevice unallocated: 100.0 GiB")
+        self.assertIn("not guaranteed writable bytes", result["measurement"]["pressure_note"])
         self.assertEqual(self.state()["last_alert"], {"timestamp": NOW, "severity": "warning", "notification_id": "42"})
         proc, result = self.run_cli(now=NOW + 6 * 3600 - 1, no_notify=False)
         self.assert_ok(proc, result, "warning")
@@ -492,6 +495,32 @@ class BtrfsWatchCLI(unittest.TestCase):
         self.assertEqual(len(self.notifications()), 1)
         self.run_cli(now=NOW + 6 * 3600, no_notify=False)
         self.assertEqual(len(self.notifications()), 2)
+
+    def test_compact_notification_preserves_readonly_and_device_error_alerts(self):
+        self.scenario["mount"]["filesystems"][0]["options"] = "ro,relatime"
+        self.write_scenario()
+        self.write_errors(write_errs=1)
+        proc, result = self.run_cli(no_notify=False)
+        self.assert_ok(proc, result, "critical")
+        self.assertEqual(self.notifications()[-1]["argv"][-1],
+                         "Metadata: 70.0% used, 60.0 GiB margin\nDevice unallocated: 100.0 GiB\n"
+                         "Filesystem read-only; recorded device errors.")
+
+    def test_compact_notification_includes_growth_only_when_it_triggers(self):
+        self.seed_history([(NOW - 4500, 138 * GIB)])
+        proc, result = self.run_cli(no_notify=False)
+        self.assert_ok(proc, result, "warning")
+        self.assertEqual(self.notifications()[-1]["argv"][-1],
+                         "Metadata: 70.0% used, 60.0 GiB margin\nDevice unallocated: 100.0 GiB\n"
+                         "Growth: +1.6 GiB/h over 75 min.")
+
+    def test_twelve_hour_sampling_does_not_invent_hourly_growth(self):
+        self.run_cli(now=NOW - 12 * 3600)
+        self.write_metadata(bytes_used=170 * GIB)
+        proc, result = self.run_cli(no_notify=False)
+        self.assert_ok(proc, result, "warning")
+        self.assertIsNone(result["measurement"]["growth"])
+        self.assertNotIn("Growth", self.notifications()[-1]["argv"][-1])
 
     def test_critical_escalation_is_immediate_then_one_hour_cooldown(self):
         self.write_metadata(bytes_used=170 * GIB)

@@ -5,6 +5,31 @@ Independent, alert-only monitoring of filesystem UUID
 `nix/modules/btrfs-watch.nix`, imported only by cbox. The Python monitor is
 `bin/cbox-btrfs-watch.py`.
 
+## Current deployment — October 23, 2026
+
+The 08:00/20:00 schedule and compact notifications are deployed. Only the
+watchdog service, timer and its existing enable link were updated; no full
+Home Manager activation or unrelated desktop change was applied.
+
+The current unit bundle is:
+
+    /nix/store/1akw36mz0d35jcxmjd1nfxj3c6gcd5iq-cbox-btrfs-watch-deployment
+
+It is GC-rooted at `~/.local/state/btrfs-watch/deployment`. The store script
+matches the source byte-for-byte. All 60 source tests and Ruff passed, as did
+all 56 CLI tests against the exact store script and pinned Python. The rendered
+units passed `systemd-analyze --user verify`.
+
+Readback confirmed an enabled, active calendar timer, no startup/five-minute
+trigger, zero randomized delay and a next check at 20:00 MST on October 23.
+A manual service verification completed at 13:31:16 MST with exit status 0,
+published state and respected the existing notification cooldown. A print-only
+preview exercised the compact body without changing live state. No new desktop
+alert was sent for this verification, and a complete 12-hour automatic cycle
+has not yet been observed.
+
+## Original deployment history — October 9, 2026
+
 Selective live deployment was verified on October 9, 2026. Only
 `cbox-btrfs-watch.service` and `cbox-btrfs-watch.timer` were installed; no full
 Home Manager activation was performed. The timer is enabled, with successful
@@ -12,11 +37,11 @@ automatic samples at 23:26:29 and 23:31:32 MST (303.19 seconds apart). The
 second sample retained the warning-notification cooldown rather than repeating
 it. State directory/file permissions were verified as 0700/0600.
 
-The reviewed, GC-rooted unit bundle is:
+The original reviewed unit bundle was:
 
     /nix/store/wkwj65g9h2bf1il8dq3p15maj1yjc7n0-cbox-btrfs-watch-deployment
 
-Its persistent GC root is `~/.local/state/btrfs-watch/deployment`; its store
+At that deployment the GC root was `~/.local/state/btrfs-watch/deployment`; its store
 script was checked byte-for-byte against the reviewed source. All 56 owned tests
 and Ruff passed. Independent review found no security or logic blockers and
 exercised 30 additional scratch-local cases with both host and pinned Python.
@@ -47,7 +72,10 @@ counter is not necessarily a new error, and zero counters are not a clean scrub.
 
 ## Conservative host policy
 
-Every five minutes, with up to 20 seconds of jitter:
+Twice daily at **08:00 and 20:00 host-local time** (MST on cbox), with no
+randomized delay and up to 10 seconds of timer coalescing. There is no startup
+or missed-run catch-up check; a stopped host waits for the next scheduled time.
+The pressure thresholds are unchanged:
 
 | Signal | Warning | Critical |
 | --- | --- | --- |
@@ -56,16 +84,24 @@ Every five minutes, with up to 20 seconds of jitter:
 | Raw device-unallocated space | <=50 GiB | <=10 GiB |
 | Recorded device errors or read-only mount | — | Any |
 
-Positive metadata growth >=1 GiB/hour over a measured 45–75 minute span also
-warns. These are deliberately conservative local policy thresholds, not Btrfs
+The existing growth detector requires samples 45–75 minutes apart and warns at
+>=1 GiB/hour. **Normal 12-hour sampling cannot provide that window, so hourly
+growth alerts are unavailable at this cadence.** Manual samples can still
+provide it; the detector never invents an hourly rate from 12-hour history.
+These are deliberately conservative local policy thresholds, not Btrfs
 universal failure boundaries. The reservation-adjusted margin is a pressure
 indicator, not a guarantee of writable capacity. Samples are live, non-atomic.
 Growth alerts require sufficient real history; first-run output cannot establish
 a rate. Missing or failed queries fail visibly rather than assuming health.
 
-State is bounded to seven days and at most 2,016 measurement points. Warning
-notifications repeat at most every six hours, critical ones every hour, with
-immediate escalation. A failed notification must not advance its cooldown.
+State is bounded to seven days and at most 2,016 measurement points. Notifications
+normally contain just metadata occupancy, reservation-adjusted margin and raw
+device-unallocated GiB, with a short extra line for growth, a read-only mount or
+recorded device errors when applicable. Failure alerts are also concise; full
+measurements, reasons, caveats and failure diagnostics remain in state/journal
+output. Warning/critical cooldowns remain six hours/one hour for manual runs,
+with immediate escalation on a sample; automatic checks can alert only at the
+two scheduled times. A failed notification must not advance its cooldown.
 Desktop alerts require a running notification server; journal evidence remains
 available separately. User lingering is enabled on computebox, so an enabled
 user timer can run without an interactive login, but desktop delivery cannot be

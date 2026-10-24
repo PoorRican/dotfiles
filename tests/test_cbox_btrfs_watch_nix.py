@@ -59,8 +59,11 @@ class BtrfsWatchNixTests(unittest.TestCase):
         self.assertTrue(service["NoNewPrivileges"])
         self.assertEqual(service["UMask"], "0077")
         timer = units["timer"]
-        self.assertEqual(timer["Timer"]["OnUnitActiveSec"], "5min")
-        self.assertEqual(timer["Timer"]["RandomizedDelaySec"], "20s")
+        self.assertEqual(timer["Timer"].get("OnCalendar"), "*-*-* 08,20:00:00")
+        self.assertNotIn("OnStartupSec", timer["Timer"])
+        self.assertNotIn("OnUnitActiveSec", timer["Timer"])
+        self.assertFalse(timer["Timer"]["Persistent"])
+        self.assertEqual(timer["Timer"]["RandomizedDelaySec"], "0")
         self.assertEqual(timer["Timer"]["AccuracySec"], "10s")
         self.assertEqual(timer["Timer"]["Unit"], "cbox-btrfs-watch.service")
         self.assertIn("timers.target", timer["Install"]["WantedBy"])
