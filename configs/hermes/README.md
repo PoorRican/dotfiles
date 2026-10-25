@@ -129,7 +129,8 @@ in terminal logs. Never put credentials in a seed.
 host. Its wrapper runs the capture command with Hermes' sealed Python interpreter
 and provides Git for read-only source provenance. It reads the current host's
 Nix-generated deployment-info file, so `--profile` must name an enabled profile
-on that host; `k-research-agent` is currently enabled on cbox.
+on that host; `k-research-agent` is currently enabled on cbox and `kairos-ops`
+on wst.
 
 Capture the runtime state of that profile for review:
 
@@ -185,10 +186,10 @@ than exported as configuration payloads.
 The Hermes package revision comes from the shared `hermes-agent` input.
 Additional input revisions are opt-in through
 `programs.hermes.capture.sourceRevisions` and appear in the optional
-`source_revisions` map. cbox declares `agent-profiles` because it composes that
-private input; `agent_profiles_revision` mirrors the map entry. Other hosts
-leave the map empty, so they do not force the local-only private input during
-evaluation.
+`source_revisions` map. cbox and wst declare `agent-profiles` because they
+compose that private input; `agent_profiles_revision` mirrors the map entry.
+Other hosts leave the map empty, so they do not force the local-only private
+input during evaluation.
 
 Snapshots can still contain sensitive persona, memory, skill, and other user
 text; capture is not a general content redactor. Its case-insensitive secret
@@ -273,16 +274,17 @@ agent-profiles = {
 };
 ```
 
-and appends `inputs.agent-profiles.homeManagerModules.cbox` to cbox's modules.
+and appends `inputs.agent-profiles.homeManagerModules.cbox` to cbox's modules
+and `inputs.agent-profiles.homeManagerModules.wst` to wst's.
 The private flake has no dependencies: it exports the existing host module and
 uses Home Manager, packages, and module arguments supplied by dotfiles.
 `git+file` keeps the lock tied to a committed revision rather than the working
 directory. The lock records the local URL, a commit and a narHash; private
 configuration stays in the private repository.
 
-Only cbox composes a private module today; mbp, dgx, emc and wst still evaluate
-without consuming that export. A missing required export fails cbox evaluation
-loudly rather than silently dropping the private profile.
+cbox and wst compose private modules today; mbp, dgx and emc still evaluate
+without consuming that export. A missing required export fails the composing
+host's evaluation loudly rather than silently dropping the private profile.
 
 Update the private pin from a host with the clone, after committing all files
 referenced by the export. An older locked revision without the new flake/module

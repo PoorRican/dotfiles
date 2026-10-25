@@ -1,5 +1,5 @@
 # wst server
-{ pkgs, lib, ... }:
+{ pkgs, lib, inputs, ... }:
 
 {
   imports = [
@@ -11,11 +11,15 @@
 		# not used at this moment
 		#../layers/knowledge-tools.nix
     # Hermes without the rest of dev-extra; the private flake extends this
-    # host with the privileged k-system-admin profile.
+    # host with the kairos-ops profile and the host gateway that serves it.
     ../modules/hermes.nix
   ];
 
   programs.hermes.enable = lib.mkDefault true;
+
+  # This host composes the private profile flake; record its revision for
+  # hermes-profile-capture provenance.
+  programs.hermes.capture.sourceRevisions."agent-profiles" = inputs.agent-profiles.rev or null;
 
 	home.packages = with pkgs; [
 		python314

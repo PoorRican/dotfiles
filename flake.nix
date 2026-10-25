@@ -150,7 +150,10 @@
         system = "x86_64-linux";
         username = "swe";
         homeDirectory = "/home/swe";
-        modules = [ ./nix/hosts/wst.nix ];
+        modules = [
+          ./nix/hosts/wst.nix
+          inputs.agent-profiles.homeManagerModules.wst
+        ];
       };
     };
   };
