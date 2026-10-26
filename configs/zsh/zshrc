@@ -219,8 +219,11 @@ function dcr() {
   docker-compose down && docker-compose up -d --build "$@"
 }
 
-# Fix SSL certificates for Python on macOS with Nix
-if [[ -f "/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt" ]]; then
+# Trust system CAs plus Kairos Registry and Python Index CAs when present
+if [[ -f "$HOME/.kairos/ca-bundle.crt" ]]; then
+  export SSL_CERT_FILE="$HOME/.kairos/ca-bundle.crt"
+  export REQUESTS_CA_BUNDLE="$HOME/.kairos/ca-bundle.crt"
+elif [[ -f "/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt" ]]; then
   export SSL_CERT_FILE="/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt"
   export REQUESTS_CA_BUNDLE="/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt"
 fi
