@@ -129,7 +129,7 @@ in terminal logs. Never put credentials in a seed.
 host. Its wrapper runs the capture command with Hermes' sealed Python interpreter
 and provides Git for read-only source provenance. It reads the current host's
 Nix-generated deployment-info file, so `--profile` must name an enabled profile
-on that host; `k-research-agent` is currently enabled on cbox and `kairos-ops`
+on that host; `k-research-agent` is currently enabled on cbox and `k-ops`
 on wst.
 
 Capture the runtime state of that profile for review:

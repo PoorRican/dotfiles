@@ -11,7 +11,7 @@
 		# not used at this moment
 		#../layers/knowledge-tools.nix
     # Hermes without the rest of dev-extra; the private flake extends this
-    # host with the kairos-ops profile and the host gateway that serves it.
+    # host with the k-ops profile and the host gateway that serves it.
     ../modules/hermes.nix
   ];
 
