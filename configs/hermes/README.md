@@ -55,8 +55,11 @@ or through the generated `<name>` launcher. Every enabled profile gets:
   does not replace or delete them. See [Runtime seeds](#runtime-seeds).
 - `skills.names` — the explicit allowlist, resolved against
   `programs.agent-skills.catalogRoots` plus the profile's own `skills.roots`.
-  Names must be unique across all roots. `skills.allowBundled` re-enables
-  bundled-skill seeding; it is off so the catalog stays the only source.
+  Names must be unique across all roots. `skills.bundledNames` exposes selected
+  upstream-bundled skills through a second immutable view (the default profile
+  takes its names from `collections.nix`'s `hermesBundled`).
+  `skills.allowBundled` re-enables full bundled-skill seeding; it is off so the
+  catalog stays the only source.
   Hermes scans the mutable `$HERMES_HOME/skills` *before* the Nix view and
   refuses to load a name present in both, so a profile that predates Nix
   ownership must have its old local copies moved aside (never deleted) before

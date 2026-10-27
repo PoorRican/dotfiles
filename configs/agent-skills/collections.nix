@@ -61,6 +61,14 @@
     "weights-and-biases"
   ];
 
+  # Upstream Hermes-bundled skills to expose while keeping full bundled skill
+  # seeding disabled. Add names from Hermes's bundled SKILL.md frontmatter here
+  # when the upstream copy should be available without importing the whole
+  # bundled catalog into ~/.hermes/skills.
+  hermesBundled = [
+    "hermes-agent"
+  ];
+
   hosts = {
     cbox = {
       coding = [ ];
