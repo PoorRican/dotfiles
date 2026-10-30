@@ -22,6 +22,7 @@
     "group/workspaces",
     "custom/separator",
     "idle_inhibitor",
+    "custom/drift",
     "hyprland/submap"
   ],
   "modules-center": [
@@ -163,6 +164,16 @@
     },
     "tooltip-format-activated": "idle inhibited",
     "tooltip-format-deactivated": "idle allowed"
+  },
+
+  "custom/drift": {
+    "exec": "/home/swe/.local/bin/waybar-drift",
+    "return-type": "json",
+    "interval": 1,
+    "exec-on-event": true,
+    "format": "{text}",
+    "on-click": "/home/swe/.local/bin/drift toggle",
+    "on-click-right": "/home/swe/.local/bin/drift note"
   },
 
   "mpris": {

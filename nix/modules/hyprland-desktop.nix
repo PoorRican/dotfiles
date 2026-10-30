@@ -257,6 +257,12 @@ in
     source = dotfiles + "/bin/waybar-hypr-workspace";
     executable = true;
   };
+  home.file.".local/bin/waybar-drift" = {
+    source = pkgs.writeShellScript "waybar-drift" ''
+      exec ${pkgs.python313}/bin/python3 ${dotfiles + "/bin/waybar-drift"} "$@"
+    '';
+    executable = true;
+  };
   home.file.".local/bin/hypr-waybar-visibility" = {
     source = pkgs.writeShellScript "hypr-waybar-visibility" ''
       exec ${pkgs.python313}/bin/python3 ${dotfiles + "/bin/hypr-waybar-visibility"} "$@"

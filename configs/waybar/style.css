@@ -42,6 +42,7 @@ tooltip label {
 /* --- shared module spacing (V6.ce) --- */
 #clock,
 #idle_inhibitor,
+#custom-drift,
 #submap,
 #mpris,
 #custom-expand-icon,
@@ -61,6 +62,7 @@ tooltip label {
 
 #clock:hover,
 #idle_inhibitor:hover,
+#custom-drift:hover,
 #custom-expand-icon:hover,
 #network:hover,
 #bluetooth:hover,
@@ -168,6 +170,19 @@ tooltip label {
 #idle_inhibitor.activated {
   color: @accent;
   opacity: 1;
+}
+
+/* Red means Drift itself reports recording, including changes from its tray. */
+#custom-drift.recording,
+#custom-drift.recording:hover {
+  color: #ff5555;
+  opacity: 1;
+}
+
+#custom-drift.paused,
+#custom-drift.unavailable {
+  color: @muted;
+  opacity: 0.6;
 }
 
 /* --- now playing: slow phosphor pulse (V6.ce) --- */
