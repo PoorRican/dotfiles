@@ -2,6 +2,17 @@
 
 Scope: task boundaries, context transfer, and sequencing for implementations that use multiple agents.
 
+## Preparation and dependency scope
+
+Before expanding preparation, identify the next user-relevant outcome and what genuinely prevents the
+next authorized step. A discovered problem is not automatically a prerequisite for every path.
+Preserve safety and correctness gates, but keep blockers attached to the work they affect. When a
+repair creates more changes or verification obligations, reconsider whether its broader scope is
+necessary. Once the scoped claim is adequately evidenced, return to the main objective.
+
+**Tell:** Preparation keeps producing additional tasks, but not a new result relevant to the user's
+goal.
+
 ## Plans as usable handoffs
 
 - An independently executable task has a clear file boundary, an interface with neighboring work, and an observable way to assess the result; enough domain context keeps a fresh implementer from having to infer hidden constraints. (src: writing-plans; src: sdd-worktree-orchestration, portable lesson)
