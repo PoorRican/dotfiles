@@ -17,9 +17,6 @@ class AnatomySkillAssignmentTests(unittest.TestCase):
         expression = r'''let
           f = builtins.getFlake "path:REPO_PATH";
           targets = {
-            claude = ".claude/skills/";
-            codex = ".codex/skills/";
-            pi = ".pi/agent/skills/";
             omp = ".omp/agent/skills/";
             opencode = ".config/opencode/skills/";
           };

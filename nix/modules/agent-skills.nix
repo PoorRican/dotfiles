@@ -8,7 +8,7 @@
 #
 # Nix builds a flat union directory for each coding agent. Home Manager links
 # the top-level members of that view into mutable agent roots, leaving room for
-# agent-owned/system entries with other names (for example Codex's .system).
+# agent-owned entries with other names.
 #
 # Hermes profiles select from the same catalog roots through hermes.nix; this
 # module only publishes the roots (`programs.agent-skills.catalogRoots`).
@@ -67,9 +67,6 @@ in {
     };
 
     agents = {
-      claude = lib.mkEnableOption "Claude Code skill distribution" // { default = true; };
-      codex = lib.mkEnableOption "Codex skill distribution" // { default = true; };
-      pi = lib.mkEnableOption "Pi skill distribution" // { default = true; };
       omp = lib.mkEnableOption "OMP skill distribution" // { default = true; };
       opencode = lib.mkEnableOption "OpenCode skill distribution" // { default = true; };
     };
@@ -104,9 +101,6 @@ in {
       };
 
       home.file = lib.mkMerge [
-        (lib.mkIf cfg.agents.claude (mkAgentFiles ".claude/skills" codingView codingSkills))
-        (lib.mkIf cfg.agents.codex (mkAgentFiles ".codex/skills" codingView codingSkills))
-        (lib.mkIf cfg.agents.pi (mkAgentFiles ".pi/agent/skills" codingView codingSkills))
         (lib.mkIf cfg.agents.omp (mkAgentFiles ".omp/agent/skills" ompView ompSkills))
         (lib.mkIf cfg.agents.opencode (mkAgentFiles ".config/opencode/skills" codingView codingSkills))
       ];
@@ -117,9 +111,6 @@ in {
         ''
         legacy_root="''${XDG_STATE_HOME:-$HOME/.local/state}/agent-skills/pre-centralization"
         for relative in \
-          ".claude/skills" \
-          ".codex/skills" \
-          ".pi/agent/skills" \
           ".omp/agent/skills" \
           ".config/opencode/skills"
         do
