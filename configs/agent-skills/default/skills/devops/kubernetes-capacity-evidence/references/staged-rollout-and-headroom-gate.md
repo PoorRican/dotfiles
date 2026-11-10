@@ -57,6 +57,11 @@ Before each `RollingUpdate`, require the node's unreserved CPU and memory (alloc
 
 Slow readiness is not a stall: a pod that waits on another component's readiness, or a workload loading a large state, can take many minutes (tens of minutes on a cold start). Wait before intervening.
 
+## StatefulSets and guarded JSON patches
+
+- A StatefulSet with `podManagementPolicy: OrderedReady` does not roll a pod that is not Ready, so a template change never reaches it; `kubectl delete pod <name>` is the roll, and the controller recreates it from the updated template.
+- Apply JSON patches (`--type=json`) with leading `test` ops that assert the values you expect to replace, so a drifted object fails the patch instead of being overwritten. Snapshot the objects first (`kubectl get <kind> <name> -o yaml`), and run the same patch with `--dry-run=server` before applying it. (src: statefulset-rollout-and-json-patch, 2026-11-10; not re-run)
+
 ## Report
 
 Separate merged, applied and runtime-verified. Name which Deployments had `Recreate` gaps and how long. Do not claim historical capture loss from readiness or missing metric series alone; that needs landing files or row-level evidence.

@@ -30,4 +30,9 @@ Scope: portable context and partitioning principles for independent diff review 
 - Generate every table cell and derived number from receipts with a script, formatting each value once at its final precision (re-rounding a printed value is the commonest error), and generate tables in their final published form so the gate can assert byte identity. Sort before writing any "largest" or "helps most" sentence. (src: numbers-and-claims-review)
 - For relational (no-threshold) results give each effect with its interval, avoid intensifiers and equality words ("barely", "flat", "agree"), keep ratios within one comparator set and unit, and leave the decision-maker's interpretation to them. Report to the owner from the committed text, not from memory of drafts: grep the committed record before saying what it does or does not contain. (src: numbers-and-claims-review)
 
+## Dialectic investigation swarm
+
+- For a contested, evidence-heavy question, the orchestrator builds a write-protected evidence pack plus a brief of first-pass facts to challenge, then runs waves. Wave 1: specialist investigators each state falsifiable claims and what they tried to falsify. Wave 2: a prosecutor and a defender with opposite theses, a framer who attacks the premise itself, and auditors who recompute from raw sources without reusing the audited scripts. Wave 3: targeted follow-ups sent to the idle agents rather than fresh spawns.
+- Bound each analysis with `systemd-run --user --scope -p MemoryMax=<n>G` and have each agent copy its reports out of its scratch area at the end. Reviewer briefing, output schema and finding verification are as above. (src: dialectic-swarm-recipe, 2026-11-10; the memory-cap flags not re-run)
+
 This reference focuses on reviewer scope, independence, and briefing rather than on how to evaluate code generally.
