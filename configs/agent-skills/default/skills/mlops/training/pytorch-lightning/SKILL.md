@@ -322,6 +322,8 @@ trainer = L.Trainer(accelerator='gpu', devices=1)
 
 **Hyperparameter tuning**: See [references/hyperparameter-tuning.md](references/hyperparameter-tuning.md) for integration with Optuna, Ray Tune, and WandB sweeps.
 
+**Logging and sparse telemetry**: See [references/logging-and-telemetry.md](references/logging-and-telemetry.md) for why `self.log(on_step=True)` re-emits intermittently logged values and how to log sparse samples.
+
 ## Hardware requirements
 
 - **CPU**: Works (good for debugging)

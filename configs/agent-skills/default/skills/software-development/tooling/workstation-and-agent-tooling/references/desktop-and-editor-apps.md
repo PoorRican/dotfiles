@@ -30,3 +30,9 @@ Scope: Platform, event-loop, and runtime-discovery behavior for native desktop a
 - An active stream associated with the running Drift process is not expected to contain Arrow EOS until normal shutdown; absence of EOS on that active stream alone is not evidence of truncation. (src: drift-input-daemon-artifact-validation; 2026-07-29)
 - A concurrently appended Arrow file should be interpreted from one fixed byte snapshot; a newly orphaned screenshot can be an in-flight flush race, so a later stable snapshot is needed before classifying it as defective. (src: drift-input-daemon-artifact-validation; 2026-07-29)
 
+
+## Live-previewing a desktop change (Hyprland 0.56.2, observed 2026-10-05)
+
+- `hyprctl eval` fails when the snippet begins with a `--` comment; strip comments from live snippets. (src: hyprland-live-preview, 2026-10-05)
+- A launcher such as rofi started from an agent's non-session shell never mapped a window, while the same command through `systemd-run --user` did, so preview GUI pieces that way [INFERENCE: the missing session environment is the likely cause]. (src: hyprland-live-preview, 2026-10-05)
+- `USR2` reloads ghostty and `dunstctl reload` reloads dunst, so neither needs a session restart. Version-specific and not re-run here. (src: hyprland-live-preview, 2026-10-05)

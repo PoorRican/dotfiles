@@ -11,6 +11,8 @@ Scope: Distinct GitHub issue, conversation, formal-review and inline-thread surf
 - A GraphQL review-thread ID and a REST root-comment database ID are different identifiers. A descendant supersedes feedback only when its code concretely fixes the behavior or removes the criticized path; a resolution reply should cite that descendant evidence. (src: github-stacked-review-relevance-resolution, 2026-07-29)
 - Review-thread relevance is judged against both the revision the reviewer saw and the current stack tip; descendant code may supersede an issue without erasing whether the original report was valid. (src: github-stacked-review-relevance-resolution, 2026-07-29)
 - PR conversation comments retrieved with `gh pr view --json comments` differ from a known inline comment retrieved through the pull-request review-comments API. (src: get-pr-comments, 2026-06-19)
+- For follow-up fix PRs, reply to each review thread with a link to the fix as soon as it exists and resolve the thread only after the follow-up PR merges. A report cited from a review belongs in a tracked, dated document, not a scratch path. (src: review-thread-hygiene lesson, 2026-11-08)
+- A fresh read of a PR diff after a push can return the pre-push diff (observed 2026-10-07; cause unestablished). Bind the review to explicit base and head SHAs and an exact committed diff, merge with `gh pr merge <n> --merge --match-head-commit <reviewed sha>`, then verify the merged state and the two parents. (src: pr-diff-staleness lesson, 2026-10-07)
 
 ## Issues and checks
 
@@ -18,3 +20,5 @@ Scope: Distinct GitHub issue, conversation, formal-review and inline-thread surf
 - `Closes #N`, `Fixes #N` and `Resolves #N` in a PR body link an issue for automatic closure when the PR merges. (src: github-issues, 1969-12-31)
 - Commit statuses and Actions check-runs are distinct surfaces; either alone may not explain a PR's complete CI state. (src: github-pr-workflow, 1969-12-31)
 - GitHub's REST API supports direct PR merge, while enabling auto-merge uses GraphQL. (src: github-pr-workflow, 1969-12-31)
+- An Actions job can conclude failure while its failing step is cancelled, so `gh run view --log-failed` may exit 0 with no log. Inspect the step conclusions, fetch the job logs through `gh api` (add `--allow-escape-sequences`), and rerun only after attributing the interruption, never to erase an assertion failure. (src: ci-cancelled-step lesson, 2026-10-03)
+- An issue whose acceptance criteria reference live state (data population, null rates, a running system) must not close on code, schema and migration evidence alone: gate closure on a read-only check of that state, or leave the issue open and name the check. Schema-only issues may close from static evidence. Re-verify a delegate's claim that a test was removed before relying on it. (src: issue-closure lesson, 2026-11-08)

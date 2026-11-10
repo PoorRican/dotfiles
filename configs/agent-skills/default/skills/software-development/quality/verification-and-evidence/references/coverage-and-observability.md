@@ -19,3 +19,8 @@ Scope: distinguish completed work and usable health signals from silent omission
 
 - A freeze rule that pauses a bounded drain or cleanup path can fill its buffer and exhaust disk, creating the outage it is intended to prevent. This secondary hazard belongs in the freeze-versus-alert judgment. Known alert-only cases are distinguishable by stable signatures; unknown causes remain fail-closed, and the same classification should cover new and in-flight failures. (src: supervised-observation-window, 2026-08-08)
 - If the watcher dies while production continues, durable system records can reconstruct the gap; a truncated success page does not establish zero failures. A changing deployment stack prevents a steady-state window, so an interrupted or truncated observation is incomplete rather than a completed window. (src: supervised-observation-window, 2026-08-08)
+
+## Time-series coverage claims
+
+- A full-window health gate assembled from overlapping range-query chunks must not sum per-chunk point counts, because chunk endpoints are inclusive. Build the exact global timestamp grid with half-open bins, dedupe by series identity plus timestamp, require identical values where chunks overlap, and capture a raw range-vector tail at `time=end`. (src: range-query-coverage, 2026-10)
+- A non-empty `up` range does not prove continuous recording: query lookback reuses the last raw sample for about five minutes. An empty `ALERTS` series during a coverage gap is not proof that nothing fired. Check raw-sample age against the expected scrape cadence and the loaded rule groups. (src: range-query-coverage, 2026-10)

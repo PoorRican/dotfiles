@@ -20,3 +20,7 @@ Scope: distinguish what a schema, client, test, runtime guard, or capability act
 - A status-only assertion can miss a durable journal, event, or database write; persisted-state evidence matters when persistence is part of the claim. (src: false-green-verification-traps, 2026-08-12)
 - A test that fails first for the expected missing behavior shows that it can detect it; a test that passes immediately has not established that. Mocks can erase relevant side effects, so evidence is stronger when isolation occurs at the lowest boundary that removes only slow or external behavior. A real-component integration test can be clearer when complex mocks obscure the behavior. (src: test-driven-development, 2026-06-22)
 - Test-only lifecycle helpers usually fit better in test utilities than production classes. (src: test-driven-development, 2026-06-22)
+
+## Gate design: prospective paths
+
+- When tightening an observation or provenance helper, test the next legitimate live lifecycle, not only frozen historical loaders and tamper negatives: an artifact qualified as a reader may legitimately be run later by a scheduled worker. Preserve the raw roles and add a lifecycle smoke that drives the real function behind a fake boundary. (src: provenance-helper-lifecycle, 2026-10-07)

@@ -12,6 +12,7 @@ Scope: output-equivalence evidence and state-source semantics in behavior-preser
 - Before interpreting a missing output attribute as behavior drift, does the accessor still exist on the class? In templated SQL, doubled regex braces work only if a later `str.format` consumes them; inserted as an f-string value, they remain literal and may silently match no rows. (src: byte-identity-refactor-proof, 2026-09-20)
 - A small-corpus RSS slope can reflect a change in worker count rather than per-item retention. How do parent and child processes contribute, and can retained objects be measured directly? Aggregate memory peaks may also include reclaimable scratch page cache. (src: prechange-worktree-parity-qualification, 2026-09-14)
 - Are timed comparisons isolated from competing work and warming effects? Interleaved run order and an order-balanced summary reduce the chance that timing drift is mistaken for a refactor effect. (src: prechange-worktree-parity-qualification, 2026-09-14)
+- After splitting a monolithic module into a package, `monkeypatch.setattr(old_module, "name", ...)` must target the submodule that defines the consuming function, because names resolve in that function's own `__globals__`. Patching the package re-export raises or silently no-ops, while patches on module objects are unaffected; import-still-works checks hide the problem. (src: split-module-monkeypatch)
 
 ## Current state and event reconstruction
 

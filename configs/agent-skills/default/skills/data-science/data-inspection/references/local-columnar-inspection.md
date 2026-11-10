@@ -13,3 +13,7 @@ Scope: Distinguish descriptive inventories from row-level data and keep data-cov
 - “Earliest” is population-dependent: the earliest metadata record, stored row, and row for a filtered subset can differ, so the population determines the timestamp's meaning. (src: local-columnar-data-inspection)
 - Footer statistics can answer extrema questions without decoding row data when the relevant column statistics are present; a missing statistic cannot establish that the file has no matching values. (src: local-columnar-data-inspection)
 - The bundled [footer scanner](../scripts/parquet_footer_min_ts.py) reads integer INT32/INT64 min/max statistics and interprets them directly as Unix seconds; timestamps encoded in another unit or representation, or lacking usable statistics, are outside that assumption. (src: local-columnar-data-inspection, 2026-06-09)
+
+## DuckDB file-backed databases
+
+- DuckDB infers a file-backed database's catalog name from its filename stem. A shadow copy named `<name>.duckdb` that also creates a schema `<name>` makes two-part SQL (`<name>.table`) ambiguous between the catalog and the schema. Give the file a distinct name or use three-part names, and test with a real file-backed database, not `:memory:`. (src: duckdb-catalog-name-collision)

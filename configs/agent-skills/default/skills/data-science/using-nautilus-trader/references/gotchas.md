@@ -107,6 +107,7 @@ depth on any area follow the per-topic reference linked in each section.
 | Not checking `cache.instrument(...)` for None (live) | May not be loaded yet | On None: log + `self.stop()` + return |
 | Not cancelling timers in `on_stop` | Timers leak across stop/resume | `self.clock.cancel_timer(name)` for every timer |
 | Timer/alert without a callback, expecting a named method | TimeEvent falls back to `on_event` | Pass a callback or handle in `on_event` |
+| Cancelling a timer/alert by name when it may have just fired (TestClock, observed on 1.230) | The clock batches alerts before handlers: a due alert has already left `clock.timer_names` while its callback is still queued, and a timer armed in `on_order_filled` can fire after a later tick | Cancel only `if name in self.clock.timer_names`, always discard local bookkeeping for the name, and do not suppress `KeyError` |
 | Storing runtime state back into config | Config is construction data (runtime IDs live on the Rust core) | Read via `self.config`; mutable state as instance attrs |
 | `modify_order` with unchanged qty/price/trigger | At least one value must differ | Ensure a real change |
 | `modify_order` on an exec-algo-controlled order | Only cancelable once under an algo | Cancel, don't modify |

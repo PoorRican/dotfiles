@@ -152,6 +152,10 @@ Pick the closest existing category. Don't invent new top-level categories casual
 
 `metadata.hermes.related_skills` unions both trees (`skills/` in-repo and `~/.hermes/skills/`) at load time. You CAN reference a user-local skill from an in-repo skill, but it won't resolve for other users who clone the repo fresh. Prefer referencing only in-repo skills from in-repo skills. If a frequently-referenced skill lives only in `~/.hermes/skills/`, consider promoting it to the repo.
 
+## Splitting Interactive and Structural Skills
+
+When a skill is half interview/orchestration flow and half durable-artifact contract, split it into a paired interactive and structural skill. See [references/interactive-vs-structural-split.md](references/interactive-vs-structural-split.md) for the split, the naming and cross-linking pattern, and when not to split.
+
 ## Editing Existing In-Repo Skills
 
 - **Small fix (typo, added pitfall, tightened trigger):** `skill_manage(action='patch', name=..., old_string=..., new_string=...)` works fine on in-repo skills.

@@ -1,6 +1,6 @@
 ---
 name: workstation-and-agent-tooling
-description: "Use for personal workstation and agent-runtime tooling: Hermes profiles and Nix/Home Manager daemon configuration, native desktop popups, Waybar and Neovim runtime issues, interactive TUI and agent-harness testing, notebook kernels and FIM completions, skill packaging, and secure remote secret installation."
+description: "Use for personal workstation and agent-runtime tooling: Hermes profiles and Nix/Home Manager daemon configuration, native desktop popups, Waybar and Neovim runtime issues, interactive TUI and agent-harness testing, notebook kernels and FIM completions, skill packaging, secure remote secret installation, and a locked GNOME login keyring that hangs gh or git-over-https."
 ---
 
 # Workstation and agent tooling
@@ -14,6 +14,9 @@ Workstation failures often come from runtime ownership or version-specific behav
 | Working with Hermes profile ownership, Nix merges, or daemon configuration | [references/hermes-profiles-and-nix.md](references/hermes-profiles-and-nix.md) |
 | Debugging notebook FIM prompts or monitoring a shared notebook kernel | [references/notebook-kernels-and-completions.md](references/notebook-kernels-and-completions.md) |
 | Installing or validating a remote credential | [references/secrets-handling.md](references/secrets-handling.md) |
+| `gh` or git-over-https hangs with no prompt because the GNOME login keyring is locked after an autologin boot | [references/locked-login-keyring.md](references/locked-login-keyring.md) |
 | Packaging a skill or assessing a discovered skill | [references/skill-tooling.md](references/skill-tooling.md) |
+| Verifying native prompts, notifications, or input-gated behavior of a desktop app in a private compositor session | [references/isolated-wayland-ui-smoke.md](references/isolated-wayland-ui-smoke.md) |
+| Deploying hyprlock and hypridle, or debugging lock failures, idle timers, and DPMS on Hyprland | [references/hyprland-lock-and-idle.md](references/hyprland-lock-and-idle.md) |
 
-Canonical docs: [Hermes profile contract](/home/swe/dotfiles/configs/hermes/README.md) — current profile composition, configuration ownership, and runtime-state boundaries.
+Canonical docs: Hermes profile contract (`configs/hermes/README.md` in the dotfiles repository) — current profile composition, configuration ownership, and runtime-state boundaries.

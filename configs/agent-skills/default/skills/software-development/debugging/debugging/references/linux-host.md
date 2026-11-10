@@ -35,3 +35,17 @@ Scope: durable Linux authentication, device, memory, filesystem, and mount-names
 - Before formatting a device that remains busy, do not bypass the exclusivity failure with force; identify and release its holders, then require `blockdev --rereadpt` to succeed before the destructive operation. (src: hidden-mount-namespace-block-device-busy; 2026-08-24)
 - Stale container-storage configuration that still points at a retired mount can make later invocations fail or recreate state on the wrong filesystem; the obsolete reference remains a migration/removal issue. (src: hidden-mount-namespace-block-device-busy; 2026-08-24)
 
+
+## GPU driver and kernel-module mismatch
+
+- A GPU workload failing with an NVML "Driver/library version mismatch" (pods in `StartError`, `nvidia-smi` failing) after a distribution upgrade without a reboot: compare the loaded kernel module (`head -1 /proc/driver/nvidia/version`) with the installed userspace (on Arch, `pacman -Q nvidia-utils`), and check that `/usr/lib/modules/$(uname -r)` still exists and `dkms status` built the module for the installed kernel. (src: gpu-driver-mismatch, 2026-10-24)
+- A module reload (`rmmod nvidia_uvm nvidia_drm nvidia_modeset nvidia`, then `modprobe nvidia`) works only when the running kernel's modules survived the upgrade and every GPU user is stopped; otherwise only a reboot does. Both interrupt every GPU consumer and are the machine owner's decision. Prevention: reboot after any kernel or `nvidia-*` upgrade before the next GPU workload. (src: gpu-driver-mismatch, 2026-10-24)
+
+## Pausing supervised processes
+
+- Pausing a systemd-supervised campaign started with `uv run python ...`: `SIGSTOP` on the unit's MainPID can stop only the `uv` wrapper and leave the Python scheduler free to launch more work. Inspect `ps --ppid <MainPID>`, confirm the exact driver command, stop the real scheduler too, and verify its `STAT` contains `T` (observed: wrapper `Tsl`, child still `Sl` until stopped, then `Tl`). Signal only the scheduler and wrapper PIDs, not the whole cgroup, when existing SDK clients and remote jobs must survive. Pausing also pauses ledger reconciliation, so record in-flight run ids and disclose that terminal metadata may not yet be reconciled. (src: pausing-supervised-scheduler, 2026-10-08)
+- `SIGSTOP` is an acceptable pause only for a pure scheduler: stopping a process that holds a data stream open (a `btrfs send`, for example) was an unsafe pause in practice. (src: pausing-supervised-scheduler, 2026-10)
+
+## Filesystem notification pitfalls
+
+- If a producer publishes with `os.link(tmp, final)` and then unlinks `tmp`, a watcher subscribed only to `IN_CLOSE_WRITE|IN_MOVED_TO` misses it, because a hard link emits `IN_CREATE`. Include `IN_CREATE`, start watching before a single race-closing directory scan, filter on the exact file name, and fail closed on queue overflow. A notification proves publication, not producer success. (src: inotify-hardlink-publish)

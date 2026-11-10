@@ -23,3 +23,8 @@ Scope: Cargo workspace formatting and lint boundaries, deletion correctness, and
 ## Open conflict: history rewriting
 
 - Open question: which worktree ownership and branch preconditions, if any, make history rewriting appropriate during a workspace cutover? The deletion source warns against reset in a shared tree, but later recommends a soft reset for squashing without reconciling those conditions; neither recommendation is general guidance. (src: rust-workspace-deletion-refactor, 2026-07-26)
+
+## Toolchain drift and shared build directories
+
+- CI clippy on an unpinned stable toolchain (no `rust-toolchain.toml`) means a new stable release can turn the main branch red: one release (rustc 1.98) added a lint, `clippy::result_large_err`, that fired in several places. Reproduce with the CI toolchain (`rustup toolchain install <VER> --profile minimal --component clippy,rustfmt`, then `cargo +<VER> clippy ... -D warnings`) and prefer a targeted `#[allow]` on cold paths over a mass refactor. (src: unpinned-toolchain-drift, 2026)
+- Sharing one `CARGO_TARGET_DIR` across worktrees of the same Rust workspace makes gates untrustworthy: path crates are keyed by workspace-relative path with mtime-based freshness, so another worktree's build counts as Fresh. The safe pattern on btrfs: `cp -a --reflink=always target <private copy>`, touch the sources, run the gate, delete the copy afterwards. (src: shared-target-dir-freshness, 2026-09-27)

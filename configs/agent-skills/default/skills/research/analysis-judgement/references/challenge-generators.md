@@ -23,3 +23,8 @@ Questions for making an attractive conclusion answer to live alternatives, witho
 - A useful challenge is falsifiable, distinguishes live hypotheses, is cheap relative to its information, and could change the decision. If it does not meet that bar, it may be dropped or carried as a named risk; the same standard applies to criticism of one's own conclusion. (src: challenge-the-obvious)
 - A measured null forecloses only what was measured under those conditions; it does not rule out a different, causally plausible and reversible hypothesis. The original frame may be correct: frame movement is a possible result of pressure-testing, not a success condition. (src: challenge-the-obvious)
 - Once a challenge is answered, accepted as a named risk, or found not decision-bearing, repeated doubt without new evidence adds little. A weaker surviving claim may call for a correspondingly weaker conclusion; these are useful outcomes, not a required three-bucket ritual. (src: challenge-the-obvious)
+
+## Fallbacks and invariants
+
+- Before adding a guessing fallback (deriving an identifier or structure from a name), does its trigger condition already guarantee that the stored answer exists? If a field is supplied only at creation, "present" is authoritative and "absent" can mean "already recorded in the index", not "unknown", so guessing at absence may contradict a correct record. (src: fallback-trigger-completeness)
+- Which invariant between the authoritative index and the derived table makes the fallback unnecessary, and what would break that invariant? (src: fallback-trigger-completeness)

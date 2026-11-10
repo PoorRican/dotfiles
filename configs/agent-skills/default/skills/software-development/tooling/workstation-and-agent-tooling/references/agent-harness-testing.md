@@ -23,3 +23,7 @@ These observations belong to the live agent-rail suite on Zellij 0.44.3, not to 
 - If the `omp` executable is absent, the suite can still observe a visible, held, exited active session with its slot suppressed; absence of the executable alone is not evidence that the session should auto-close. (src: zellij-agent-rail-live-suite; 2026-08-31)
 - A pre-action pane with T1 visible while its slot is suppressed is not proof of a successful post-close state; emitting `CloseOwnedTerminal` from visibility alone could close T1 while leaving the slot suppressed. (src: zellij-agent-rail-live-suite; 2026-08-31)
 - A stale “close” elsewhere in a captured screen can falsely satisfy a close-confirmation check; the suite distinguishes fresh PTY bytes containing “Press x” after output is pumped. (src: zellij-agent-rail-live-suite; 2026-08-31)
+
+## Native GUI smoke
+
+- Graphical apps need a compositor, not a pty. For a private headless compositor, private D-Bus, virtual-pointer input, or a sandboxed nested compositor, see [isolated-wayland-ui-smoke.md](isolated-wayland-ui-smoke.md). A synthetic pointer proof is not a human-click test.

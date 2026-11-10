@@ -29,3 +29,11 @@ Scope: distinguish memory consumers and computational changes before interpretin
 
 
 - A memory optimization that changes when backward occurs can alter the recipe, not merely its resource use. Per-item loss weighting, batch-dependent statistics, and the model/fit identity are separate equivalence questions. (src: training-memory-and-nan-localization)
+
+## Dated observations and traps
+
+- `nn.TransformerEncoderLayer` in eval mode returned all-NaN for a finite 3-D float `src_mask` of shape `[N*heads, S, S]` (torch 2.14.0+cu130, 2026-09-21). Training worked, and the NaNs first appeared at a frozen eval. The eval-mode fast path (`torch._transformer_encoder_layer_fwd`) exists in that version, but the NaN itself was reported and not re-run [INFERENCE]; compare train-mode and eval-mode outputs on the same finite inputs and mask before trusting a mask path. (src: transformer-eval-mask-nan, 2026-09-21)
+- PyArrow Parquet publication raises `ArrowCapacityError` at about 2 GiB of `large_binary` data in one column chunk (32-bit BYTE_ARRAY offsets) even when the finished file would compress tiny. Bound the row-group size and prove the fix with a real table above 2 GiB. It surfaced as a normal error exit (1), not OOMKilled, so raising memory requests does nothing. (src: parquet-2gib-limit, 2026-10-08)
+- CPython 3.13 `ProcessPoolExecutor` workers that return large objects: a task-level `finally` cleanup runs before the result is pickled, so it cannot release memory the result still holds. Keep the cleanup pass (`gc.collect()` plus `malloc_trim`) at the start of each task and add the same pass after preparation; a `finally`-only cleanup left worker PSS about 1.7x higher in one measured run (2026-10-07). (src: processpool-result-memory, 2026-10-07)
+- Retrying a PyTorch batch after CUDA OOM: do not recurse inside the `except` block. The live traceback keeps the failed forward's frame locals and activations alive, so smaller retries falsely OOM and `empty_cache` cannot free them. Leave the `except` scope first, then retry, and add a weakref-on-tensor regression test showing the failed activations are collectable. (src: cuda-oom-retry, 2026-10)
+- Native heap attribution (jemalloc profiling, RSS versus live heap): see [native-heap-attribution.md](native-heap-attribution.md).

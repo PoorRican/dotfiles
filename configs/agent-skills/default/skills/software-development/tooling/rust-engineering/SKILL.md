@@ -1,6 +1,6 @@
 ---
 name: rust-engineering
-description: "Use for Rust workspace engineering: dependency adoption and feature unification, replacing in-house layers with crates, borrowed/zero-copy decoding and honest benchmarks, uv-built Rust extensions, CI gates, deletion refactors, and multi-crate commit boundaries."
+description: "Use for Rust workspace engineering: dependency adoption and feature unification, replacing in-house layers with crates, borrowed/zero-copy decoding and honest benchmarks, uv-built Rust extensions, CI gates, deletion refactors, and multi-crate commit boundaries. Also covers async and object-store runtime traps and reclaiming Cargo disk space."
 ---
 
 # Rust engineering
@@ -13,3 +13,6 @@ Rust changes often look correct by compiling while silently changing feature set
 | Adopting a crate, replacing an in-house layer, or evaluating resolved dependency cost | [references/dependency-adoption.md](references/dependency-adoption.md) |
 | Debugging stale Rust extensions built through a uv workspace or preserving cross-language map order | [references/uv-rust-extensions.md](references/uv-rust-extensions.md) |
 | Changing workspace gates, deleting Rust surface, or splitting workspace additions | [references/workspace-gates-cutovers-and-commit-splits.md](references/workspace-gates-cutovers-and-commit-splits.md) |
+| Chasing a stale compiled extension after a branch switch, a copied virtualenv, or a stale uv overlay wheel | [references/uv-rust-extensions.md](references/uv-rust-extensions.md) |
+| Investigating a dead spawned task, silently missing events, or object_store path keys that differ between local and S3 | [references/async-and-storage-runtime-traps.md](references/async-and-storage-runtime-traps.md) |
+| Reclaiming disk from Cargo caches, `target/` directories, or old worktrees | [references/cargo-disk-cleanup.md](references/cargo-disk-cleanup.md) |

@@ -1,6 +1,6 @@
 ---
 name: performance-and-throughput
-description: "Use when a pipeline, model, training loop, or data path is slow or memory-hungry; for cost attribution, performance-claim review, RSS growth, CPU/GPU benchmarking, loader starvation, CPU-bound training, container-only CUDA faults, streaming-cache thrash, and memory or numerical blowups."
+description: "Use when a pipeline, model, training loop, or data path is slow or memory-hungry; for cost attribution, performance-claim review, RSS growth, CPU/GPU benchmarking, loader starvation, CPU-bound training, container-only CUDA faults, streaming-cache thrash, and memory or numerical blowups. Also covers fused Triton kernel replacement and native-heap (jemalloc) attribution."
 ---
 
 # Performance and throughput
@@ -13,3 +13,5 @@ Performance claims often confuse a measured component with end-to-end cost, or m
 | Diagnosing RSS growth, peak memory, accumulation, or non-finite values | [references/memory-growth-and-numerics.md](references/memory-growth-and-numerics.md) |
 | Distinguishing CPU, GPU, loader, and step bottlenecks or investigating CUDA faults | [references/training-loop-throughput.md](references/training-loop-throughput.md) |
 | Working with Mosaic StreamingDataset caches, shuffling, or merged shard indexes | [references/mosaic-streaming.md](references/mosaic-streaming.md) |
+| Replacing an eager PyTorch recursion or custom autograd Function with fused Triton kernels | [references/fused-kernel-replacement.md](references/fused-kernel-replacement.md) |
+| Attributing a native (Rust/C) service's RSS to live heap, allocator retention, or a leak, or reading jemalloc profiles | [references/native-heap-attribution.md](references/native-heap-attribution.md) |

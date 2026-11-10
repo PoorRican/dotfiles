@@ -270,6 +270,8 @@ For this user's dotfiles repo:
 - `references/neovim-obsidian-markdown-wiki-stack.md` — Obsidian/wiki Markdown stack for this dotfiles Neovim setup: `obsidian.nvim`, `markdown-oxide`, `render-markdown.nvim`, declarative dependencies, Tree-sitter main-branch API pitfall, and headless verification checks.
 - `references/helix-pkm-language-server-profile.md` — Helix PKM profile pattern: mapping Helix language-support rows to nixpkgs LSP packages, syntax-only filetype caveats, `superhtml`/`markdown-oxide` overrides, Rustup `rust-analyzer` conflict handling, and `hx --health` verification.
 - `references/bun-global-agent-overlay.md` — pattern for bun-installed global coding agents when nixpkgs lags the required Bun version: package metadata checks, cross-platform source overlay, `$HOME/.bun/bin` activation PATH, shared module wiring, and runtime smoke tests.
+- `references/flake-input-proof-chain.md` — proof chain for "is this package coming from the intended flake input and revision": input, consumer, host enable, lock pin, narrow `nix eval`; version-bump and dirty-lockfile checks, evaluation-passes-but-build-fails triage, and Home Manager "would be clobbered" handling.
+- `references/live-activation-safety.md` — switching a running NixOS host safely: running-generation provenance versus the deploy checkout, build/diff-closures/dry-activate with the `systemd-sysctl` red flag, rollback timers and an independent session, workload-level verification, and landing the change.
 
 ## Verification Checklist
 

@@ -9,13 +9,21 @@
   coding = [
     "agent-orchestration"
     "analysis-judgement"
+    "authoritative-upstream-behavior-research"
     "code-liveness-and-refactoring"
     "data-inspection"
     "debugging"
     "documentation-curation"
+    "gate-and-exit-rule-evaluation"
     "git-and-github"
+    "github-actions-throughput-analysis"
+    "kubernetes-capacity-evidence"
+    "kueue-troubleshooting"
     "marimo-pair"
+    "omp-runtime-recipes"
     "performance-and-throughput"
+    "probabilistic-forecast-evaluation"
+    "prometheus-alert-rule-tuning"
     "prose-writing-style"
     "rust-engineering"
     "using-nautilus-trader"
@@ -71,7 +79,7 @@
 
   hosts = {
     cbox = {
-      coding = [ ];
+      coding = [ "cbox-desktop-live-preview" ];
       hermes = [
         "media-transfer-to-te-amo"
         "te-amo-tv-show-layout"

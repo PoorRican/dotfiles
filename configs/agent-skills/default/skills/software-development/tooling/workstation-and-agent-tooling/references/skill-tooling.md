@@ -10,3 +10,7 @@ Scope: Durable packaging facts and one quality check for externally discovered s
 ## Skill discovery
 
 - Search ranking or install counts alone are weak evidence for recommending a skill; source review and evidence of adoption provide a stronger basis. (src: find-skills; 2026-06-18)
+
+## Probing what a session actually loads
+
+- To see which skills a fresh agent session really discovers, as opposed to what a packaging layout says, run a non-interactive probe such as `omp -p --mode json --no-session --tools=read '<ask it to list its skill names>'` and read the assistant text events from the JSON stream [INFERENCE: the stream shape was not re-run here]. Discovery layouts change, so probe rather than trust a remembered directory map. (src: skill-discovery-probe, 2026-10-03)

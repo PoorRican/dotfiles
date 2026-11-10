@@ -14,3 +14,11 @@ Scope: surviving evidence and scope-control facts when an agent process, fan-out
 
 - `git checkout` or `git restore` of a path returns it to the committed version and can erase every uncommitted edit in that file. For data-loss prevention, preserve a known pre-edit copy or reverse only the intended change rather than treating the repository version as a backup. (src: agent-transcript-file-recovery; source 2026-08-06)
 - What surviving callers, tests, or adjacent files constrain the missing content, and which source provides the verbatim version rather than a reconstruction? (src: agent-transcript-file-recovery)
+
+## Before parallel semantic refactors
+
+- In an uncommitted shared tree, preserve byte snapshots of ALL owned files, hashes of unrelated work, and an inventory of existing test functions before parallel semantic refactors begin. Implementers deleted regression cases while replacing obsolete tests, and only a suite-count regression exposed it. After recovery, restore behavior coverage, not just the pass count; two copies derived from one recollection are not independent corroboration; compare a recovered AST test inventory with the pre-overwrite snapshot. (src: pre-refactor-snapshot)
+
+## Harness quirk (dated observation)
+
+- An OMP task subagent that yields incrementally can settle as "failed (exit 1) schema_violation" (expected string, received array) although every yield returned ok; the work is intact in the persisted transcript (`history://<job id>`). Recover from the transcript tail instead of re-running, and instruct agents to yield each schema section exactly once. The cause (duplicate-yield aggregation) is not documented upstream, so treat this as an observation of one omp version [INFERENCE]. (src: omp-yield-schema-violation)

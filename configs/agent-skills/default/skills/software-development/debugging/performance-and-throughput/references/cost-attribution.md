@@ -24,6 +24,7 @@ Scope: mechanisms for locating cost and deciding what a benchmark actually estab
 - Component-off comparisons are interpretable when a real production dial suppresses its calls and the remaining consumer-visible inputs, outputs, and attempts stay equivalent. If disabling it also removes a downstream consumer, that consumer’s cost is part of the measured delta. (src: load-matched-cost-decomposition)
 - Shared-host absolutes drift with co-tenant load. Back-to-back comparisons under matched conditions support a ratio or delta; an absolute from a quiet run is a separate anchor, not a substitute for the matched comparison. (src: load-matched-cost-decomposition)
 - A batch’s wall time is not each member’s historical per-item latency. Batching can change both measured latency semantics and downstream behavior when timing is itself an input. (src: load-matched-cost-decomposition)
+- Report a cautious midpoint between the peak and an unchanged confirmation run rather than presenting the peak as sustained throughput. Quote benchmark spread alongside any percent delta: a 1-2% difference can sit inside harness noise unless runs are paired and drift-cancelled. (src: benchmark-reporting, 2026-07-27)
 
 ## Fit, compatibility, and speed
 
@@ -32,3 +33,12 @@ Scope: mechanisms for locating cost and deciding what a benchmark actually estab
 - For small-batch inference, launch and fixed latency can dominate, so peak-FLOPS ratios may greatly overstate the measured CPU/GPU speed ratio. (src: checkpoint-cpu-gpu-benchmark-from-fixtures)
 - A faster implementation is an optimization of a validated path only when values at the consumer’s actual reads remain equivalent. Similar state can omit observation moments and change decisions, so equivalence is judged at the consumer’s reads and in light of any changed timing or observation frequency. (src: load-matched-cost-decomposition)
 
+## GPU microbenchmark hygiene
+
+- Warm up before timing: Triton compiles per specialization and cuFFT builds plans on first use, so the first call of each shape measures setup, not steady state. (src: gpu-measurement-hygiene, 2026-10-25)
+- `torch.profiler` with CUDA activities ran a 32 GiB pod out of memory after about 15 s. Profile 1-25% of a batch at production block sizes and take timings from separate unprofiled warm runs. (src: gpu-measurement-hygiene, 2026-10-25)
+- Training on some GPUs is not bitwise reproducible run to run (about 1e-9 relative on one unified-memory GPU class, 2026-10-25). Rerun the baseline to measure that spread before attributing a difference to a code or image change. (src: gpu-measurement-hygiene, 2026-10-25)
+
+## NumPy hot-loop negatives
+
+- In one dated tuning pass over a NumPy rollup loop (2026-07), these changes did not help: a dense slot index in place of compacted active indices, a flattened-offset single `searchsorted`, `int8` outputs, and `int32` indices. Measure narrower dtypes and flatter structures instead of assuming they are faster. (src: numpy-hotloop-tuning, 2026-07)

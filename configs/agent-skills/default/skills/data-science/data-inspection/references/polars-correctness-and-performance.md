@@ -8,6 +8,8 @@ Scope: Preserve Polars semantics that can silently alter row meaning, and point 
 - A bare aggregation inside `with_columns` broadcasts the global scalar to every row; `.over(group)` produces a group aggregate aligned to each row. (src: polars, 2026-07-24)
 - A comparison against null produces null, and filters retain only true rows, so `filter(pl.col("x") > value)` drops null-valued rows; including those rows requires a separate `.is_null()` condition. (src: polars, 2026-07-24)
 - Join null-key behavior is semantic: null keys do not match by default, so inner joins can lose those rows; `nulls_equal=True` enables null-key matches when that is the intended meaning. (src: polars, 2026-07-24)
+- `pl.lit(1).cum_sum().over(group)` does not count rows per group: it gave 1 on every row. Use `pl.int_range(pl.len()).over(group)` (add 1 for a 1-based count). (src: polars, 2026-09-23)
+- Polars sets `_RJEM_MALLOC_CONF` in the process environment on first import (observed on 1.40.1), so an environment snapshot taken before the import shows it as a change; take baselines after the import. (src: polars; version-dated)
 
 ## Planning and migration
 

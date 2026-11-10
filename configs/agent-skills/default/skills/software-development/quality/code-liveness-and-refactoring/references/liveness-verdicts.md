@@ -9,6 +9,7 @@ Scope: separating implementation, data flow, active integration, and observed ex
 - Do module headers describe stage ownership, and does the current orchestrator confirm that boundary? These can be more authoritative than stale per-file assumptions or old comments about downstream consumers. (src: refactor-aware-pipeline-rederivation, 2026-09-11; verifying-wired-vs-stale-code, 2026-08-31)
 - Passing tests support implementation correctness, not integration into the active pipeline or execution of its caller. Does the production path, its prerequisites, and any documented successor confirm current integration separately? (src: staleness-and-dead-code-investigation, 2026-08-31; staleness-liveness-audit, 2026-08-31; verify-pipeline-code-liveness, 2026-08-31)
 - Could a parked or legacy output area hold the consumer or attempt that explains apparent orphaned work? Such a match may explain intent without making the old attempt part of the current production path. (src: code-liveness-triage, 2026-08-31)
+- Before archiving or removing a legacy directory, verify cross-implementation consumers: another module may import shared vocabulary (a format class or artifact type) from it, or duplicate its format to avoid a heavier dependency. Give shared vocabulary a neutral owner apart from its adapter; deletion still needs its own authorization. (src: legacy-dir-live-dependency)
 
 ## Execution evidence and limits
 

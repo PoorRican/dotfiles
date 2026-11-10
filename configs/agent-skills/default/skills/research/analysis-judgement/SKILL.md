@@ -13,3 +13,4 @@ A plausible result can still answer the wrong question, use the wrong population
 | Reading grouped data, staged counters, or a time-bounded evaluation | [references/denominators-grains-and-boundaries.md](references/denominators-grains-and-boundaries.md) |
 | Pressure-testing an idea or deciding whether to build an experiment | [references/ideas-and-spikes.md](references/ideas-and-spikes.md) |
 | Reviewing empirical results or attributing a gap to multiple mechanisms | [references/result-audits-and-residuals.md](references/result-audits-and-residuals.md) |
+| Calibrating a clustered-interval claim rule's true size by simulating its null before freezing it | [references/claim-rule-calibration.md](references/claim-rule-calibration.md) |
