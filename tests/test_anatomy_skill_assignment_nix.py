@@ -16,10 +16,7 @@ class AnatomySkillAssignmentTests(unittest.TestCase):
     def setUpClass(cls):
         expression = r'''let
           f = builtins.getFlake "path:REPO_PATH";
-          targets = {
-            omp = ".omp/agent/skills/";
-            opencode = ".config/opencode/skills/";
-          };
+          prefix = ".omp/agent/skills/";
         in builtins.mapAttrs (_: home:
           let
             c = home.config;
@@ -27,10 +24,8 @@ class AnatomySkillAssignmentTests(unittest.TestCase):
             keys = builtins.attrNames c.home.file;
           in {
             ompEnabled = c.programs.agent-skills.enable && c.programs.agent-skills.agents.omp;
-            agents = builtins.mapAttrs (_: prefix:
-              map (key: lib.removePrefix prefix key)
-                (builtins.filter (key: lib.hasPrefix prefix key) keys)
-            ) targets;
+            omp = map (key: lib.removePrefix prefix key)
+              (builtins.filter (key: lib.hasPrefix prefix key) keys);
             managed = builtins.filter
               (key: lib.hasInfix ".omp/agent/managed-skills" key) keys;
           }
@@ -52,24 +47,7 @@ class AnatomySkillAssignmentTests(unittest.TestCase):
         for host, config in self.hosts.items():
             with self.subTest(host=host):
                 if config["ompEnabled"]:
-                    self.assertEqual(config["agents"]["omp"].count("anatomy"), 1)
-
-    def test_other_agents_do_not_receive_anatomy(self):
-        for host, config in self.hosts.items():
-            for agent, names in config["agents"].items():
-                if agent != "omp":
-                    with self.subTest(host=host, agent=agent):
-                        self.assertNotIn("anatomy", names)
-
-    def test_existing_shared_coding_selection_is_preserved(self):
-        for host, config in self.hosts.items():
-            if not config["ompEnabled"]:
-                continue
-            omp_shared = set(config["agents"]["omp"]) - {"anatomy"}
-            for agent, names in config["agents"].items():
-                if agent != "omp" and names:
-                    with self.subTest(host=host, agent=agent):
-                        self.assertEqual(omp_shared, set(names))
+                    self.assertEqual(config["omp"].count("anatomy"), 1)
 
     def test_omp_managed_skill_root_is_not_owned(self):
         for host, config in self.hosts.items():

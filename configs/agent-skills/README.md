@@ -54,15 +54,13 @@ categorized view per Hermes profile from the same roots.
   `.no-bundled-skills` prevents Hermes from reseeding the full bundled
   catalog. See `configs/hermes/README.md`.
 - **OMP** receives a Nix-built flat union under `~/.omp/agent/skills`.
-- **OpenCode** receives a Nix-built flat union under
-  `~/.config/opencode/skills`.
 
-OMP and OpenCode receive only the names in the explicit `coding` collection, not the
-entire catalog. Home Manager links each selected top-level member of the Nix-built
-views into the agent's mutable skill root; it does not recursively expand bundles
-during Nix evaluation. Unrelated runtime entries with other names therefore remain
-possible. A same-name legacy entry is replaced by the centralized
-copy.
+OMP receives only the names in the explicit `coding` and `omp` collections, not
+the entire catalog. Home Manager links each selected top-level member of the
+Nix-built view into the agent's mutable skill root; it does not recursively
+expand bundles during Nix evaluation. Unrelated runtime entries with other names
+therefore remain possible. A same-name legacy entry is replaced by the
+centralized copy.
 
 OMP's `~/.omp/agent/managed-skills` remains agent-owned and is never managed by this
 module. OMP can continue creating and updating skills there independently of the

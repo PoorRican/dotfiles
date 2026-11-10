@@ -1,4 +1,4 @@
-# Centralized Agent Skills distribution for coding agents.
+# Centralized Agent Skills distribution for OMP.
 #
 # Canonical source layout:
 #   configs/agent-skills/default/skills/<category>/<skill>/SKILL.md
@@ -6,8 +6,8 @@
 # Distribution policy:
 #   configs/agent-skills/collections.nix
 #
-# Nix builds a flat union directory for each coding agent. Home Manager links
-# the top-level members of that view into mutable agent roots, leaving room for
+# Nix builds a flat union directory for OMP. Home Manager links the top-level
+# members of that view into the mutable agent root, leaving room for
 # agent-owned entries with other names.
 #
 # Hermes profiles select from the same catalog roots through hermes.nix; this
@@ -27,7 +27,6 @@ let
   ompNames = lib.unique (codingNames ++ (collections.omp or [ ]));
   ompSkills = catalog.select ompNames;
 
-  codingView = skillsLib.mkFlatView { name = "coding-${label}"; skills = codingSkills; };
   ompView = skillsLib.mkFlatView { name = "omp-${label}"; skills = ompSkills; };
 
   mkAgentFiles = target: view: skills:
@@ -68,7 +67,6 @@ in {
 
     agents = {
       omp = lib.mkEnableOption "OMP skill distribution" // { default = true; };
-      opencode = lib.mkEnableOption "OpenCode skill distribution" // { default = true; };
     };
   };
 
@@ -100,39 +98,32 @@ in {
         label = "programs.agent-skills";
       };
 
-      home.file = lib.mkMerge [
-        (lib.mkIf cfg.agents.omp (mkAgentFiles ".omp/agent/skills" ompView ompSkills))
-        (lib.mkIf cfg.agents.opencode (mkAgentFiles ".config/opencode/skills" codingView codingSkills))
-      ];
+      home.file = lib.mkIf cfg.agents.omp (mkAgentFiles ".omp/agent/skills" ompView ompSkills);
 
       home.activation.prepareAgentSkillRoots = lib.hm.dag.entryBetween
         [ "linkGeneration" ]
         [ "writeBoundary" ]
         ''
         legacy_root="''${XDG_STATE_HOME:-$HOME/.local/state}/agent-skills/pre-centralization"
-        for relative in \
-          ".omp/agent/skills" \
-          ".config/opencode/skills"
-        do
-          root="$HOME/$relative"
-          if [ -L "$root" ]; then
-            rm "$root"
-          fi
-          mkdir -p "$root"
-          for name in ${managedSkillNames}; do
-            target="$root/$name"
-            backup="$legacy_root/$relative/$name"
-            if [ -L "$target" ]; then
-              rm "$target"
-            elif [ -e "$target" ]; then
-              if [ -e "$backup" ] || [ -L "$backup" ]; then
-                echo "Refusing to replace $target: migration backup already exists at $backup" >&2
-                exit 1
-              fi
-              mkdir -p "$(dirname "$backup")"
-              mv "$target" "$backup"
+        relative=".omp/agent/skills"
+        root="$HOME/$relative"
+        if [ -L "$root" ]; then
+          rm "$root"
+        fi
+        mkdir -p "$root"
+        for name in ${managedSkillNames}; do
+          target="$root/$name"
+          backup="$legacy_root/$relative/$name"
+          if [ -L "$target" ]; then
+            rm "$target"
+          elif [ -e "$target" ]; then
+            if [ -e "$backup" ] || [ -L "$backup" ]; then
+              echo "Refusing to replace $target: migration backup already exists at $backup" >&2
+              exit 1
             fi
-          done
+            mkdir -p "$(dirname "$backup")"
+            mv "$target" "$backup"
+          fi
         done
       '';
     })
