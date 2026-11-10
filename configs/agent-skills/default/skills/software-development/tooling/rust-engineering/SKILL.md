@@ -1,6 +1,6 @@
 ---
 name: rust-engineering
-description: "Use for Rust workspace engineering: dependency adoption and feature unification, replacing in-house layers with crates, borrowed/zero-copy decoding and honest benchmarks, uv-built Rust extensions, CI gates, deletion refactors, and multi-crate commit boundaries. Also covers async and object-store runtime traps and reclaiming Cargo disk space."
+description: "Use for Rust workspace engineering: dependency adoption and feature unification, replacing in-house layers with crates, borrowed/zero-copy decoding and honest benchmarks, uv-built Rust extensions, CI gates, deletion refactors, and multi-crate commit boundaries. Also covers async and object-store runtime traps and reclaiming Cargo disk space. Also covers supervised cache-bounded Cargo verification and scoped source-module evidence."
 ---
 
 # Rust engineering
@@ -16,3 +16,4 @@ Rust changes often look correct by compiling while silently changing feature set
 | Chasing a stale compiled extension after a branch switch, a copied virtualenv, or a stale uv overlay wheel | [references/uv-rust-extensions.md](references/uv-rust-extensions.md) |
 | Investigating a dead spawned task, silently missing events, or object_store path keys that differ between local and S3 | [references/async-and-storage-runtime-traps.md](references/async-and-storage-runtime-traps.md) |
 | Reclaiming disk from Cargo caches, `target/` directories, or old worktrees | [references/cargo-disk-cleanup.md](references/cargo-disk-cleanup.md) |
+| Supervising cache-bounded Rust verification or qualifying a scoped source-module harness | [references/cargo-bounded-verification.md](references/cargo-bounded-verification.md) |

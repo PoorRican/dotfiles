@@ -9,6 +9,8 @@ Interpretation traps when findings are corrected by another analysis or several 
 - When a confirm-half point estimate has the search-half direction but its confidence interval crosses zero, that can indicate limited power rather than a sign reversal. A post-hoc split remains descriptive. (src: layered-result-audit-ladder, 2026-08-18)
 - A “beats a constant” comparison is directionally informative when the constant was estimated on data inside the scored sample, but is not independent of that sample. Degenerate intervals from small-cluster bootstrap machinery are directional evidence, not precise uncertainty bounds. (src: layered-result-audit-ladder, 2026-08-18)
 - On priced instruments, hit rate can merely restate average price; the price-implied null is a more relevant baseline than a coin-flip comparison. (src: layered-result-audit-ladder, 2026-08-18)
+- Distinguish native model capability from the identity of a qualified scored law, its trained and evaluated targets, archive vocabulary, and what the consumer supports. A missing named endpoint alone does not prove native incapacity; inspect shared trajectories and origin-specific suffix equivalence. Do not replace a frozen mixture with one component or infer joint dependence from separate marginals.
+- In staged timing audits distinguish source receipt, computation readiness, scheduled eligibility, response, consumer receipt, and downstream action. Waiting can overlap computation, so summing both full durations double-counts time. Separate restart and catch-up observations from steady operation and state cross-clock assumptions.
 
 ## Attributing a residual
 

@@ -1,6 +1,6 @@
 ---
 name: prose-writing-style
-description: "Use when brainstorming or discussing with the user, writing plans, answering user questions, or whenever a response needs direct technical prose rather than code, data, or a formal document."
+description: "Use when brainstorming or discussing with the user, writing plans, answering user questions, or whenever a response needs direct technical prose rather than code, data, or a formal document. Also covers Decision-oriented operations briefs comparing fresh evidence with the prior brief and open targets."
 ---
 
 # Prose writing style
@@ -17,6 +17,7 @@ Start with the verdict and its central caveat in one or two **plain, unformatted
 | Distinct sections or comparison axes | Short bold headings on their own line, such as `**Cost:**` or `**How generation works**`, after the unformatted opening. |
 | A real sequence | A numbered list. Each item starts with a short bold lead and continues with one to four complete sentences. |
 | Parallel, enumerable facts | Plain bullets. A simple fact may be one full sentence. |
+| Decision-oriented operations brief | Compare evidence with the prior brief and open targets; see [decision-delta.md](references/decision-delta.md). |
 
 Do not flatten a multi-axis comparison into undifferentiated paragraphs, and do not shred connected reasoning into bullets. Do not use a bolded label followed by a clipped noun phrase as a bullet. Shortening means removing low-value sentences, not collapsing useful structure into a uniform shape.
 

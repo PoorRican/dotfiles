@@ -65,6 +65,8 @@ Output a structured markdown report:
 | Sharpe Ratio | X.XX | X.XX |
 | Win Rate | X% | - |
 | Total Trades | X | - |
+| comparing execution arms on paired signals | [references/paired-execution-controls.md](references/paired-execution-controls.md) |
+| testing payoff bounds from marginal survivals | [references/payoff-containment.md](references/payoff-containment.md) |
 
 ## Risk Metrics
 | Metric | Value |

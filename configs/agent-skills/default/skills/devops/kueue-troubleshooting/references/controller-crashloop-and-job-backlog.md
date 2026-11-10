@@ -12,6 +12,7 @@ Scope: Job submission fails because the Kueue mutating webhook has no endpoint, 
 1. **Check the exit reason first**: `kubectl -n kueue-system get pod <pod> -o jsonpath='{.status.containerStatuses[0].lastState}'`. Two variants share one root cause, a large finished-Job backlog re-reconciled at startup:
    - `OOMKilled` (exit 137) a few seconds after start. Upstream manifests ship a modest default manager memory limit (512Mi); a backlog of well over a thousand finished Jobs has been observed to exceed it, with logs showing only `Reconciling Job` lines before death. Steady-state usage after recovery is far lower.
    - **Leader election lost**: `kubectl -n kueue-system logs <pod> --previous --tail=60` shows lease-lock rate-limiter errors (`client rate limiter Wait returned an error`), failed lease renewals and then `leader election lost`, roughly every five minutes. This points to client-side throttling during the startup re-reconcile of finished Workloads.
+   - Bound log inspection to the relevant controller incarnation and incident interval. A byte-limited response can stop before the interval ends; narrow the start time or split the interval before concluding a later event is absent. Filter large output before returning it.
 2. **Size the backlog per namespace** that submits Jobs:
    ```sh
    for ns in <jobs-ns-1> <jobs-ns-2>; do echo "$ns $(kubectl -n $ns get jobs --no-headers | wc -l)"; done

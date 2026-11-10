@@ -9,6 +9,7 @@ Scope: interpret empty or never-passing gates without mistaking a predicate/plum
 - Does an exact extreme such as zero coverage mean genuine population loss, a denominator/construction defect, or universal undecidability? A gate that has never passed leaves every downstream stage unexercised; independent serial defects may surface one after another. A first local green is not end-to-end completion. (src: unexercised-gate-defect-sweep, 2026-08-13; first-run-path-gate-chain, 2026-08-27)
 - In a worker-backed pipeline, “no output” may hide Pending/configuration failure, a terminated worker, or a launcher that ran inline instead of creating a worker. A phase-only Running filter and absent resource requests can conceal failure reasons; producer/consumer receipt contracts may expose incomparable populations behind a fail-closed gate. (src: first-run-path-gate-chain, 2026-08-27)
 - Could a zero coverage/extreme value be a construction defect rather than a real population count? All-`None` optional columns may infer a `Null` schema and fail when values later appear; explicit schemas prevent the inference artifact. Matching regenerated content digests can show that a repair changed provenance/plumbing without changing the population. (src: unexercised-gate-defect-sweep, 2026-08-13)
+- For a membership-scoped consumer, cover members whose events cross the selection boundary, nonmembers, an explicitly empty selection, and selected members with missing source records.
 
 ## Completion evidence
 

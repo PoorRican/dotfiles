@@ -1,6 +1,6 @@
 ---
 name: git-and-github
-description: "Use for costly Git and GitHub work: shared or concurrently edited checkouts, commit splitting and hooks, index-isolated commits, rebases and squash-merge landings with tree proof, dirty-checkout updates, worktree retirement and loss audits, history purges, stacked or overlapping pull requests, review threads and issue APIs, and recovering lost or misattributed work, and auditing conflict-resolved or delegated merges for silently dropped default-branch content."
+description: "Use for costly Git and GitHub work: shared or concurrently edited checkouts, commit splitting and hooks, index-isolated commits, rebases and squash-merge landings with tree proof, dirty-checkout updates, worktree retirement and loss audits, history purges, stacked or overlapping pull requests, review threads and issue APIs, and recovering lost or misattributed work, and auditing conflict-resolved or delegated merges for silently dropped default-branch content. Also covers capturing and checking patch artifacts; branch, tag and release operations."
 ---
 
 # Git and GitHub
@@ -19,4 +19,6 @@ Shared checkouts, history rewrites and PR stacks fail in ways that a clean statu
 | Reading or posting GitHub issues, PR comments, formal reviews or inline threads, or judging CI and issue-closure evidence | [references/github-api-reviews-and-issues.md](references/github-api-reviews-and-issues.md) |
 | Choosing branch topology, merge order or policy for stacked and overlapping PRs, splitting a dirty tree into a stack, or sweeping review comments across a stack | [references/pr-stacks-merges-and-reviews.md](references/pr-stacks-merges-and-reviews.md) |
 | Auditing a conflict-resolved or delegated merge for default-branch lines it silently dropped, and repairing them with 3-way merges | [references/merge-drop-audit.md](references/merge-drop-audit.md) |
+| Capturing and checking patch artifacts without staging working files | [references/patch-artifacts.md](references/patch-artifacts.md) |
+| Preparing and verifying branch, tag, pull request and release operations | [references/release-operations.md](references/release-operations.md) |
 

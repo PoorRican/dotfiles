@@ -26,6 +26,7 @@ A suspended workload on an idle host usually means the quota controller admitted
 - **An allocator, runtime or binary change resets the evidence.** Re-measure for at least 24 hours on the new build, including the peak load window, before resizing; peaks and slopes from the previous allocator size nothing, and OOM records written before the change are not evidence about the new one (rewrite the manifest comment with the new evidence in the same change).
 - **Requests and limits are different decisions.** A lower request does not reclaim physical memory or cap growth and can worsen OOM and eviction ranking under node pressure; state which of the two a change touches.
 - State the formula and window you used for a request (for example a multiple of the retained working-set peak plus measured growth, rounded up) with the figures, so the next pass can redo it.
+- For contention attribution, retain bounded query responses and a manifest of queries and windows; compare before, during and after at native scrape resolution against actual process wall-clock intervals. Separate receive from transmit and process incarnations. A maximum of rolling p99 estimates is not a pooled p99; interface totals or a configured storage endpoint cannot identify a process or establish historical bytes transferred.
 
 ## Reading the cost of a change
 

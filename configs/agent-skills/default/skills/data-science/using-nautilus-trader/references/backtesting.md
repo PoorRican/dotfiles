@@ -337,6 +337,27 @@ call before `dispose()`):
 Deeper P&L / statistics come from the portfolio analyzer — see
 [portfolio-and-reports.md](portfolio-and-reports.md).
 
+### Qualifying replay and retaining failure evidence
+
+These are test-design recommendations, not a tested runner recipe:
+
+- For an explicitly opted-in simulated-clock replay, require a declared simulated
+  clock; do not relabel missing or recorded clocks as simulated. Keep modeled
+  delivery and order delays separate from unmeasured physical latency: modeled zero
+  is not a speed measurement.
+- Qualify the actual engine and accounting guard with bounded fixtures, replacing
+  only external input boundaries. Inject a failure after real fills and compare
+  cached orders, fill events, positions, account states and strategy-delivered
+  callbacks before disposal. Test primary-run, capture and disposal error
+  precedence separately, and assert that disposal occurs once.
+- For successful old-versus-new parity, compare clocks, fills, settlement and
+  result readouts. Normalize generated identifiers and NaN only in comparison
+  copies, never in retained monetary evidence.
+- Retain zero, missing, failed and budget-exhausted partitions distinctly. When
+  assembling or refolding evidence bundles, verify complete shard identities,
+  source caveats, archive-member bytes and digests, including nested bundles.
+  Refolding development artifacts does not by itself qualify them as receipts.
+
 ### Single engine vs multiple runs
 
 - **One engine, many instruments/strategies** — add all to a single `BacktestEngine`

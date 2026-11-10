@@ -1,0 +1,9 @@
+# Recorded revision fixture discovery
+
+Scope: bounded, read-only discovery of candidate revisions from retained responses.
+
+- Locate retained captures and read the recorder and receipt contract first; a fresh request for final state cannot replace historical observations. Before opening blobs, narrow by manifest and set explicit limits on files, receipt count, distinct bodies and decompressed bytes. Preserve originals read-only and place candidate copies in scratch. (src: recorded-revision-fixtures; method)
+- Establish availability using the recorder's documented full-body receipt clock rather than request start, headers or source event time. Retain integer timestamp precision. If conversion from a monotonic duration is necessary, use the recorder's paired clocks and reject negative elapsed durations; do not assume every format has such a pair. (src: recorded-revision-fixtures; method)
+- Verify exact retained decoded bytes against the recorded digest in its specified scope, retaining exact receipt references and the manifest fingerprint. Lossy text cannot prove the digest of original bytes: recover the original bytes or report the limitation. Verify extracted before-and-after payloads against the copied original responses. (src: recorded-revision-fixtures; method)
+- Compare actual properties and relationships under stable source identity, not just a modification timestamp. Examine pagination, completeness and endpoint-specific empty-response semantics before interpreting an absence as deletion; a partial page cannot establish removal of unseen entities. (src: recorded-revision-fixtures; method)
+- Report only mechanisms observed in the bounded window. A verified transition and its copies are fixture candidates, not automatically an approved ontology, version policy, completed test or published dataset; resolve outstanding update semantics before encoding the design. (src: recorded-revision-fixtures; method)

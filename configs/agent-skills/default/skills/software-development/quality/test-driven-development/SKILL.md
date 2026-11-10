@@ -202,6 +202,7 @@ Next failing test for next feature.
 | **Minimal** | One thing. "and" in name? Split it. | `test('validates email and domain and whitespace')` |
 | **Clear** | Name describes behavior | `test('test1')` |
 | **Shows intent** | Demonstrates desired API | Obscures what code should do |
+| [sensor-resource-regressions.md](references/sensor-resource-regressions.md) | Testing resource injection through sensor tick evaluation |
 
 ## Why Order Matters
 

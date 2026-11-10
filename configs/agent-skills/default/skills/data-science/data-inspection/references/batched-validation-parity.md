@@ -1,0 +1,8 @@
+# Batched validation parity
+
+Scope: preserve per-entity validation semantics while reducing repeated reads.
+
+- Read a modest fixed batch of identifiers and release it before the next. Partition latest-evidence windows by complete entity identity; retain conflicting latest ties and deduplicate only fully agreeing evidence. Independent membership predicates may bound I/O but do not prove tuple membership: match the entire selected identity after retrieval. (src: batched-validation-parity; method)
+- Preserve validation ordering, byte hash and length checks, projection comparisons, dates and exhaustive refusal reasons for each entity. Propagate operational or authentication failures rather than treating them as empty history. Keep timings outside readiness metadata, digest inputs and persisted seals. (src: batched-validation-parity; method)
+- Demonstrate the original query-count regression first. Test a batch boundary, distinct latest commit times, conflicting latest ties, healthy and deferred entities, and cross-product identity traps. Compare batch sizes one, small and normal against explicit independent golden expectations for eligibility, refusals, provenance and digests. Exercise publication and blocking checks with pinned offline fixtures and a local artifact store; verify every selected payload independently. (src: batched-validation-parity; method)
+- Compare typed cells exactly, respecting any contractually meaningful ordering, rather than requiring incidental physical row order or byte-identical independently aggregated columnar files. (src: batched-validation-parity; method)

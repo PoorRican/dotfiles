@@ -28,3 +28,9 @@ Scope: distinguish source changes and rendered configuration from the installed,
 
 - A remotely launched CLI wrapper (a systemd unit that starts the real job) needs its failure paths exercised, as the real native wrapper, on isolated CPU-only resources before any GPU launch. Mocked or arithmetic deadline tests missed three boundaries: `select` plus `readline` on a `TextIOWrapper` (buffered data invisible to `select`), a renamed module imported bare, and a unit that stopped itself before the remote files were deleted. (src: native-wrapper-smoke)
 - A Deployment safety or readiness gate must prove Pod to ReplicaSet to Deployment through controller `ownerReference` name and UID, not Pod to Deployment, and keep that chain in the before/after evidence. Fake boundary tests can pass falsely when their fixtures repeat the wrong ownership assumption. (src: ownership-chain-gate, 2026-10-07)
+
+## Stateful cutover observation
+
+- Enumerate exact workload names and namespaces before filtering; substring matches can include unrelated workloads. Compare observed process state with the actual running configuration, not just the desired configuration.
+- Capture a timestamped inventory of the controller, replacement Pod, claim, source and destination volumes, and endpoints. Record object identities, scheduling condition and the claim's bound volume; re-read changed objects before drawing conclusions. Earlier health does not establish present availability.
+- Compare live placement constraints with the volume actually bound to the claim, including node affinity and local path. A matching destination claim reference or selector change alone does not move an already-bound claim. Treat null endpoint collections as empty when summarizing and isolate per-object summary failures. Corroborate missing endpoints with a bounded readiness request; missing endpoints alone do not establish data corruption.

@@ -1,6 +1,6 @@
 ---
 name: kubernetes-capacity-evidence
-description: "Use when deciding whether Kubernetes capacity is actually short (host usage vs scheduler requests vs quota), right-sizing requests from Prometheus history, assessing whether an always-on workload fits a smaller node, or rolling out resource changes in stages on a node with priority-based preemption."
+description: "Use when deciding whether Kubernetes capacity is actually short (host usage vs scheduler requests vs quota), right-sizing requests from Prometheus history, assessing whether an always-on workload fits a smaller node, or rolling out resource changes in stages on a node with priority-based preemption. Also covers tracking authorized long-running copies and interpreting incomplete size scans."
 ---
 
 # Kubernetes capacity evidence
@@ -12,6 +12,7 @@ Scheduling capacity is usually lost to requests, not to usage, and the three led
 | Reconciling host usage, bound-pod requests and quota before touching a quota, or reading peaks and growth from Prometheus | [references/capacity-ledgers-and-promql.md](references/capacity-ledgers-and-promql.md) |
 | Asked whether an always-on workload could move to a small, low-RAM or ARM node | [references/small-node-fit.md](references/small-node-fit.md) |
 | Applying a resource or config change that restarts several Deployments on a node where surge pods can preempt other workloads | [references/staged-rollout-and-headroom-gate.md](references/staged-rollout-and-headroom-gate.md) |
+| Tracking an authorized long-running copy or interpreting a timed-out size scan | [references/long-running-copy-processes.md](references/long-running-copy-processes.md) |
 
 ## Rules that hold across the references
 

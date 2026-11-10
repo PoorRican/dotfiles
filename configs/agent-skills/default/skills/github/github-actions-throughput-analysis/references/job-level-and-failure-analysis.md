@@ -20,6 +20,16 @@ Scope: once the queue-versus-runtime split points at the jobs themselves, or whe
 - Before calling a failure a flake, check runner eviction (`kube_pod_status_reason`) and container terminations for the runner pod, and node IO pressure for timing-sensitive tests.
 - Classify with `gh run view --log-failed`.
 - Group failures by job and step, and by runner or node, before concluding anything about the test.
+- For bounded image-build investigations, retain build logs and metadata, and inspect actual builder worker resource limits and available storage rather than relying on requested driver options.
+- Distinguish DNS and trust at the runner, builder and image-process layers. Avoid dumping full inspection records that may contain certificate material; never disable TLS verification to make a probe pass.
+
+## Image publication and qualification evidence
+
+- For an image-build investigation, distinguish candidate tags and input hashes from immutable registry digests. Resolve an image index and its platform children independently; verify the intended platform set and descriptor identities, distinguishing attestation descriptors from runnable images.
+- When storage limits affect builds, consider serializing them. If publication is explicitly authorized, publish uniquely tagged candidates before final aliases and read candidates back by immutable digest. Keep incomplete and complete platform-qualification receipts separate.
+- A manifest inspection, imported library or emulated execution alone does not establish native accelerator kernel execution.
+- For explicitly authorized accelerator qualification, use bounded dataset-free probes, isolate client state, disable analytics and restrict network access. Check dependency closure, source exclusion, imports, non-root execution, native initialization and a small deterministic kernel separately. Record workload and pod identities, architecture, requested image, observed image ID, exit status and output; establish whether the runtime reports an index or child digest.
+- If a qualification leg is deferred, cancel task-owned queued workloads promptly when authorized and verify workload and pod absence. Continue only permitted legs; treat final promotion and configuration activation as separate decisions. Record final state before removing task-owned resources; do not prune shared caches or delete a manifest merely to remove a tag, since other tags may reference the same digest.
 
 ## Pitfalls
 

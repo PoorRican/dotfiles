@@ -10,6 +10,15 @@ SFT trains models on input-output pairs to minimize cross-entropy loss. Use for:
 - Chatbot training
 - Domain adaptation
 
+## Workflow and Reproducibility
+
+- Identify the intended artifact and task before selecting a framework: training, preference optimization, evaluation, adapter merge/export, serving, or structured generation.
+- Choose a task-specific evaluation and baseline before running. A completed command or training loss alone does not establish task quality.
+- Keep the evaluation command with the run. Record code and dependency versions, model and tokenizer revisions, dataset identity and revision, seed, hardware, precision, and quantization.
+- For adapter training, also record target modules, rank, scaling, dropout, sequence length, batch size, gradient accumulation, optimizer, and checkpoint policy.
+- For structured generation, specify the schema or grammar and independently validate the returned artifact against the consumer contract. Constrained syntax does not establish semantic correctness.
+- Check compatibility among the training tokenizer, chat template, adapter merge/export, and intended inference backend.
+
 ## Dataset Formats
 
 ### Format 1: Prompt-Completion
