@@ -1,94 +1,49 @@
-# Cross-Agent Skill Source Classification
+# Skill Library Governance Workflow
 
-Use this reference when a machine has several agent runtimes and many paths containing `SKILL.md`.
 
-## Source classes
+### 1. Declare scope and exclusions
 
-| Class | Common examples | Include in canonical migration? | Canonical-source rule |
-|---|---|---:|---|
-| Repository-managed skill | Dotfiles or a maintained project skill directory | Yes | Prefer the tracked source over deployed copies |
-| Shared global skill root | `~/.agents/skills`, or another root intentionally consumed by several agents | Yes | Treat one physical bundle as canonical; record all runtime aliases |
-| Runtime user skill root | User-managed `skills/` under a runtime home | Yes | Include resident bundles; compare against repo/global sources |
-| Deployment alias | A symlink from one runtime root to another skill bundle | No separate payload | Resolve once, inventory the target, and retain alias provenance |
-| Project-linked managed skill | A global managed-root symlink into a project repository | Usually yes | The project target is authoritative; centralization may require rewriting project-relative links |
-| Bundled/system skill | Runtime-shipped or hidden system skill directories | Usually baseline only | Treat as protected/upstream unless explicitly vendoring |
-| Plugin/package cache | Plugin install cache, package manager tree, `node_modules`, remote catalog cache | No | Never promote the cache path; locate its maintained upstream if needed |
-| Project/session memory skill | Memory-generated skill under a project/session memory tree | No by default | Promote only after explicit review; prefer an already-promoted managed version |
-| Backup/archive | `.bak`, snapshots, curator archives | No active copy | Use for lineage and delta recovery only |
+Record each requested source root, proposed target root, and exclusions. Classify roots and entries as maintained or shared sources, deployment aliases, project-linked managed skills, runtime/system bundles, package caches, generated memories, or archives. State whether system bundles are comparison baselines or migration candidates. Keep excluded sources visible in the inventory summary.
 
-## Discovery rule
 
-Use two complementary views:
+### 2. Inventory root entries and symlinks
 
-1. **Recursive skill discovery** finds resident `SKILL.md` files.
-2. **Immediate root-entry inspection** finds symlinked skill directories that recursive search may not traverse.
+Enumerate immediate root entries as well as recursively discovered `SKILL.md` files. Recursive file search commonly does not traverse directory symlinks, so relying on it alone silently misses deployment aliases and project-linked managed skills.
 
-Reconcile them as:
+For each root entry, record its path and type, raw and resolved symlink target, whether the link is valid in the checkout, only after deployment, or broken, and whether `SKILL.md` is present at the resolved root. Follow a root skill symlink once for content inspection; record nested links as bundle entries rather than traversing arbitrary symlink graphs. Account for category containers separately from resident bundles and aliases.
 
-```text
-resident bundles + valid root aliases + broken root aliases = direct root entries in scope
-```
 
-A relative alias may be dangling inside a source checkout but valid at its deployment location. Record both facts; do not label the design invalid solely from the checkout view.
+### 3. Parse identity from frontmatter
 
-## Full-tree exactness
+Record `name`, `description`, source directory basename, malformed or missing frontmatter, directory/name mismatches, and platform or tool metadata relevant to migration. The logical identity is `name`, not the source directory name. A file without valid `name` and `description` is not a valid Hermes skill; repair it or give it an explicit disposition rather than copying it blindly.
 
-A deterministic bundle fingerprint should include, in sorted relative-path order:
 
-```text
-relative path
-entry type
-executable bit
-symlink target or file bytes
-```
+### 4. Fingerprint the whole bundle
 
-Two identical `SKILL.md` files with different scripts, references, assets, permissions, or symlink targets are not exact duplicate bundles.
+Compute a deterministic tree fingerprint over each relative entry's path, entry type, executable bit, symlink target, and regular-file bytes. Compare `SKILL.md` separately for diagnostics, but do not infer bundle equality from it alone. For mechanical normalization, whitelist only explicitly understood transformations; preserve both raw and normalized results.
 
-## Substantive-duplicate decision record
 
-For every reviewed family, record:
+### 5. Detect substantive duplicate families
 
-```yaml
-family: logical capability or colliding name
-members:
-  - source: source class/path
-    frontmatter_name: parsed name
-    relation: exact | near-copy | overlapping-trigger | specialization | lineage
-canonical: chosen source
-reason: why it is authoritative and portable
-action:
-  - copy | relocate | normalize | merge | rename | fold | drop
-harvest:
-  - valuable deltas from non-canonical members
-risks:
-  - name, trigger, tool, path, or domain-rule conflicts
-```
+Group candidates by identical frontmatter name, equivalent trigger descriptions, promised outcome or workflow, renamed near-copies, apparent memory promotion, or a narrow skill whose behavior is covered by a broader one. Read candidate bodies and supporting files before deciding. Similar subject matter is not enough: skills may be complementary specializations. Different names can still compete for the same trigger and produce contradictory instructions.
 
-## Canonical selection questions
 
-Ask in order:
+### 6. Choose the canonical source
 
-1. Which path is actually maintained?
-2. Is a central or target-native version already present?
-3. Are copies byte-identical at full-tree level?
-4. Does one version contain runtime-specific commands or stale model names?
-5. Are the skills true duplicates, or complementary specializations?
-6. Would relocation break support-file or project-document references?
-7. Does any candidate contain a domain rule that contradicts another candidate?
+Prefer an authoritative, maintainable, portable source adapted to the target runtime. A useful default order is an existing maintained central skill, repository-tracked authoritative source, shared user-managed source, then runtime copy. Treat system bundles as upstream baselines; do not choose caches, generated memories, or backups as canonical without explicit promotion. Do not pick by size, modification time, or apparent novelty alone. Name one base and list valuable deltas to harvest from other versions so update provenance remains clear.
 
-Choose one base even when merging deltas. “Merge both” without naming a canonical base loses update provenance.
+### 7. Build the target map
 
-## Migration-map accounting
+For each surviving skill, record its target location and frontmatter name, canonical source path or class, action (copy, relocate, normalize, merge, rename, fold, or drop), duplicate family, and portability work. Account for every source entry, including aliases and rejected candidates. Grouped rows are acceptable only when each source skill remains traceable. Use the target's existing organization where it fits; do not assume every catalog is categorized.
 
-Keep aliases separate from payload counts:
+### 8. Audit collision and portability risks
 
-```text
-root entries
-- deployment aliases and exact copied payloads
-= unique payloads
-- payloads already represented by the target
-- malformed, folded, or intentionally dropped payloads
-= new target bundles
-```
+Check duplicate frontmatter names, active backups, directory/name mismatches, broken or deployment-relative aliases, hardcoded paths and runtime assumptions, foreign tool dialects, and relative links that relocation will break. Review trigger overlap and contradictory operational or domain rules. Do not erase intentional platform-specific behavior: gate it by platform or rewrite the common workflow in platform-neutral terms.
 
-Report system/bundled skills, plugin caches, memories, and backups outside this equation. They are source classes, not silent omissions.
+### 9. Report counts that reconcile
+
+Separate aliases and copied payloads from unique source payloads; then account for payloads already represented in the target and those folded or dropped to arrive at new target bundles. Account for category containers separately rather than treating every root entry as one payload. Report excluded system bundles, caches, memories, and backups separately.
+
+### 10. Verify audit or migration outcomes
+
+For a read-only audit, distinguish pre-existing changes from changes made by the audit; an authorized report outside the source tree is not a source edit. For an executed migration, check valid frontmatter, directory/name agreement, supporting files, resolving relative references, active duplicate names, excluded sources, and target inventory against the decision map.

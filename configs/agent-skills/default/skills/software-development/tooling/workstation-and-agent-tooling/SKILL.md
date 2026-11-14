@@ -1,22 +1,15 @@
 ---
 name: workstation-and-agent-tooling
-description: "Use for personal workstation and agent-runtime tooling: Hermes profiles and Nix/Home Manager daemon configuration, native desktop popups, Waybar and Neovim runtime issues, interactive TUI and agent-harness testing, notebook kernels and FIM completions, skill packaging, secure remote secret installation, and a locked GNOME login keyring that hangs gh or git-over-https."
+description: Use for workstation and agent-tooling failures involving desktop UI, terminal tests, notebook kernels, Nix services, credentials, and locked login keyrings.
 ---
 
 # Workstation and agent tooling
 
-Workstation failures often come from runtime ownership or version-specific behavior, not the spelling of a config: a deployed file, active service, attached highlighter, or successful API response can still mask a consumer that did not apply it. These references capture the less-visible distinctions behind those symptoms and label suite- or version-specific behavior rather than presenting it as universal. Open the focused reference for the component or boundary you are diagnosing.
+A deployed configuration, running process, or successful API call can conceal a failure at the consumer boundary. These references cover troubleshooting and safe observation of those boundaries.
 
-| When you are… | Open |
+| Task | Reference |
 |---|---|
-| Testing interactive terminal behavior, editor motions, or a live agent harness | [references/agent-harness-testing.md](references/agent-harness-testing.md) |
-| Integrating native popups, diagnosing Waybar modules, Neovim highlighting, or an input daemon | [references/desktop-and-editor-apps.md](references/desktop-and-editor-apps.md) |
-| Working with Hermes profile ownership, Nix merges, or daemon configuration | [references/hermes-profiles-and-nix.md](references/hermes-profiles-and-nix.md) |
-| Debugging notebook FIM prompts or monitoring a shared notebook kernel | [references/notebook-kernels-and-completions.md](references/notebook-kernels-and-completions.md) |
-| Installing or validating a remote credential | [references/secrets-handling.md](references/secrets-handling.md) |
-| `gh` or git-over-https hangs with no prompt because the GNOME login keyring is locked after an autologin boot | [references/locked-login-keyring.md](references/locked-login-keyring.md) |
-| Packaging a skill or assessing a discovered skill | [references/skill-tooling.md](references/skill-tooling.md) |
-| Verifying native prompts, notifications, or input-gated behavior of a desktop app in a private compositor session | [references/isolated-wayland-ui-smoke.md](references/isolated-wayland-ui-smoke.md) |
-| Deploying hyprlock and hypridle, or debugging lock failures, idle timers, and DPMS on Hyprland | [references/hyprland-lock-and-idle.md](references/hyprland-lock-and-idle.md) |
-
-Canonical docs: Hermes profile contract (`configs/hermes/README.md` in the dotfiles repository) — current profile composition, configuration ownership, and runtime-state boundaries.
+| Test terminal or desktop UI behavior | [Interactive UI testing](references/interactive-ui-testing.md) |
+| Diagnose desktop apps, editors, notebooks, and service configuration | [Runtime diagnosis](references/runtime-diagnosis.md) |
+| Diagnose and unlock a locked GNOME login keyring | [Locked login keyring](references/locked-login-keyring.md) |
+| Transfer and validate credentials securely; diagnose runtime and packaging boundaries | [Runtime diagnosis](references/runtime-diagnosis.md) |

@@ -1,24 +1,9 @@
-# Fan-out and File Recovery
+# Recovery and session evidence
 
-Scope: surviving evidence and scope-control facts when an agent process, fan-out, or file edit is lost.
+Loss of an orchestration process or job identifier does not prove its work was lost or that remote work stopped. Check for running work, partial reports, scripts, outputs, and persisted transcripts before relaunching; otherwise expensive or unsafe work may run twice. Pass recovered partial results into a relaunch and compare its scope with the original acceptance criteria. A steering message may not interrupt a long-running call; cancel it if continued execution is unsafe.
 
-## Recovering agent work
+Transcripts can retain full edit or write arguments even when rendered output is truncated, but only if the session read or wrote the file. Concurrent human edits need not appear in the transcript; a later read snapshot, editor backup, or dangling version-control object may preserve them. Distinguish verbatim recovery from reconstruction constrained by callers and tests. Restoring a path to its committed version can erase uncommitted edits; preserve a pre-edit copy or reverse only the intended change.
 
-- Loss of the orchestration process or job identifiers does not establish loss of work: partial reports, scripts, outputs, and persisted transcripts may remain. A disconnected local client also does not prove remote work stopped; could work still be running and duplicate expensive or unsafe activity if relaunched? (src: crashed-fanout-recovery; source 2026-08-27)
-- Persisted transcript tool-call records can preserve full `write` or `edit` arguments even when rendered execution displays truncate them. A transcript route is useful only if an agent read or wrote the target file in that session. (src: agent-transcript-file-recovery; source 2026-08-06)
-- A human's concurrent edits do not appear in an agent transcript. A read snapshot taken after those edits landed may be the only verbatim record of that content. Version-control dangling objects and editor backups are independent recovery sources. (src: agent-transcript-file-recovery; source 2026-08-06)
-- Recovered partial results need to be explicitly passed to relaunches. Compare resumed work with the original acceptance criteria: relaunches can silently narrow scope while appearing to continue the same task. (src: crashed-fanout-recovery; source 2026-08-27)
-- A steering message may not interrupt an agent already inside a long-running call. If continuing that call could be unsafe, cancellation is the relevant control rather than assuming the message has taken effect. (src: crashed-fanout-recovery; source 2026-08-27)
+Before parallel semantic refactors in a shared uncommitted tree, preserve snapshots of owned files and an inventory of existing tests. Compare recovered coverage with the original inventory; matching a test count alone does not establish restored behavior.
 
-## File-loss boundary
-
-- `git checkout` or `git restore` of a path returns it to the committed version and can erase every uncommitted edit in that file. For data-loss prevention, preserve a known pre-edit copy or reverse only the intended change rather than treating the repository version as a backup. (src: agent-transcript-file-recovery; source 2026-08-06)
-- What surviving callers, tests, or adjacent files constrain the missing content, and which source provides the verbatim version rather than a reconstruction? (src: agent-transcript-file-recovery)
-
-## Before parallel semantic refactors
-
-- In an uncommitted shared tree, preserve byte snapshots of ALL owned files, hashes of unrelated work, and an inventory of existing test functions before parallel semantic refactors begin. Implementers deleted regression cases while replacing obsolete tests, and only a suite-count regression exposed it. After recovery, restore behavior coverage, not just the pass count; two copies derived from one recollection are not independent corroboration; compare a recovered AST test inventory with the pre-overwrite snapshot. (src: pre-refactor-snapshot)
-
-## Harness quirk (dated observation)
-
-- An OMP task subagent that yields incrementally can settle as "failed (exit 1) schema_violation" (expected string, received array) although every yield returned ok; the work is intact in the persisted transcript (`history://<job id>`). Recover from the transcript tail instead of re-running, and instruct agents to yield each schema section exactly once. The cause (duplicate-yield aggregation) is not documented upstream, so treat this as an observation of one omp version [INFERENCE]. (src: omp-yield-schema-violation)
+When reconstructing a session, inspect relevant prompts, agent reports, plans, and artifacts as well as summaries. Historical recommendations are leads, not current evidence: recheck open threads against current source or live state.

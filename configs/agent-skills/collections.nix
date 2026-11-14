@@ -11,22 +11,30 @@
     "analysis-judgement"
     "authoritative-upstream-behavior-research"
     "code-liveness-and-refactoring"
+    "code-review"
+    "conventional-commits"
     "data-inspection"
     "debugging"
     "documentation-curation"
     "gate-and-exit-rule-evaluation"
     "git-and-github"
     "github-actions-throughput-analysis"
+    "github-pr-workflow"
     "kubernetes-capacity-evidence"
     "kueue-troubleshooting"
+    "linux-system-debugging"
     "marimo-pair"
     "omp-runtime-recipes"
     "performance-and-throughput"
     "probabilistic-forecast-evaluation"
     "prometheus-alert-rule-tuning"
     "prose-writing-style"
+    "requesting-code-review"
     "rust-engineering"
+    "systematic-debugging"
+    "test-driven-development"
     "using-nautilus-trader"
+    "using-superpowers"
     "verification-and-evidence"
     "workstation-and-agent-tooling"
   ];
@@ -48,12 +56,10 @@
     "experiment-log-interview"
     "experiment-log-structure"
     "fine-tuning-with-trl"
-    "gguf-quantization"
     "huggingface-hub"
     "llama-cpp"
     "llm-wiki"
     "maps"
-    "ml-paper-writing"
     "modal-serverless-gpu"
     "native-mcp"
     "obsidian"
@@ -80,10 +86,7 @@
   hosts = {
     cbox = {
       coding = [ "cbox-desktop-live-preview" ];
-      hermes = [
-        "media-transfer-to-te-amo"
-        "te-amo-tv-show-layout"
-      ];
+      hermes = [ "media-transfer-to-te-amo" ];
     };
 
     dgx = {
@@ -98,7 +101,7 @@
 
     mbp = {
       coding = [ ];
-      hermes = [ "macos-computer-use" ];
+      hermes = [ "docker-desktop-macos-vm-recovery" ];
     };
   };
 }

@@ -1,19 +1,16 @@
 ---
 name: rust-engineering
-description: "Use for Rust workspace engineering: dependency adoption and feature unification, replacing in-house layers with crates, borrowed/zero-copy decoding and honest benchmarks, uv-built Rust extensions, CI gates, deletion refactors, and multi-crate commit boundaries. Also covers async and object-store runtime traps and reclaiming Cargo disk space. Also covers supervised cache-bounded Cargo verification and scoped source-module evidence."
+description: Use for Rust workspace changes, dependency resolution, decoding and benchmarking, native Python extensions, runtime traps, Cargo verification, or Nix/crane builds.
 ---
 
 # Rust engineering
 
-Rust changes often look correct by compiling while silently changing feature sets, decode validity, state transitions, or the measured work. The references collect Cargo and serde behaviors that are easy to miss, and prompts for judging whether a dependency, optimization, gate, or cutover fits the actual workspace.
+Rust workspace changes can compile while changing feature resolution, decoder validity, runtime behavior, or benchmarked work. These references cover failure modes that ordinary compilation can miss.
 
-| When you are… | Open |
+| When | Reference |
 |---|---|
-| Changing borrowed deserialization, a decode path, or its performance claim | [references/borrowed-decode-and-benchmarks.md](references/borrowed-decode-and-benchmarks.md) |
-| Adopting a crate, replacing an in-house layer, or evaluating resolved dependency cost | [references/dependency-adoption.md](references/dependency-adoption.md) |
-| Debugging stale Rust extensions built through a uv workspace or preserving cross-language map order | [references/uv-rust-extensions.md](references/uv-rust-extensions.md) |
-| Changing workspace gates, deleting Rust surface, or splitting workspace additions | [references/workspace-gates-cutovers-and-commit-splits.md](references/workspace-gates-cutovers-and-commit-splits.md) |
-| Chasing a stale compiled extension after a branch switch, a copied virtualenv, or a stale uv overlay wheel | [references/uv-rust-extensions.md](references/uv-rust-extensions.md) |
-| Investigating a dead spawned task, silently missing events, or object_store path keys that differ between local and S3 | [references/async-and-storage-runtime-traps.md](references/async-and-storage-runtime-traps.md) |
-| Reclaiming disk from Cargo caches, `target/` directories, or old worktrees | [references/cargo-disk-cleanup.md](references/cargo-disk-cleanup.md) |
-| Supervising cache-bounded Rust verification or qualifying a scoped source-module harness | [references/cargo-bounded-verification.md](references/cargo-bounded-verification.md) |
+| Changing borrowed decoding or benchmarking a pipeline | [Borrowed decoding and benchmarks](references/borrowed-decode-and-benchmarks.md) |
+| Adopting dependencies or replacing an in-house layer | [Dependency adoption](references/dependency-adoption.md) |
+| Building or debugging Python extensions | [Python extensions](references/uv-rust-extensions.md) |
+| Changing workspace gates, cutovers, Cargo caches, or investigating runtime traps | [Workspace gates, Cargo and runtime traps](references/workspace-gates-cutovers-and-commit-splits.md) |
+| Building Rust workspaces with Nix and crane | [Nix and crane builds](references/nix-crane-builds.md) |

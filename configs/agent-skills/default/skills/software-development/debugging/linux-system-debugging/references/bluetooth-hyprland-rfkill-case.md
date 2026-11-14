@@ -1,68 +1,34 @@
-# Bluetooth on Hyprland: rfkill + Blueman session integration
+# Authentication and desktop devices
 
-This reference condenses a real diagnostic where Bluetooth GUI pairing/connect failed on an Arch/Hyprland desktop with a Qualcomm/Foxconn USB Bluetooth controller.
+## PAM and screen lockers
 
-## Symptoms observed
+`pam_faillock` tracks failures per user across PAM services that include it. A first TTY failure can complete a tally that already includes screen-locker or sudo attempts. Inspect `faillock --user <user>`, relevant PAM service stacks and journal entries before resetting a tally or changing policy. Failed privilege-escalation attempts can add to the tally, so avoid blind retries.
 
-- Blueman/manager could not reliably connect to devices.
-- The initial suspicion was poor connectivity or antenna/driver failure.
-- `bluetoothctl scan on` found nearby BLE devices with plausible RSSI when unblocked, which weakened the bad-antenna hypothesis.
-- After service/controller reset, BlueZ reported:
-  - `PowerState: off-blocked`
-  - `SetDiscoveryFilter failed: org.bluez.Error.NotReady`
-  - `Failed to start discovery: org.bluez.Error.NotReady`
-  - `bluetoothctl power on` failed
-- Persisted rfkill state under `/var/lib/systemd/rfkill/...:bluetooth` contained `1`.
+If a locker was already running when PAM configuration changed, compare its start time with the configuration modification time; an existing PAM conversation may reflect the earlier stack. Check keyboard firmware layers and stuck modifiers as well as the OS layout when graphical login fails.
 
-## Root causes found
+A replacement locker may still use the same PAM stack. Stop or update stale idle triggers that can relaunch the old locker; keep manual and idle entrypoints consistent. Starting a real lock or terminating a locker affects access to the session: obtain authorization and ensure a recovery path first.
 
-1. **Desktop session integration was incomplete**
-   - Hyprland autostart launched Waybar and GUI tools but not `blueman-applet`.
-   - `polkitd` was running, but no user-session Polkit auth agent was present.
-   - Under custom WMs, this breaks or hides authorization paths that full desktop environments usually provide.
+Inspect `/etc/security/faillock.conf` and the affected files in `/etc/pam.d/`; correlate `faillock --user "$USER"` with `journalctl -b -g 'pam_faillock|pam_unix|FAILED LOGIN'`. If policy is too strict, `deny`, `fail_interval`, and `unlock_time` control the tradeoff. A service-specific PAM change can exclude a locker from lockout accounting without weakening other services.
 
-2. **Bluetooth became persistently soft-blocked**
-   - Current rfkill state showed `Soft blocked: yes`.
-   - Persisted systemd-rfkill state also contained blocked state, so resets could reapply the problem.
+## Bluetooth and session integration
 
-## Durable fix pattern
+- Inspect controller enumeration, kernel and Bluetooth service logs, `bluetoothctl show`, and `rfkill list bluetooth` before blaming a GUI or antenna. `off-blocked` or `NotReady` calls for checking power and rfkill. Successful scanning with plausible RSSI supports a working radio path, not necessarily a working peripheral.
+- A bonded device need not be awake or advertising. Check fresh discovery or RSSI and wake the peripheral before removing a bond. A reset or privacy address can make an old saved address stale.
+- Custom desktop sessions may lack a Bluetooth applet or a user-session Polkit authentication agent even when the system daemon is running. A graphical user service can also fail if its session target or display environment is absent; inspect the user unit and imported session environment.
+- Before changing rfkill state, identify the correct device and distinguish soft from hardware blocking; check persisted systemd-rfkill state when a block returns after restart.
 
-For a Home Manager-managed Hyprland session:
-
-- Install/include:
-  - `bluez`
-  - `blueman`
-  - `lxqt.lxqt-policykit`
-- Autostart:
-  - `blueman-applet`
-  - `lxqt-policykit-agent`
-- If launcher PATH is unreliable, launch GUI tools from the Home Manager profile path.
-
-For rfkill repair, after confirming the rfkill node belongs to Bluetooth:
+For a live Wayland session whose user unit fails because its graphical target or display environment is missing, import the session environment before starting a transient user unit:
 
 ```bash
-sudo rfkill unblock bluetooth
-sudo sh -c 'printf 0 > /var/lib/systemd/rfkill/<bluetooth-state-file>'
-sudo sh -c 'printf 0 > /sys/class/rfkill/rfkillX/soft'
+systemctl --user import-environment DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE DBUS_SESSION_BUS_ADDRESS PATH
+dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE HYPRLAND_INSTANCE_SIGNATURE DBUS_SESSION_BUS_ADDRESS PATH
+systemd-run --user --unit=waybar-manual --collect \
+  --property=Environment=DISPLAY="$DISPLAY" \
+  --property=Environment=WAYLAND_DISPLAY="$WAYLAND_DISPLAY" \
+  --property=Environment=XDG_CURRENT_DESKTOP="$XDG_CURRENT_DESKTOP" \
+  --property=Environment=XDG_SESSION_TYPE="$XDG_SESSION_TYPE" \
+  --property=Environment=HYPRLAND_INSTANCE_SIGNATURE="$HYPRLAND_INSTANCE_SIGNATURE" \
+  waybar
 ```
 
-Then verify:
-
-```bash
-rfkill list bluetooth
-bluetoothctl power on
-bluetoothctl pairable on
-bluetoothctl show
-bluetoothctl scan on
-```
-
-## Evidence that hardware/driver was unlikely primary cause
-
-- Adapter enumerated normally.
-- BlueZ recognized the controller.
-- Kernel logs did not show persistent firmware load failures or HCI reset loops.
-- Scanning found multiple nearby BLE devices with plausible RSSI after unblocking.
-
-## Device-specific follow-up
-
-For keyboards such as Kinesis Adv360 Pro, put the keyboard into pairing mode and rediscover it. If a previously known address is unavailable, do not treat that as system Bluetooth failure; remove stale state and pair the newly discovered address.
+The same transient-unit pattern can start `blueman-applet` or a Polkit agent. Check the unit status and the original symptom afterward. For BLE HID, verify `bluetoothctl info <addr>` and the input device in `/proc/bus/input/devices` after connection.

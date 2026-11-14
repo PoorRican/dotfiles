@@ -1,165 +1,42 @@
 # Interview Guide
 
-Question bank and challenge protocol for the experiment-log-interview skill. Organized by section, with notes on which mode applies.
+Choose questions that fill consequential gaps; adapt them to the record and the information already available.
 
-## The balanced challenge protocol
+## Question and plan
 
-Apply this after every substantive answer. Same shape as the proposal skill, but the *focus* shifts depending on which section you're in.
+- What specific question can this experiment actually answer, and what decision would it inform?
+- What hypothesis could be wrong? What is your expectation before running?
+- What method, data, metric and comparison would distinguish the outcomes? What would each outcome imply?
+- If thresholds are useful, why are they defensible before seeing results, and how do boundary cases count? When would you stop early?
+- If results are already known, would you actually have chosen this metric and threshold beforehand? Identify any reconstruction as post hoc.
 
-| Section | What to challenge |
-|---|---|
-| 2 (pre-reg) | The **plan** — is the metric the right metric? is the threshold defensible *before* seeing data? |
-| 3 (as-run) | The **honesty of the delta** — what deviations might the user be downplaying? |
-| 4 (raw evidence) | The **completeness** — what diagnostic would a skeptic demand that's missing? |
-| 5 (interpretation) | The **claim** — does the headline outrun the evidence? what alternative explanations remain? |
-| 6 (implications) | The **logical chain** — does this finding actually move the parent proposal, or is the connection asserted? |
-| 7 (decision) | The **next step** — is this the experiment that maximally reduces uncertainty about the root question, or just the next obvious one? |
+## Execution and evidence
 
-The four-step protocol itself is unchanged: name the implicit assumption → ask for the basis → propose one alternative or falsifier → accept the response and update the doc.
+- What actually ran, and how did it differ from the plan? Why did each meaningful deviation occur, and does it change how the result can be interpreted?
+- Which code, data snapshot and configuration produced the result? What information is missing to locate or reproduce it?
+- Anything tweaked mid-run that has not been mentioned, such as a parameter sweep narrowed late, a slice excluded, or a seed swapped?
+- Do deviations mean the pre-stated thresholds no longer apply cleanly?
+- What was the result relative to the baseline, on which slice, and with what uncertainty where applicable? What do secondary metrics show?
+- What diagnostic would a skeptical reader ask for, such as slice sample sizes, residuals or an ablation? If it is unavailable, what remains unresolved?
 
-## Mode-aware traversal
+## Interpretation and implications
 
-- **Mode A (pre-reg):** sections 1, 2 only. Stop after section 2. Confirm to the user that the entry is now pre-registered and waiting for results.
-- **Mode B1 (post-run, was pre-registered):** sections 3, 4, 5, 6, 7, 8, 9. Confirm section 2 once with the user but never edit it.
-- **Mode B2 (post-run, post-hoc):** sections 1, 2 (reconstructed and tagged `[exploratory]`), then 3–9. Be explicit about the post-hoc reconstruction and its evidentiary cost.
-- **Mode C (revision):** add an addendum block. Ask only what's needed for the addendum: what changed, why, which sections are superseded, what the updated finding and confidence are. Do not re-interview prior sections.
+- What finding does the evidence support, with appropriate qualification? What claim might a reader infer that it does not support?
+- What alternative mechanism could produce the same observation, and what test would distinguish it? Which threats remain, and how do they affect confidence?
+- How does the result change the broader question or decision, including options it weakens? If a next step is proposed, why this one rather than an alternative?
+- What observations were not investigated, and what should a collaborator know before relying on the finding?
 
-## Section-by-section questions
+## Revision
 
-### Section 1 — Header
+- What changed, why, and which earlier claims are affected? Is it new evidence, a bug, or a reinterpretation?
+- What is the updated finding and confidence? If the interpretation changed without new evidence, what reasoning justifies the change?
 
-**Primary question:**
-- "In one sentence, what specific question is this experiment trying to answer? Phrase it as a question, not a topic."
+## Optional focused review passes
 
-**Follow-ups:**
-- "Which decision gate in your proposal does this inform? If none, is this experiment actually worth running right now?"
+When a result warrants a deeper review, use the relevant pass rather than running all three mechanically. Bring the most important finding back as a question and record any material unresolved issue.
 
-**Challenge prompt:**
-- If the question is broader than the experiment can answer: "Your question is bigger than your experiment. What's the narrower question this run can actually resolve?"
+**Skeptical reader:** Give the reviewer the question, plan, as-run method and raw evidence, but not the preferred interpretation. Ask what headline the evidence supports; what it does not support but a careless reader might infer; what diagnostic is missing; which deviation most threatens the pre-stated thresholds; and whether the most and least generous readings are warranted.
 
-### Section 2 — Pre-registration  *(Mode A and B2)*
+**Alternative explanations:** Give the reviewer the question through the proposed interpretation. Ask for plausible mechanisms other than the preferred one that would produce the observation, each paired with a specific test or observation that distinguishes it.
 
-**Primary questions, in order:**
-- "What's the hypothesis, stated as a claim that could be wrong?"
-- "What's your prior — your honest expectation before running? Give a rough credence."
-- "What's the exact primary metric, including the slice it's measured on?"
-- "What threshold counts as 'yes'? What threshold counts as 'no'? What's the inconclusive band?"
-- "Before you run, commit to what you'll do in each plausible outcome regime. What does each outcome imply?"
-
-**Challenge prompts:**
-- "Could you defend that threshold to a skeptic *before* seeing data? If not, what's a more defensible one?"
-- "If you got exactly the result you expect, would you have learned anything? If the experiment can only confirm, not surprise you, why are you running it?"
-- For Mode B2 specifically: "You've already seen results. Be honest — would you have picked this metric and threshold *before* running? If not, mark this entry exploratory and tag the confidence accordingly."
-
-### Section 3 — What was actually done  *(Modes B1, B2)*
-
-**Primary question:**
-- "What did you actually run, and where does it differ from what you planned in section 2?"
-
-**Follow-ups:**
-- "For each deviation, why did it happen and does it affect the validity of the pre-stated interpretations?"
-- "Where's the code commit, the data snapshot, and the run ID? The entry needs to be reproducible."
-
-**Challenge prompts:**
-- "Anything you tweaked mid-run that you haven't mentioned? Even a parameter sweep narrowed late, a slice excluded, a seed swapped — log it."
-- "Does any of these deviations mean the pre-registered thresholds in section 2 no longer apply cleanly? If so, say so explicitly in the entry."
-
-### Section 4 — Raw evidence  *(Modes B1, B2)*
-
-**Primary question:**
-- "What's the primary metric value, with whatever interval applies and the explicit comparison?"
-
-**Follow-ups:**
-- "What secondary metrics did you track, and what do they show?"
-- "What diagnostics would a skeptic demand — sample sizes per slice, residual distributions, training curves, ablations?"
-- "What plots tell the story? Each one needs a caption that stands alone."
-
-**Challenge prompts:**
-- "You said it 'improved.' Improved from what to what, on which slice, with what variance?"
-- "What's a diagnostic you didn't run that a careful reviewer would ask for? Run it now or note it as a loose end."
-
-*(After this section, trigger the skeptical-reader pass — see exploration.md.)*
-
-### Section 5 — Interpretation  *(Modes B1, B2)*
-
-**Primary question:**
-- "In one sentence, with no hedges in that sentence, what's the headline finding?"
-
-**Follow-ups:**
-- "What's your confidence — high, medium, low, speculative — and why?"
-- "Which threats to validity survived this experiment? Be specific, not generic."
-
-**Challenge prompts (the heart of this skill):**
-- "What's an alternative mechanism that would produce the same observed result? How would you distinguish it?"
-- "Strip out the headline and read only sections 3 and 4. Would a careful reader arrive at the same claim, or have you connected dots that don't quite touch?"
-- "Your confidence is `[high]` but you have three surviving threats. Are those threats really small enough to leave the rating unchanged?"
-
-*(Before finalizing this section, trigger the alternative-explanation generator — see exploration.md.)*
-
-### Section 6 — Implications  *(Modes B1, B2)*
-
-**Primary question:**
-- "How does this finding update the parent proposal — root question, theory, or a specific line of attack?"
-
-**Follow-ups:**
-- "Does any line of attack get killed or weakened by this? Don't only look for confirmations."
-- "Does this open a conditional branch that wasn't active before?"
-
-**Challenge prompt:**
-- "If section 6 is empty or vague, you may have run an experiment that didn't actually inform anything. Is that the case, or is the connection real but unstated?"
-
-### Section 7 — Decision & next step  *(Modes B1, B2)*
-
-**Primary question:**
-- "What's the next experiment, and why this one rather than another?"
-
-**Follow-ups:**
-- "Which decision gate did this resolve, and which branch is now active?"
-- "What's your confidence that the next experiment is the right one to run?"
-
-**Challenge prompts:**
-- "Is the next experiment the one that maximally reduces uncertainty about the root question, or just the next obvious one in the sequence you'd already imagined?"
-- "If you ran the next experiment and it produced its expected result, would *that* move the root question, or just inch it?"
-
-*(Before finalizing this section, trigger the calibration check — see exploration.md.)*
-
-### Section 8 — Loose ends  *(Modes B1, B2)*
-
-**Primary question:**
-- "What did you notice during this experiment that you didn't investigate?"
-
-**Follow-ups:**
-- "What would you do differently next time?"
-- "Anything a collaborator should weigh in on?"
-
-**Challenge prompt:**
-- If section 8 is empty: "Empty loose ends usually means optimism, not absence. What's one thing that nagged at you that you didn't write down?"
-
-### Section 9 — Audit trail  *(Modes B1, B2)*
-
-**Primary question:**
-- "Drop in the links: pre-reg commit, results commit, dashboard URL, notebook paths, related entries."
-
-**Challenge prompt:**
-- "If a reviewer six months from now opened this entry, could they reproduce the result from these links alone? If not, what's missing?"
-
-### Addendum  *(Mode C only)*
-
-**Primary questions:**
-- "What changed since the original entry?"
-- "Why — new evidence, a bug, reinterpretation?"
-- "Which sections of the original entry are now superseded?"
-- "What's the updated finding, and what's the updated confidence?"
-
-**Challenge prompt:**
-- "If the change is a reinterpretation rather than new evidence, what new information justifies the new view? Reinterpretation without new input is often motivated reasoning — be sure."
-
-## Anti-patterns to avoid
-
-- **Editing a frozen pre-registration silently.** Section 2 is read-only after results. Use Mode C (addendum) instead.
-- **Multi-question turns.** One question, wait, respond, move on.
-- **Stacking challenges.** One challenge per answer.
-- **Letting `[high]` confidence stand without justification.** Push for the calibration reasoning.
-- **Empty section 6.** An experiment whose implications can't be stated didn't earn its place in the log.
-- **Skipping the doc update.** If you've gone three turns without editing the file, stop and write before asking the next question.
-- **Treating null results as second-class.** Same rigor, same sections, same exploration passes.
+**Calibration:** Give the reviewer the complete entry. Ask whether confidence is proportionate to evidence and surviving threats, the headline is appropriately scoped, implications are warranted, the proposed next experiment is justified against alternatives, and any section is conspicuously empty or superficial. Ask for specific edits.

@@ -1,17 +1,15 @@
 # Pinned-tree boundary audits
 
-Scope: a read-only audit of compatibility across several repositories (producer/consumer data shapes, contracts, pins) done by fanning out one scout per boundary against trees that are pinned and fetched, not whatever the working checkouts hold.
+Use a pinned-tree audit for compatibility across repository boundaries, including producer and consumer shapes, contracts, and pins. Dirty or differently branched checkouts can otherwise produce false findings.
 
-## Pin the trees the scouts read
+1. Fetch the relevant revisions and give scouts detached, pinned worktrees; clean up the audit worktrees afterwards.
+2. Gather ground truth scouts cannot reach, such as remote storage listings, orchestrator state, open pull requests, and configuration key names without values, into a shared file before dispatch.
+3. Fan out one scout per boundary in a single batch with shared context. Ask for file-and-line evidence, the affected owner, a minimal fix, open questions, and explicit inference labels. Distinguish current breakage, drift risk, unfinished cutover, and compatible boundaries.
+4. Re-verify every BREAKS-NOW finding and every lead claim yourself at the pinned revision. For `git grep`, place the revision before `--`; otherwise the search can inspect the working tree instead.
+5. Mark scout-only claims in the report. Separate data not yet published in the required shape from a code mismatch, and distinguish current blockers from future risks.
 
-- Fetch each repository and add detached audit worktrees at the fetched upstream main branch. Main checkouts are often dirty or sit on another session's branch, and scouts without a shell read whatever tree they are given. Remove the worktrees afterwards. (src: cross-repo-audit-method; 2026-10-27)
-- Gather ground truth that scouts cannot reach (remote storage listings, orchestrator state, open pull requests, configuration key names without their values) yourself into a shared file before dispatch. (src: cross-repo-audit-method; 2026-10-27)
+## Scout brief and report
 
-## Dispatch
+Give each scout its boundary, the pinned worktree paths and revision identities, and the shared ground-truth file. Request a boundary map with `file:line` evidence, findings tagged **BREAKS-NOW**, **DRIFT-RISK**, **UNFINISHED-CUTOVER**, or **OK**, the owning repository and minimal fix for each finding, and open questions. Require `[INFERENCE]` on unverified claims. Configuration evidence should include key names, not secret values.
 
-- Fan out one scout per boundary in a single batch with a shared context and a report of at most about 700 words: boundary map with `file:line`, findings tagged BREAKS-NOW / DRIFT-RISK / UNFINISHED-CUTOVER / OK with the minimal fix and the owning repository, open questions, and `[INFERENCE]` on unverified claims. (src: cross-repo-audit-method; 2026-10-27)
-- Re-verify every BREAKS-NOW finding and every lead claim yourself at the pinned revision with `git grep <pattern> origin/main -- <path>`. The revision must come before `--`, or git silently greps the working tree. Stale trees have already produced false findings. (src: cross-repo-audit-method; 2026-10-27)
-
-## Report
-
-- Verdict first, then: blocking today, works today but breaks quietly, cutover table per goal, already compatible, housekeeping, order of work. Mark scout-only claims, and separate "data not yet published in the required shape" from "code mismatch". (src: cross-repo-audit-method; 2026-10-27)
+For example, check a claim against the actual pinned revision with `git grep <pattern> <revision> -- <path>`. Do not substitute the working checkout or assume a scout's tree matches the audited revision. Put the verdict first in the final report, then distinguish blocking today, works today but risks a quiet break, cutover status per goal, already-compatible boundaries, housekeeping, and order of work.

@@ -1,16 +1,14 @@
 ---
 name: analysis-judgement
-description: "Use when an empirical conclusion is forming, a result confirms expectations, a design needs pressure-testing, or an experiment could resolve uncertainty. Covers falsifiable challenge questions, denominators and aggregation grain, data and release boundaries, result audits, residual attribution, and choosing useful spikes. A source of judgement prompts and analytical traps, not a fixed procedure."
+description: "Use when pressure-testing empirical conclusions, selecting informative experiments, or auditing results and their attribution. Covers aggregation, evaluation boundaries, null calibration, and comparison traps."
 ---
 
 # Analysis Judgement
 
-A plausible result can still answer the wrong question, use the wrong population, or inherit a hidden premise. These references collect questions that distinguish explanations and traps that change what a number means. Choose the relevant lens rather than treating them as a checklist.
+A plausible result can answer the wrong question, describe the wrong population, or inherit a hidden premise. Use the relevant reference to test the interpretation rather than treating every question as a checklist.
 
-| When you are… | Open |
+| When | Reference |
 |---|---|
-| Testing a compelling conclusion, null, standard method, or forced choice | [references/challenge-generators.md](references/challenge-generators.md) |
-| Reading grouped data, staged counters, or a time-bounded evaluation | [references/denominators-grains-and-boundaries.md](references/denominators-grains-and-boundaries.md) |
-| Pressure-testing an idea or deciding whether to build an experiment | [references/ideas-and-spikes.md](references/ideas-and-spikes.md) |
-| Reviewing empirical results or attributing a gap to multiple mechanisms | [references/result-audits-and-residuals.md](references/result-audits-and-residuals.md) |
-| Calibrating a clustered-interval claim rule's true size by simulating its null before freezing it | [references/claim-rule-calibration.md](references/claim-rule-calibration.md) |
+| Challenging a conclusion or selecting an informative experiment | [Challenge generators](references/challenge-generators.md) |
+| Examining aggregation, funnels, revision histories, or release boundaries | [Denominators, grains, and boundaries](references/denominators-grains-and-boundaries.md) |
+| Auditing comparisons, statistical claims, or attribution of a residual | [Result audits and residuals](references/result-audits-and-residuals.md) |

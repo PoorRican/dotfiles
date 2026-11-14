@@ -1,39 +1,25 @@
 # Memory growth and numerical behavior
 
-Scope: distinguish memory consumers and computational changes before interpreting growth or non-finite results.
+## Training memory
 
-## Memory terms by scaling behavior
+- Chunking reduces activation transients, but not retained graph memory if all chunk outputs remain attached until a deferred backward. Backpropagating each microbatch releases its graph sooner; weight unequal microbatches by item count for an exact per-item mean. Batch-dependent and nonlinear statistics can still change the computation.
+- A CPU smoke with an accelerator-sized batch can exhaust host memory; a small smoke establishes plumbing, not full-batch feasibility.
+- On unified-memory platforms where device allocations are not charged to the container cgroup, its memory limit may not bound CUDA use; a per-process CUDA memory fraction set before allocation can cap the process's allocator, subject to platform accounting.
+- When retrying a CUDA OOM, leave the exception scope before retrying: the traceback can retain failed forward frames and activations, making even a smaller retry fail. Verify failed tensors can be collected.
 
+## Process and native heap
 
-- Activation transients scale with chunk or tile size; retained autograd graphs scale with work between backward calls; model, optimizer, and cache residency is comparatively fixed. A small chunk does not reduce total retained graph memory if every chunk’s outputs remain attached until one deferred backward. (src: training-memory-and-nan-localization)
-- Gradient accumulation reduces peak graph memory only when each microbatch is backpropagated before the next graph is retained. For unequal microbatches, exact per-item mean-loss weighting uses each microbatch’s item count over the total item count; dividing by the number of accumulation steps is exact only for equal sizes. Batch statistics and nonlinear statistics such as variance or covariance hinges can also differ when evaluated per microbatch. (src: training-memory-and-nan-localization)
-- On some unified-memory GPU platforms, CUDA allocations may not be charged to the pod cgroup, so a cgroup memory limit may not bound device allocations. Where that accounting boundary applies, a per-process CUDA fraction set before allocation can cap process allocations and cause an overrun to fail at the process rather than consume the shared pool; platform-specific accounting determines whether the cap is effective. (src: training-memory-and-nan-localization; 2026-09-20)
+- RSS is not Python heap. File-backed proportional memory suggests mappings or file cache; anonymous memory with a small Python heap suggests native allocations, allocator arenas, or embedded-engine buffers.
+- Compare allocator live allocated and resident gauges with process RSS: rising allocated bytes suggest live-heap growth; flat allocated with higher allocator resident suggests retention. RSS also includes other mappings, including file-backed and shared pages, so the difference does not identify anonymous memory by itself. Confirm suspected causes with profiles.
+- Check the active embedded-engine connection's actual memory limit, not just the intended configuration. A writable spill path and sufficient spill capacity are separate requirements.
+- When comparing container metrics across a rollout, filter to current instances: stale series can make an aggregate include old and new processes.
+- jemalloc `prof_gdump:true` dumps on each new high-water mark and can flood disk. When `tikv-jemalloc-sys` uses prefixed symbols, plain `MALLOC_CONF` is ignored; use `_RJEM_MALLOC_CONF=prof:true,lg_prof_sample:19,lg_prof_interval:27` with a profiling-enabled build and verify dumps appear.
+- Compare profiles with `jeprof --text --inuse_space --cum --base=<early.heap> <binary> <later.heap>` to separate startup allocation from growth. Cumulative frames overlap, so use allocator gauges and RSS for process-level totals.
 
+## Numerical failures and evaluation
 
-
-- A CPU-only smoke that inherits a batch sized for accelerator memory can exhaust host memory; a tiny smoke batch may answer shape/plumbing questions but does not establish full-batch feasibility. (src: cpu-smoke-never-inherits-gpu-batch)
-
-## Python heap and process memory
-
-
-- Large proportional file-backed PSS points toward mapped/file cache; large anonymous PSS alongside a small Python heap points toward native allocations, allocator arenas, or embedded-engine buffers rather than Python object accumulation. RSS is not a Python-heap measurement. (src: unbounded-rss-attribution)
-- An embedded engine may grow toward its configured memory limit without leaking. The inverse trap is a worker connection that never applies the intended profile and instead uses a larger default; the active connection’s setting determines the real cap. Lowering a native-engine limit without a configured writable spill path can turn memory pressure into query failure. Spill storage capacity is separate from the memory limit, so a writable path can still run out of space. (src: unbounded-rss-attribution)
-
-- A native kernel that buffers all results before returning still has memory proportional to total output. Faster execution or moving the kernel to another language does not by itself change that memory curve. (src: unbounded-rss-attribution)
-
-## Numerical failures and evaluation bugs
-
-
-- A repeatably identical set of non-finite elements suggests a structural subset; changing locations or counts suggest nondeterminism or instability. Checking stored inputs, collated batches, isolated forwards with finite substitutes for cached state, then the state-producing stage separates data, model, and cache causes. (src: training-memory-and-nan-localization)
-- An evaluation that works on one batch but returns wrong finite values across many batches may apply a batch-local index to globally concatenated arrays. Equivalence between multi-batch and single-batch results, rather than finiteness alone, is the discriminating test. (src: training-memory-and-nan-localization)
-
-
-- A memory optimization that changes when backward occurs can alter the recipe, not merely its resource use. Per-item loss weighting, batch-dependent statistics, and the model/fit identity are separate equivalence questions. (src: training-memory-and-nan-localization)
-
-## Dated observations and traps
-
-- `nn.TransformerEncoderLayer` in eval mode returned all-NaN for a finite 3-D float `src_mask` of shape `[N*heads, S, S]` (torch 2.14.0+cu130, 2026-09-21). Training worked, and the NaNs first appeared at a frozen eval. The eval-mode fast path (`torch._transformer_encoder_layer_fwd`) exists in that version, but the NaN itself was reported and not re-run [INFERENCE]; compare train-mode and eval-mode outputs on the same finite inputs and mask before trusting a mask path. (src: transformer-eval-mask-nan, 2026-09-21)
-- PyArrow Parquet publication raises `ArrowCapacityError` at about 2 GiB of `large_binary` data in one column chunk (32-bit BYTE_ARRAY offsets) even when the finished file would compress tiny. Bound the row-group size and prove the fix with a real table above 2 GiB. It surfaced as a normal error exit (1), not OOMKilled, so raising memory requests does nothing. (src: parquet-2gib-limit, 2026-10-08)
-- CPython 3.13 `ProcessPoolExecutor` workers that return large objects: a task-level `finally` cleanup runs before the result is pickled, so it cannot release memory the result still holds. Keep the cleanup pass (`gc.collect()` plus `malloc_trim`) at the start of each task and add the same pass after preparation; a `finally`-only cleanup left worker PSS about 1.7x higher in one measured run (2026-10-07). (src: processpool-result-memory, 2026-10-07)
-- Retrying a PyTorch batch after CUDA OOM: do not recurse inside the `except` block. The live traceback keeps the failed forward's frame locals and activations alive, so smaller retries falsely OOM and `empty_cache` cannot free them. Leave the `except` scope first, then retry, and add a weakref-on-tensor regression test showing the failed activations are collectable. (src: cuda-oom-retry, 2026-10)
-- Native heap attribution (jemalloc profiling, RSS versus live heap): see [native-heap-attribution.md](native-heap-attribution.md).
+- Stable locations of non-finite values suggest a structural subset; changing locations may indicate nondeterminism or instability. Inspect stored inputs, collated batches, isolated forwards, and state production to localize the first divergence.
+- If a Transformer encoder returns NaNs in evaluation with a finite three-dimensional float `src_mask`, compare train and eval on identical inputs and mask: an eval fast path can behave differently.
+- An evaluation can return finite but wrong values when batch-local indices address globally concatenated arrays. Compare multi-batch with single-batch results.
+- A process-pool task's cleanup before returning cannot release an object still held by its result while serialization occurs. Consider cleanup at the next task boundary when diagnosing worker retention.
+- A Parquet column chunk with roughly 2 GiB of binary payload can hit `ArrowCapacityError` despite high compression; bound row-group size and test a sufficiently large real table, since a normal error exit is not evidence of an OOM.

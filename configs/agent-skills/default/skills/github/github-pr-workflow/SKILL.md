@@ -8,7 +8,6 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [GitHub, Pull-Requests, CI/CD, Git, Automation, Merge]
-    related_skills: [github-auth, github-code-review]
 ---
 
 # GitHub Pull Request Workflow
@@ -17,7 +16,7 @@ Complete guide for managing the PR lifecycle. Each section shows the `gh` way fi
 
 ## Prerequisites
 
-- Authenticated with GitHub (see `github-auth` skill)
+- Authenticated with GitHub (`gh auth status`, or a `GITHUB_TOKEN` for the `curl` fallback)
 - Inside a git repository with a GitHub remote
 
 ### Quick Auth Detection

@@ -1,36 +1,30 @@
 # Root-cause tracing
 
-Scope: techniques for locating the origin of a failure and distinguishing condition waits from timing guesses.
+Compare the values, configuration and state on both sides of a component boundary to locate the first divergence. When repeated fixes fail, reconsider the causal hypothesis rather than treating an attempt limit as proof of an architectural problem.
 
-## Original triggers and component boundaries
+For asynchronous tests, wait for the observable completion condition instead of an arbitrary sleep; a fixed delay is appropriate when elapsed time itself is the contract.
 
+## Boundary failures
 
-- When an error appears deep in a call chain, which value or state reached the failing operation? Tracing its callers can reveal that the first failing operation only exposed an earlier bad input or assumption. (src: systematic-debugging; 2026-06-22)
+- An exception crossing a Python process boundary must be serializable: diagnostic state containing `MappingProxyType` can replace the original exception with a pickling error in the parent. Make the exception reconstructible with detached serializable state and test the actual process-pool failure path.
+- Distinguish transport, HTTP status and response parsing failures. Inspect status and content type when interpreting a response; an error response may contain useful JSON or a non-JSON body. Retain diagnostic response data only as appropriate for its sensitivity and retention policy.
+- `np.True_ is True` is false: identity tests can silently undercount NumPy boolean flags. Convert non-missing values with `bool`, keeping missing values distinct.
 
-- In a multi-component failure, where is the first boundary whose outgoing value, configuration, or state differs from the next component's incoming view? Comparing both sides localizes the divergence before a component is blamed. (src: systematic-debugging; 2026-06-22)
-- When several fixes fail, do the new observations undermine the causal explanation or show a different boundary failing? Repeated failures are a prompt to reassess the hypothesis or architecture when evidence warrants it, not a universal cutoff or proof of architectural fault. (src: systematic-debugging; 2026-06-22)
-- A bounded auto-fix loop's attempt count sets an operational handoff point, not an architectural diagnosis. Do failed changes suggest a revised causal hypothesis? Repeated failure is a prompt to reassess, not an automatic architecture verdict. (src: github-pr-workflow; systematic-debugging; 2026-06-22)
+## Python breakpoints
 
+- `debugpy.listen()` does not pause execution; wait for the client when attachment must precede a breakpoint.
+- Interactive pdb is unavailable inside pytest-xdist workers; run the test without xdist for an interactive prompt.
+- `PYTHONBREAKPOINT=0` disables `breakpoint()`, so a missed stop need not indicate unreachable code. Breakpoints can also hang non-interactive runs.
+- A debugger attached to one process does not automatically cover every child process; inspect attachment and breakpoint placement across process boundaries.
 
+`pdb` debugs the current thread; a child process needs its own hook or attachment. `debugpy` is thread-aware.
 
+## Async pollers
 
+- A scheduler loop that does not yield can enqueue initial work and then busy-spin, starving its own coroutines. High loop-thread CPU and repeated in-flight skip messages can masquerade as request contention.
+- Discovery bursts can crowd out periodic polls under a shared admission limit. Bound outstanding work and reserve capacity when core polling needs priority.
+- When cadence changes, re-arm existing targets as needed; otherwise old due times can silently preserve the prior cadence. Exercise realistic follow-up volume and inspect rolling request windows and per-target gaps.
 
-## Condition-based versus time-based waits
+## Native output and strict stdout
 
-
-- For asynchronous behavior, what observable condition means the operation under test is complete? Waiting for that condition is less sensitive to machine load than an arbitrary sleep. (src: systematic-debugging; 2026-06-22)
-- Is elapsed time itself the behavior being tested, or is there a known interval in the system contract? A fixed delay is informative only when tied to known timing behavior; otherwise it can hide races or make tests flaky. (src: systematic-debugging; 2026-06-22)
-
-
-## Exceptions across process boundaries
-
-- Python worker exceptions whose diagnostic state holds a `types.MappingProxyType` fail to pickle (`TypeError: cannot pickle 'mappingproxy' object`) and can replace the domain error with a `TypeError` in the parent. Define `__reduce__` carrying a detached `dict` plus the exact type, message, and category, and test the real process-pool failure path for every public error subclass rather than only raising in-process. (src: pickle-boundary-exceptions, 2026-11-08)
-
-## Attributing failures at an HTTP boundary
-
-- Keep transport failures, HTTP-status failures, and parse failures as distinct error kinds, each carrying the URL, content type, and a short body snippet, and parse JSON only after confirming a 2xx. A 403 XML body then surfaces as an availability problem instead of a misleading deserialization error; a unit test with a 403 XML response keeps it that way. (src: http-feed-failure-attribution)
-- Capture raw first and parse second: keep the raw response (URL, status, fetch time, content type, body) and quarantine raw bodies on non-2xx responses and parse failures, so schema drift can be investigated and replayed without the live feed. (src: http-feed-failure-attribution)
-
-## NumPy scalar identity traps
-
-- Tallying NumPy-derived flags with `sum(x is True for x in values)` silently counts 0 when the values are `np.True_`, because `np.True_ is True` is false. Convert with `bool(value)` and guard explicitly with `value is not None` first, so a missing flag is not counted as false. (src: numpy-bool-identity-tally, 2026-11-10)
+`contextlib.redirect_stdout` replaces Python's `sys.stdout`, not file descriptor 1; native writes can still corrupt a JSON-over-stdout protocol. If native output cannot be disabled, preserve a separate protocol descriptor and redirect fd 1 to stderr around the native call, restoring it in `finally`. Descriptor changes affect the process, so account for concurrent writers; test with actual native writes. Library progress settings may be connection-local and must be applied to each relevant connection.

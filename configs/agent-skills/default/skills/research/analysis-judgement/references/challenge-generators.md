@@ -1,30 +1,21 @@
 # Challenge Generators
 
-Questions for making an attractive conclusion answer to live alternatives, without turning skepticism into a ritual.
-
 ## Frame and alternatives
 
-- What question is this number actually the answer to? Can it be stated in full, and is that the question being asked? (src: challenge-the-obvious)
-- What does the problem look like from a vantage with opposite incentives—the counterparty, the data-generating process, or the person paying for the answer? (src: challenge-the-obvious)
-- What did the frame make unmeasurable? The most dangerous variable may be the one with no column. (src: challenge-the-obvious)
-- When exactly two options present themselves, what third option is hidden? On what axis do they not differ, and might both share a premise that is the real hypothesis? (src: challenge-the-obvious)
+- State the question the number actually answers. Check what the frame leaves unmeasured, including variables with no recorded column.
+- For a forced choice, look for a shared premise and a viable third option. Consider the incentives of the people and processes generating the data.
+- Describe the strongest plausible null that produces the same observation, and find a cheap observation that distinguishes it from the proposed explanation. Check whether a standard method's assumptions hold in this setting.
+- What changes if the baseline becomes the hypothesis under test, the instrument the object of study, or the model's error the signal? An inversion that survives may reorganize the analysis.
+- A measured null rules out only what was measured under those conditions; it need not exclude another plausible, reversible hypothesis. Scale the conclusion to the evidence and its consequences.
+- Drop repeated challenges that cannot change the decision once answered or accepted as a risk; prefer challenges that distinguish live hypotheses.
 
-## Null and method
+## Choosing an experiment
 
-- Before trusting a result, what is the strongest boring world in which the same data appears, and what is the cheapest observation that distinguishes it from the claimed explanation? A result that beats a null nobody believes has beaten nobody. (src: challenge-the-obvious)
-- “Standard” is a fact about sociology, not validity. What assumption does the standard method import, does this domain satisfy it, and is this the kind of problem the method was invented for? (src: challenge-the-obvious)
-- What changes if the baseline becomes the hypothesis under test, the instrument the object of study, or the model’s error the signal? Most inversions die immediately; one that survives may reorganize the analysis. (src: challenge-the-obvious)
-
-## Conclusion and challenge quality
-
-- What would change the conclusion? If nothing would, it is a commitment rather than a conclusion. What is the strongest reversal a hostile, competent reviewer could make, and what cheapest observation distinguishes it? (src: challenge-the-obvious)
-- What does this conclusion license someone to do, and does the evidence bear that consequence? The evidence bar belongs to the claim’s consequences, not the analysis’s elegance. (src: challenge-the-obvious)
-- Which part went unexamined because it was expensive, and which because the answer was feared? Those are different risks. (src: challenge-the-obvious)
-- A useful challenge is falsifiable, distinguishes live hypotheses, is cheap relative to its information, and could change the decision. If it does not meet that bar, it may be dropped or carried as a named risk; the same standard applies to criticism of one's own conclusion. (src: challenge-the-obvious)
-- A measured null forecloses only what was measured under those conditions; it does not rule out a different, causally plausible and reversible hypothesis. The original frame may be correct: frame movement is a possible result of pressure-testing, not a success condition. (src: challenge-the-obvious)
-- Once a challenge is answered, accepted as a named risk, or found not decision-bearing, repeated doubt without new evidence adds little. A weaker surviving claim may call for a correspondingly weaker conclusion; these are useful outcomes, not a required three-bucket ritual. (src: challenge-the-obvious)
+- Read available code and documentation first when they can resolve the feasibility question. Run the experiment most likely to invalidate the larger proposal before lower-risk work.
+- What is the boring alternative, compared on maintenance, reversibility, and blast radius? Ground claims about current behavior in code or other direct evidence.
+- Define observable outcomes for success, partial success, and failure. Comparison experiments must test the same question under comparable conditions, including integration and data handoff.
 
 ## Fallbacks and invariants
 
-- Before adding a guessing fallback (deriving an identifier or structure from a name), does its trigger condition already guarantee that the stored answer exists? If a field is supplied only at creation, "present" is authoritative and "absent" can mean "already recorded in the index", not "unknown", so guessing at absence may contradict a correct record. (src: fallback-trigger-completeness)
-- Which invariant between the authoritative index and the derived table makes the fallback unnecessary, and what would break that invariant? (src: fallback-trigger-completeness)
+- Before guessing an identifier or structure from a name, check the trigger and the authoritative index. A field supplied only at creation can be absent because it was already recorded, not because it is unknown; a fallback can contradict the record.
+- Identify the invariant between the authoritative index and derived table, and what could break it, before deciding whether a fallback is needed.

@@ -18,5 +18,3 @@ Scope: when a skill is half conversational workflow (an interview, review loop, 
 
 - A purely operational skill that produces no durable artifact, a one-off artifact not worth standardizing, or a case where splitting adds overhead with no reuse.
 - Keep the full artifact contract in one home; minor overlap is fine, duplicated rules are not. Prefer a few class-level skills to one narrow skill per artifact instance.
-
-(src: skill-design-pattern; applied in the public research-proposal and experiment-log skill pairs)

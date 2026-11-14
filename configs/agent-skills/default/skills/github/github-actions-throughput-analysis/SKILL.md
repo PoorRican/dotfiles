@@ -1,13 +1,12 @@
 ---
 name: github-actions-throughput-analysis
-description: "Use when CI feels slow or before resizing self-hosted runner capacity: separate queue time from runner start latency and execution time by joining the GitHub API's runs and jobs with runner-pod lifecycle metrics, replay slot counts, find duplicate spend and classify failures before calling them flakes."
+description: "Use to diagnose slow GitHub Actions runs or assess self-hosted runner capacity by separating queueing, runner startup and job execution, and by investigating duplicate work and failures."
 ---
 
 # GitHub Actions throughput analysis
 
-"CI is slow" can mean the queue (not enough runner slots), the runner system (scheduling, boot, registration), or the job itself (a slow layer, a straggler test shard). Measuring first keeps capacity changes and workflow edits aimed at the right layer. The analysis is read-only and authorizes no change; report what is merged, what is applied and what is observed at runtime as three separate states.
+Slow CI can reflect scarce runner slots, runner startup delays, or slow job execution. Separate those phases before changing capacity or workflows.
 
-| When you are… | Open |
+| Task | Reference |
 |---|---|
-| Collecting runs and jobs, splitting each job's wait into scheduling, boot and registration phases, bucketing by pool saturation, or replaying slot counts | [references/queue-vs-runtime-analysis.md](references/queue-vs-runtime-analysis.md) |
-| Reading step timings and slow layers, finding duplicate runs, or classifying a failure before calling it a flake | [references/job-level-and-failure-analysis.md](references/job-level-and-failure-analysis.md) |
+| Measure queueing, runner lifecycle, job duration, duplicates and failures | [Throughput analysis](references/queue-vs-runtime-analysis.md) |

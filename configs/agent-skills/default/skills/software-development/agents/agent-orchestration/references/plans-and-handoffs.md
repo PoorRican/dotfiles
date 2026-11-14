@@ -1,41 +1,37 @@
-# Plans and Handoffs
+# Plans, handoffs, and reviews
 
-Scope: task boundaries, context transfer, and sequencing for implementations that use multiple agents.
+## Briefing and review
 
-## Preparation and dependency scope
+A handoff needs the original requirements, exact workspace and scope, neighboring interfaces, constraints, and evidence expected for acceptance. A fresh reviewer can independently assess the requirements and specified revision range without relying on the implementer's account. Separate specification compliance from code quality; implementation and tests generally belong in the same review slice.
 
-Before expanding preparation, identify the next user-relevant outcome and what genuinely prevents the
-next authorized step. A discovered problem is not automatically a prerequisite for every path.
-Preserve safety and correctness gates, but keep blockers attached to the work they affect. When a
-repair creates more changes or verification obligations, reconsider whether its broader scope is
-necessary. Once the scoped claim is adequately evidenced, return to the main objective.
+For a branch review, `base...head` selects changes since the merge base; a direct comparison may include base-branch drift. For uncommitted work, `git diff` omits untracked files: inventory the working tree and materialize a complete, frozen review surface, including relevant caller migrations. Findings should identify the mechanism, affected consumer and consequence, and distinguish newly introduced regressions from inherited hazards. Verify findings against their evidence before acting.
 
-**Tell:** Preparation keeps producing additional tasks, but not a new result relevant to the user's
-goal.
+For evidence-heavy drafts, independent reviewers can check numerical derivations and substantive claims separately. Check source identity and definitions, distinguish inference, and recompute material numbers from the underlying evidence. After changes, review the changed text and check any final additions against their sources.
 
-## Plans as usable handoffs
+For a results draft citing receipts, dispatch a read-only numbers reviewer and a claims reviewer in one batch with a shared output schema: `{findings: [{severity: error|overclaim|unclear|nit, draft_text, problem, evidence, correction}], verified: [...]}`. The numbers reviewer recomputes cells and prose numbers from receipts at full precision, checks identifiers, named commits and quoted values. The claims reviewer checks definitions against code and frozen text, confirms or refutes mechanisms with `file:line`, checks decisions against receipts, and flags unlabeled inference.
 
-- An independently executable task has a clear file boundary, an interface with neighboring work, and an observable way to assess the result; enough domain context keeps a fresh implementer from having to infer hidden constraints. (src: writing-plans; src: sdd-worktree-orchestration, portable lesson)
-- Fresh implementer and reviewer contexts can reduce self-justification and context contamination. A review brief rooted in original requirements, rather than the implementer's account, helps reviewers assess what is present rather than what was intended. (src: subagent-driven-development; src: stacked-issues)
-- For dependent issues, later work is based on the prior issue's implementation; comparing each change with the preceding tip makes it clearer which issue introduced it than a common-base comparison. (src: stacked-issues)
-- A local branch handoff does not by itself authorize pushing or opening a pull request; implementation permission does not imply permission to publish. (src: stacked-issues)
-- Relative paths can resolve against a session's working directory rather than the shell's current directory; explicit workspace-qualified paths prevent a handoff from editing a different checkout. (src: sdd-worktree-orchestration, portable lesson; source 2026-07-18)
-- Concurrent workers that share one Git index can race over staging and commits. When that shared-index risk applies, serialized commits scoped to owned paths avoid the race. (src: sdd-worktree-orchestration, portable lesson; source 2026-07-18)
-- Could generated briefs or reports overwrite durable history because their “scratch” directory is tracked, and does a task-local check omit a stricter project-wide gate? (src: sdd-worktree-orchestration, portable lesson; source 2026-07-18)
+Verify each finding against its cited evidence before applying it. A reviewer's computation is not a receipt: use it to drop or soften a claim, and publish its numbers only after recomputing them in an audited script. After a large revision, give both reviewers the revised path and changes for a delta round covering changed text and regressions; preserve their structured findings. Gate final additions yourself: check numbers against receipts or final-form generator output, recompute table cells, and open cited lines and named commits. Generate derived values at final precision rather than re-rounding printed numbers.
 
-## From approved design to a working increment
+For a contested, evidence-heavy question, build a write-protected evidence pack and first-pass facts to challenge. Have specialist investigators state falsifiable claims and what they tried to falsify; then use opposing theses, a reviewer challenging the premise, and auditors recomputing from raw sources without reusing the audited scripts. Send targeted follow-ups to existing investigators.
 
-- Recover the approved semantics and acceptance boundary from existing design and implementation surfaces. Separate mechanics needed for the authorized increment from optional capabilities; do not reopen settled decisions or make the whole roadmap its gate. (src: iterative-software-delivery)
-- Once authorization resolves execution choices, decide routine bounded mechanics rather than presenting serial menus. Ask when an unresolved choice affects meaning, information availability, public compatibility, irreversible state, or risk. A deferred capability or reversible provisional default is not approval of permanent policy. (src: iterative-software-delivery)
-- Trace a real input through the smallest complete user-relevant path to an inspectable output; a builder, schema diagram, or wrapper alone does not demonstrate the running path. For a data system, inspect the produced data. (src: iterative-software-delivery)
-- Name unsupported contracts and provisional defaults; fail explicitly rather than silently accepting declarations the implementation ignores. Preserve agreed domain semantics and source-of-truth policies when simplifying infrastructure. (src: iterative-software-delivery)
-- Record only execution details needed in the existing workflow, including payload shapes and verification commands; do not duplicate the architecture as another specification. Keep integration and verification in coordinating scope. (src: iterative-software-delivery)
-- When authorized, build and run relevant tests, drive the selected real input through the artifact, and inspect it through its consumer path. Distinguish unit, source-fixture, and integrated execution evidence; none substitutes for another. (src: iterative-software-delivery)
-- Report what actually runs, its entry command and artifact location, and capabilities not yet qualified. Do not present one slice as the completed acceptance sequence or pending integration as finished. (src: iterative-software-delivery)
+## Dependent issue chains
 
-## Coordination questions
+Read the issues and parent constraints together and identify the interfaces and dependencies that actually require sequencing. Later work must start from the preceding issue's implementation, not merely its specification. Before dispatching the next implementer, compare the new worktree's HEAD with the previous issue's tip; an incorrect base makes the stack misleading. Review each issue against that preceding tip rather than the common base.
 
-- Which dependencies require a later wave, and which files can genuinely be owned independently? Where are signatures, error vocabulary, and invariants frozen so downstream tasks do not guess?
-- Does a purportedly verified configuration value reach a runtime consumer, and are the implementation, test, and documentation boundaries consistent?
-- Is a task useful on its own, with a verification result that a fresh reviewer can assess against the original acceptance criteria?
+For each issue:
 
+1. Read the issue text and parent epic, explore affected code and cross-boundary coupling, and plan the files to create, move, edit, or leave untouched. Include concrete verification commands and sequence dependencies before dispatch.
+2. Create the next worktree and branch from the previous issue's branch. Check its HEAD against the previous issue's commit before dispatch; if wrong, correct the base before starting work. Record the previous tip for the review range.
+3. Give the implementer the full issue text, exact worktree and branch, relevant plan, architectural decisions, files not to touch, verification commands, and applicable commit conventions. State publication boundaries. Request changed files, command results, commit SHA when applicable, and deviations.
+   If committing, forbid `--amend` after a failed commit hook: the commit may not have happened, so amending can silently change the previous issue's commit. Use a follow-up commit for review fixes.
+4. Brief a fresh independent reviewer with the issue text, worktree, preceding tip and head, and one checklist section per acceptance criterion. Do not include the implementer's report. Ask for concrete evidence per criterion, test results, scope and working-tree status, and a verdict of VERIFIED or GAPS_FOUND with specific failures.
+5. Sanity-check the reported change and worktree yourself, including `git -C <worktree> log --oneline <previous-tip>..HEAD`, `git -C <worktree> show --stat <commit-sha>`, and `git -C <worktree> status`. Proceed to the next issue only after addressing review gaps.
+6. Hand off each worktree and branch, commit SHA where applicable, verification results, and non-blocking observations. Do not push or open a pull request without authorization.
+
+After independent review, triage gaps: correct a small, unambiguous omission directly; delegate a larger repair; surface a substantive design divergence or uncertain scope change for a decision. Re-review the affected work after fixes. Conflicting IDE and command-line diagnostics need investigation in the correct workspace and configuration; a passing different analyzer does not by itself prove an IDE result stale. A local branch handoff does not authorize publishing it.
+
+For apparently stale IDE import diagnostics across worktrees, run the relevant runtime import and configured CLI type checker in the new worktree, for example `uv run python -c "from <package> import <symbol>"` and `uv run mypy --config-file=mypy.ini <paths>`. If both pass, investigate the IDE's workspace and configuration; matching configuration and refreshed diagnostics can establish a stale IDE result. Record a confirmed stale diagnostic as non-blocking rather than treating it as an implementation gap.
+
+For a confirmed unit-testable defect, a proving test should fail before the fix while pinning the intended behavior. A passing test that merely echoes an implementation constant does not prove the fix; record refuted hypotheses where they prevent an incorrect future change.
+
+Keep blockers attached to the work they actually affect. Trace a real input through the smallest complete path to an inspectable output, and report unsupported or unverified capabilities rather than presenting a partial slice as the whole acceptance sequence.

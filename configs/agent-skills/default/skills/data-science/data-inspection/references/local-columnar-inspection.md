@@ -1,29 +1,19 @@
-# Local columnar inspection
+# Coverage and inspection
 
-Scope: Distinguish descriptive inventories from row-level data and keep data-coverage queries tied to an explicit population.
+## Population and coverage
 
-## Metadata and observed data
+- Availability metadata and inventory entries do not prove corresponding rows were stored. Define the population before reporting an earliest timestamp: metadata, all stored rows, and a filtered subset can have different extrema.
+- Narrow with structured identifiers; text searches need controlled synonyms and exclusions. A missing listing match or a successful sample does not establish population-wide absence or coverage.
+- For paginated APIs, bound selected records, request timeouts, and response bytes; do not bypass access refusals. Preserve responses and per-record reports, inspect pagination metadata, follow pages as needed, and reconcile reported counts with collected items. Report sample success separately from qualified population coverage.
+- Compare rates on a common population; ensure categories partition that population and their counts sum to it. An observation at an instant is not a duration, and “always null when X” does not imply “null only when X”. Compare coverage with an independent source where available.
 
-- Market metadata fields such as `open_time` and `close_time` describe availability; statistics from a relevant data column (for example, `end_ts`) describe observed Parquet-row coverage. (src: local-columnar-data-inspection)
-- A local SQLite inventory can expose tables, schemas, row counts, and provenance fields that narrow a search across large data files; it is an index of the export, not proof that every indexed item has corresponding row data. (src: local-columnar-data-inspection)
+## Parquet and asynchronous persistence
 
-## Search scope and extrema
-
-- Structured identifiers or exact ticker fields constrain the search population; title/rules text contributes controlled synonyms and exclusions because broad substrings can match unrelated records. (src: local-columnar-data-inspection)
-- “Earliest” is population-dependent: the earliest metadata record, stored row, and row for a filtered subset can differ, so the population determines the timestamp's meaning. (src: local-columnar-data-inspection)
-- Footer statistics can answer extrema questions without decoding row data when the relevant column statistics are present; a missing statistic cannot establish that the file has no matching values. (src: local-columnar-data-inspection)
-- The bundled [footer scanner](../scripts/parquet_footer_min_ts.py) reads integer INT32/INT64 min/max statistics and interprets them directly as Unix seconds; timestamps encoded in another unit or representation, or lacking usable statistics, are outside that assumption. (src: local-columnar-data-inspection, 2026-06-09)
-
-## Asynchronous persistence comparisons
-
-- For two asynchronously persisted datasets, preserve the exact row-time window, identity and channel filters, scan time, counts and last observed timestamps. Repeat the same fixed window after persistence catches up: newly visible rows that explain an earlier tail deficit support visibility lag for that interval, not completeness in general. Check interior time buckets and population/key compatibility separately; matching totals alone do not establish identical rows. (src: local-columnar-data-inspection; method)
-
-## Reconstructable analysis inputs
-
-- Preserve policy-independent forecast issues and all opportunities, including refusals, missing support, zero fills and untraded siblings; retain execution slices, holdings and pending reservations for later analysis. Retain reconstructable timestamped paths rather than interval extrema alone, and distinguish physical-event evidence, source-body completion, forecast usability and market clocks. (src: reconstructable-analysis-inputs; method)
-- Preserve negative receipt-relative lags, gaps, overlapping event associations and interval censoring. Label moves as candidate associations, not causal effects; freeze cutoffs before scoring and distinguish contract payoff determination, observable determination, closure and settlement. (src: reconstructable-analysis-inputs; method)
-- Bound storage with durable source identities, verified regeneration inputs, decoders and offsets, numerical settings and random streams. A manifest alone does not keep inputs alive. (src: reconstructable-analysis-inputs; method)
+- Row-group footer statistics can cheaply identify extrema, nulls, constants, and impossible ranges without decoding data. Check whether each statistic exists; missing statistics do not prove absence. Footer extrema describe the whole row group, not necessarily a filtered subset.
+- For limited memory, project needed columns and aggregate one row group at a time using `ParquetFile.read_row_group(i, columns=[...])`. Check `has_null_count` and `has_min_max` before using footer statistics. For last row per key, reduce within and across groups using the intended ordering, not file order unless that is the intended order.
+- The [footer scanner](../scripts/parquet_footer_min_ts.py) accepts files or directories and emits JSON lines for timestamp-named INT32/INT64 statistics interpreted as Unix seconds. Its `--min-epoch` and `--max-epoch` defaults bound both extrema; override them for the intended interval. `--limit` stops after matching hits, and errors are emitted as JSON lines. It does not infer units; missing, unsupported, filtered, or failed statistics are not evidence of no data.
+- Compare asynchronously persisted datasets using the same fixed row-time window, identity and channel filters; preserve scan time, counts and last timestamps. Repeat after persistence catches up. A recovered tail supports visibility lag for that interval only; check interior buckets and row identities separately, because equal totals do not prove equal rows.
 
 ## DuckDB file-backed databases
 
-- DuckDB infers a file-backed database's catalog name from its filename stem. A shadow copy named `<name>.duckdb` that also creates a schema `<name>` makes two-part SQL (`<name>.table`) ambiguous between the catalog and the schema. Give the file a distinct name or use three-part names, and test with a real file-backed database, not `:memory:`. (src: duckdb-catalog-name-collision)
+- DuckDB infers a file-backed database's catalog name from its filename stem. A file named `<name>.duckdb` that also creates schema `<name>` makes two-part SQL (`<name>.table`) ambiguous between catalog and schema. Give the file a distinct name or use three-part names, and test with a real file-backed database, not `:memory:`.

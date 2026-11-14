@@ -1,13 +1,13 @@
 ---
 name: kueue-troubleshooting
-description: "Use when a Kueue-managed Kubernetes Job stays suspended or Pending (admitted but unschedulable, PodsReadyTimeout eviction loops) or Job submission fails because the Kueue webhook has no endpoints: separates the quota ledger from node fit, taints and real usage, and recovers a crash-looping controller backed up by finished Jobs."
+description: "Use when a Kueue-managed workload is suspended, Pending or repeatedly evicted, or when a controller or webhook outage blocks Job submission."
 ---
 
 # Kueue troubleshooting
 
-Kueue adds an admission layer in front of kube-scheduler, and the two disagree in ways that look like one problem: a workload can be admitted yet unschedulable, a quota can look free while nothing runs, and a controller outage can block every Job on the cluster. Diagnose which gate or component is failing before changing quota, priority or anyone else's workload; report options and act only with approval when the objects belong to someone else.
+Kueue admission and Kubernetes node placement are separate gates. An admitted workload can still be unschedulable, while a failing webhook can prevent Job creation altogether.
 
-| When you are… | Open |
+| Task | Reference |
 |---|---|
-| Looking at an admitted Job whose pod stays Pending, loops through PodsReadyTimeout evictions, or waits "for quota" while the node looks idle | [references/admission-vs-node-fit.md](references/admission-vs-node-fit.md) |
-| Seeing `failed calling webhook ... no endpoints` on submission, a CrashLoopBackOff controller, a finished-Job backlog, or a GPU step Pending while the GPU is idle | [references/controller-crashloop-and-job-backlog.md](references/controller-crashloop-and-job-backlog.md) |
+| Distinguish quota admission from node fit, taints and requeue | [Admission versus node fit](references/admission-vs-node-fit.md) |
+| Diagnose webhook outages and controller crashes | [Controller and backlog](references/controller-crashloop-and-job-backlog.md) |

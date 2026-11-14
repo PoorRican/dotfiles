@@ -1,46 +1,21 @@
 # Cost attribution
 
-Scope: mechanisms for locating cost and deciding what a benchmark actually establishes.
-
 ## Attribution to the executed path
 
-
-- Which exact process, function, step, or span produced the timing, and does that measured path reach the code the proposed optimization targets? A duration attached to one unit does not establish cost in a different, merely related unit. (src: perf-issue-claim-attribution-audit)
-- Invocation counts establish frequency, not duration. Likewise, idle-system I/O or throughput probes do not reproduce the running process’s cache, connection reuse, concurrency, or contention state; phase wall times and counts measured in a realistic run distinguish repeated work from genuinely expensive work. (src: opaque-step-cost-attribution)
-- With a reported logical-to-physical work ratio, the implied multiplier can be factored into passes and fan-out. Separately issued per-entity queries do not share scans merely because they read the same input; a large ratio can indicate query fan-out rather than a few full passes. (src: perf-issue-claim-attribution-audit)
-- Have partial prior art and postmortems been checked? They can show that a plausible optimization already exists or is contradicted by the measured mechanism. (src: perf-issue-claim-attribution-audit)
-- For a slow validation pipeline, distinguish queue wait, scheduler admission, query time, payload validation, reduction, and publication/check time. Inspect the executing revision and failure stack; reaching publication late does not establish which phase consumed the time. Attribute timings to the worker's immutable executing image, not a concurrent control-plane rollout.
-- Time bounded representative queries against a known source snapshot and count the eligible population separately. Label samples; neither one entity's timing nor fewer SQL calls alone guarantees whole-build runtime.
-
-
-- A measured stage’s share matters to an end-to-end estimate: a component made several times slower may barely affect total time if it was a small fraction of the original pipeline. Component latency and whole-pipeline impact are distinct quantities. (src: checkpoint-cpu-gpu-benchmark-from-fixtures)
-
-
+- Identify the executing revision and the process, function, or phase that produced each timing. Counts establish frequency, not duration; time phases in a representative run rather than inferring them from idle-system probes.
+- Factor logical-to-physical work into passes and fan-out. Separately issued per-entity queries need not share scans, even when they read the same input.
+- Separate queue wait, admission, query, validation, reduction, and publication time when those phases exist. A late publication does not identify the expensive phase.
+- A component's share of total time bounds the end-to-end effect of changing it. Measure both component and whole-workload cost.
 
 ## Comparison validity
 
+- If a component's output changes downstream branches or call counts, whole-run timing mixes its cost with a changed workload. To isolate cost on a fixed trajectory, execute the real component at the real call sites but return baseline values; matching output digests check that the trajectory remained fixed. This does not establish output fidelity or cost under a changed trajectory.
+- A component-off comparison isolates its cost only if the remaining consumer-visible inputs, outputs, and attempts are equivalent. Removing a downstream consumer includes that consumer's cost in the delta.
+- Compare shared-host runs back-to-back under matched load and report spread, not just the best run. Batch wall time is not each item's historical latency, particularly when timing itself affects downstream behavior.
+- Synthetic inputs should preserve relevant shapes and plausible variation; label them as synthetic and do not present component timing as production end-to-end timing. Judge equivalence at the consumer's actual reads, including changed observation timing or frequency.
 
-- When real outputs change downstream branches, call counts, or loop lengths, comparing full-run times confounds component cost with a changed workload. One attribution design executes the real component at its real call frequency and context, discards its result, and returns the baseline value; matching output digests then establish that the downstream trajectory stayed fixed. This estimates component cost on that trajectory, not output fidelity or output-distribution-dependent downstream cost. (src: fixed-output-cost-attribution)
-- Benchmark inputs derived from the component’s real schema and populated with varied plausible values avoid a constant-input strawman. A benchmark report can distinguish real from synthetic inputs and work; schema realism alone does not make a synthetic-value benchmark a production end-to-end measurement. (src: fixed-output-cost-attribution)
+## GPU measurement
 
-- Component-off comparisons are interpretable when a real production dial suppresses its calls and the remaining consumer-visible inputs, outputs, and attempts stay equivalent. If disabling it also removes a downstream consumer, that consumer’s cost is part of the measured delta. (src: load-matched-cost-decomposition)
-- Shared-host absolutes drift with co-tenant load. Back-to-back comparisons under matched conditions support a ratio or delta; an absolute from a quiet run is a separate anchor, not a substitute for the matched comparison. (src: load-matched-cost-decomposition)
-- A batch’s wall time is not each member’s historical per-item latency. Batching can change both measured latency semantics and downstream behavior when timing is itself an input. (src: load-matched-cost-decomposition)
-- Report a cautious midpoint between the peak and an unchanged confirmation run rather than presenting the peak as sustained throughput. Quote benchmark spread alongside any percent delta: a 1-2% difference can sit inside harness noise unless runs are paired and drift-cancelled. (src: benchmark-reporting, 2026-07-27)
-
-## Fit, compatibility, and speed
-
-
-- A checkpoint’s saved hyperparameters and state dictionary can reconstruct the model’s actual tensor shapes; random parameter values suffice for forward-latency timing when shapes are faithful, and schema-valid synthetic fixtures can avoid an unrelated production data pipeline. Checkpoint size, software/API compatibility, forward latency, and end-to-end cost are distinct questions. (src: checkpoint-cpu-gpu-benchmark-from-fixtures)
-- For small-batch inference, launch and fixed latency can dominate, so peak-FLOPS ratios may greatly overstate the measured CPU/GPU speed ratio. (src: checkpoint-cpu-gpu-benchmark-from-fixtures)
-- A faster implementation is an optimization of a validated path only when values at the consumer’s actual reads remain equivalent. Similar state can omit observation moments and change decisions, so equivalence is judged at the consumer’s reads and in light of any changed timing or observation frequency. (src: load-matched-cost-decomposition)
-
-## GPU microbenchmark hygiene
-
-- Warm up before timing: Triton compiles per specialization and cuFFT builds plans on first use, so the first call of each shape measures setup, not steady state. (src: gpu-measurement-hygiene, 2026-10-25)
-- `torch.profiler` with CUDA activities ran a 32 GiB pod out of memory after about 15 s. Profile 1-25% of a batch at production block sizes and take timings from separate unprofiled warm runs. (src: gpu-measurement-hygiene, 2026-10-25)
-- Training on some GPUs is not bitwise reproducible run to run (about 1e-9 relative on one unified-memory GPU class, 2026-10-25). Rerun the baseline to measure that spread before attributing a difference to a code or image change. (src: gpu-measurement-hygiene, 2026-10-25)
-
-## NumPy hot-loop negatives
-
-- In one dated tuning pass over a NumPy rollup loop (2026-07), these changes did not help: a dense slot index in place of compacted active indices, a flattened-offset single `searchsorted`, `int8` outputs, and `int32` indices. Measure narrower dtypes and flatter structures instead of assuming they are faster. (src: numpy-hotloop-tuning, 2026-07)
+- Warm each relevant specialization before timing; compilation and plan creation can dominate first calls. Collect steady-state timings separately from profiling.
+- GPU profiling can consume substantial memory and perturb execution. Profile a bounded representative portion and time separate unprofiled warm runs.
+- Measure baseline-to-baseline variation before attributing small training differences to a code or environment change.

@@ -1,53 +1,21 @@
-# promtool boundary tests and a mutation harness
+# Rule tests and runtime verification
 
-Scope: proving a changed or new alert rule does what the replay said. Each rules file has its tests beside it (`<name>.rules.test.yml`); run everything in the same image CI uses, so the result matches CI.
+## Test the intended behavior
 
-## Boundary tests
+- Test values immediately on each side of the threshold and exactly at it where comparison strictness matters. For a `for:` rule, test before and after the hold period with enough input history for range functions. Add decoy label sets that must not fire and assert expected labels and rendered annotations.
+- Use the Prometheus version used by the deployment or CI. When confidence in test sensitivity matters, mutate a threshold, comparison, matcher or `for:` independently and check that the relevant test fails; a passing mutant indicates a gap. A failure due to setup or file permissions is not a detected behavioral mutation.
+- Ensure a test loop propagates failures rather than merely printing them. For example:
 
-- Cover both sides of each threshold: just under, held well past `for:`, gives `exp_alerts: []`; just over gives no alert before `for:` elapses and an alert after. Keep evaluation times well clear of the boundary (for example `10m` and `25m` for a 15-minute `for:` over a `rate(...[5m])`).
-- Absolute byte thresholds: test `threshold - 1` (fires for a `<` rule) and exactly `threshold` (silent), for example `53687091199` and `53687091200` for 50 GiB. Add decoys that must stay silent: another mount on the same node and the same mount on another node.
-- Counter inputs at `interval: 1m`: `'0+18x60'` is 0.3 per second.
-- `exp_labels` must list severity, service and every label the expression keeps (the class label, `condition`, `status: "true"` for kube-state-metrics conditions). Quote numeric-looking or boolean-looking values (`outcome: "429"`). `exp_annotations` must be the exact rendered text with templates expanded.
-
-## Mutation check
-
-Mutate every threshold, comparison operator, label matcher and `for:` in turn. Each mutation must fail exactly its intended case; a mutation that no test notices means the test is not pinning that boundary. Build the mutants outside the worktree:
-
-```bash
-M=$(mktemp -d -p "${SCRATCH_DIR:-.}")
-python - "$M" <<'PY'
-import pathlib, shutil, sys
-root, src = pathlib.Path(sys.argv[1]), pathlib.Path("<rules-dir>")
-rules = (src / "NAME.rules.yml").read_text()
-EXPR = 'node_filesystem_avail_bytes{node="n1",mountpoint="/"} < 53687091200'   # exact text of the expression in the rules file
-assert rules.count(EXPR) == 1
-mutants = {
-    "threshold": rules.replace(EXPR, EXPR.replace("53687091200", "42949672960")),
-    "lt-to-le": rules.replace(EXPR, EXPR.replace("< ", "<= ")),
-    "drop-mountpoint": rules.replace(EXPR, EXPR.replace(',mountpoint="/"', "")),
-}
-for name, text in mutants.items():
-    assert text != rules, name
-    shutil.copytree(src, root / name)
-    (root / name / "NAME.rules.yml").write_text(text)
-PY
-chmod -R a+rX "$M"   # the image runs as nobody: otherwise cd fails and every mutant looks detected
-docker run --rm --entrypoint /bin/sh -v "$M:/m:ro" prom/prometheus:<ci-version> -c '
-  for d in /m/*/; do cd "$d"
-    if out=$(/bin/promtool test rules NAME.rules.test.yml 2>&1); then echo "$(basename "$d"): NOT DETECTED"
-    else echo "$(basename "$d"): $(printf "%s\n" "$out" | grep -o -E "name: [a-z0-9-]+" | sort -u | tr "\n" " ")"; fi
-  done'
-rm -rf "$M"
+```sh
+status=0
+for t in ./*.rules.test.yml; do
+  promtool test rules "$t" || status=1
+done
+exit "$status"
 ```
 
-Use the Prometheus image version CI pins, not `latest`. A mutant must fail at least one named test; "NOT DETECTED" is a missing test.
+## Apply and verify
 
-## Run everything
-
-```bash
-docker run --rm --entrypoint /bin/sh -v "$PWD/<rules-dir>:/rules:ro" prom/prometheus:<ci-version> -ec \
-  'cd /rules && for f in *.rules.yml; do /bin/promtool check rules "$f" >/dev/null || echo "CHECK FAIL $f"; done;
-   for t in *.rules.test.yml; do /bin/promtool test rules "$t" >/dev/null 2>&1 || echo "FAIL $t"; done'
-```
-
-Also run any repository render tests that pin the observability overlays (storage or Alertmanager render tests) when those overlays changed.
+- Compare the intended rules render to the live configuration before an authorized apply: unrelated merged changes can ride along, and a rule whose producer metric is absent may be inert. Reload or roll out according to the deployment's configuration mechanism.
+- After an evaluation interval, inspect the rules API for the intended expression and health; a newly loaded rule may be unknown before its first evaluation. Check active alerts and the relevant Alertmanager route, silences and inhibition separately.
+- Verify notification delivery using the actual integration's delivery counters or receiver evidence. A loaded rule or an active Alertmanager alert alone does not prove delivery. Report merged, applied and runtime-verified states separately.

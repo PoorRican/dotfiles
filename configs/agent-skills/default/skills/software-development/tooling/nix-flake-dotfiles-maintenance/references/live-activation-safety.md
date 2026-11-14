@@ -1,23 +1,32 @@
-# Live activation safety (NixOS generations)
+# Activation safety
 
-Scope: switching a running NixOS host to a new generation when the host carries traffic or services you must not interrupt (a router, a Kubernetes node, a remote machine reachable only over SSH). The procedure assumes the owner has authorized the activation itself.
+## Distinguish states
 
-## Provenance: what is running versus what you are about to build
+Report repository content, evaluation, built generation, applied generation and live service behavior separately. A successful evaluation or commit does not make a desktop change active; a running process may still use an older configuration. When removing a desktop profile, inspect imports, applied links and live services separately from dormant files, and preserve needed replacements.
 
-- Find the revision that builds to the running generation first: `nix eval --raw .#nixosConfigurations.<host>.config.system.build.toplevel.outPath` must equal `readlink -f /run/current-system`, in the primary deploy checkout and in every git worktree on the host. If none matches, stop: switching would revert someone's live, uncommitted activation. Never trust a local workstation mirror of the deploy repository; fetch and compare against the real remote. (src: nixos-live-switch; 2026-10)
+## Managed files
 
-## Build, diff, dry-activate
+Home Manager can build successfully but refuse activation because an unmanaged file would be clobbered. Compare the file with the intended managed source and preserve local changes before moving it to a backup and switching. Managing an entire Neovim config directory as a symlink while Home Manager also generates a file inside it can cause an installation conflict; choose one owner for the tree or its individual files. Multiple package providers of the same binary can likewise conflict in the generated profile.
 
-- Build first, then compare: `nix store diff-closures` between the running and new system, a diff of `etc/sysctl.d` (and `sshd_config`, `fstab` when touched), and a dry-activate. Every difference must be yours. (src: nixos-live-switch; 2026-10)
-- Treat `systemd-sysctl.service` in dry-activate output as a red flag. Dry-activate lists the units it will restart, not what they re-apply, and a restart re-applies the declared sysctl set from scratch: require every runtime-critical key (for example `net.ipv4.conf.all.forwarding = 1`) to be present in `$NEW/etc/sysctl.d`. One switch that only added a single sysctl key restarted the unit, reset forwarding to 0, and cut all off-host pod traffic through the node for minutes while the node stayed Ready and host ping stayed green. (src: nixos-live-switch; 2026-10-26)
-- A strict reverse-path filter drops a source arriving on an unexpected interface, so a legitimate peer may need explicit RETURN exceptions. `iptables-nft -C ... -i <if>` once false-matched a rule for another interface; list the chain after every insert instead of trusting the check. (src: nixos-live-switch; 2026-10-26)
+Git may read both a managed XDG configuration and an unmanaged legacy config; inspect both when effective URL rewrites or credential helpers differ from the managed file.
 
-## Preserve access and services across the switch
+## Remote switch procedure
 
-- Commit only your own files on the host worktree branch, and assert that the committed tree rebuilds to the same `$NEW` you tested. Keep an independent SSH session open for the whole switch. (src: nixos-live-switch; 2026-10)
-- Before any route or firewall change, arm rollback timers on each affected host: `systemd-run --on-active=180 <absolute path to the rollback command>` (absolute binary paths, because the transient unit has a minimal `PATH`). Stop them only after verification passes. (src: nixos-live-switch; 2026-10)
-- Verify at the workload level after activation, not just the host: forwarding (`net.ipv4.ip_forward`) reads 1, service endpoints answer from a peer host, the count of healthy scrape targets is as expected rather than a single digit, and in-cluster DNS resolves. Never restart `systemd-sysctl` as a probe; if forwarding reads 0, set it at once and then fix the source. Link the repository's own runbook for the exact commands rather than copying them. (src: nixos-live-switch; 2026-10-26)
-
-## Landing the change
-
-- Land on the main branch by `git cherry-pick -x` onto a branch off the freshly fetched remote main, run `nix-instantiate --parse` on the changed files, and merge by pull request with a merge commit. In the PR state the generation number, the store path, the source branch, and whether main still fails to reproduce the live system. (src: nixos-live-switch; 2026-10)
+1. Establish which source reproduces the running generation:
+   `nix eval --raw '.#nixosConfigurations.<host>.config.system.build.toplevel.outPath'`
+   versus `readlink -f /run/current-system`. Check the actual deployment
+   checkout and relevant worktrees; if none matches, stop and resolve the
+   provenance mismatch before risking a reversion of a live change.
+2. Build the candidate. Compare `nix store diff-closures` for the running and
+   candidate systems, diff generated `etc/sysctl.d` and, when touched,
+   `sshd_config` and `fstab`, then inspect dry-activation output. A listed
+   `systemd-sysctl.service` restart can reset runtime-critical forwarding:
+   check the full candidate sysctl set, not just the edited key.
+3. Keep an independent SSH session open. Before authorized route or firewall
+   changes, arm a rollback on each affected host, for example
+   `systemd-run --on-active=180 <absolute-path-to-rollback-command>`;
+   transient units have a minimal PATH. Cancel only after verification.
+4. Verify the affected workload from a peer, including forwarding and DNS
+   where applicable, not just a reachable host. If forwarding is unexpectedly
+   disabled, restore it and fix the declaration; do not restart
+   `systemd-sysctl` as a diagnostic probe.

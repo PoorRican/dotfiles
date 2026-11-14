@@ -1,10 +1,10 @@
-# Directory-scoped omp settings and memory
+# Directory-scoped OMP settings and memory
 
-Scope: keep a setting (for example the memory backend) off globally and enable it only under one workspace tree, using a config overlay that direnv loads.
+Scope: keep a setting (for example the memory backend) off globally and enable it only under one workspace tree, using a config overlay that direnv loads. Check installed OMP settings and CLI support before relying on these keys.
 
 ## Mechanics
 
-- omp's native `<cwd>/.omp/config.yml` discovery does not walk ancestors, so a parent workspace's overlay is not seen from a child directory. Scope settings to a tree by appending the absolute overlay path to `PI_CONFIG_FILES` from the workspace's `.envrc`:
+- OMP's native `<cwd>/.omp/config.yml` discovery does not walk ancestors, so a parent workspace's overlay is not seen from a child directory. Scope settings to a tree by appending the absolute overlay path to `PI_CONFIG_FILES` from the workspace's `.envrc`:
   ```bash
   export PI_CONFIG_FILES="${PI_CONFIG_FILES:+${PI_CONFIG_FILES}:}/absolute/workspace/.omp/config.yml"
   ```
@@ -22,6 +22,6 @@ Scope: keep a setting (for example the memory backend) off globally and enable i
 ## Behavior to expect
 
 - A missing or invalid overlay file is a hard error, not a silent fallback.
-- Running omp processes do not acquire a newly exported environment; relaunch from a direnv-enabled shell.
+- Running OMP processes do not acquire a newly exported environment; relaunch from a direnv-enabled shell.
 - Disabling a backend does not delete stored memories.
 - Treat the current files as authoritative rather than assuming an earlier setup still holds; re-read them before editing.

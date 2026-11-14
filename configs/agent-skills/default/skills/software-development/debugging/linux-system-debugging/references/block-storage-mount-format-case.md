@@ -1,35 +1,31 @@
-# Block storage mount/format case notes
+# Block storage and mounts
 
-Session pattern: user reported two connected-but-unmounted drives: one existing ~512GiB filesystem to mount, and one 12TB HDD to format. Prior session context contained the desired 12TB layout, but the exact user-provided typo search term (`btfrs`) returned no results.
+## Identifying a target
 
-Reusable lessons:
-
-- When asked to search past sessions with a misspelled term, first search the exact term, then retry likely corrections if no matches are found. Report both.
-- For destructive storage tasks, identify target disks with multiple stable attributes before any write: `/dev/disk/by-id`, model, serial, size, current partition/filesystem signatures, mountpoints, and current kernel-visible device nodes.
-- Treat user claims like “connected” as a hypothesis. Verify kernel enumeration with `lsblk`, `/dev/disk/by-*`, `/sys/block`, USB/sysfs topology, and recent kernel storage logs before trying to mount.
-- If the expected drive is not kernel-visible, do not invent a mount command as if it were available. Preserve the likely previous UUID/label/path from history, but state that reseat/rescan or cable/power checks are prerequisite.
-- For existing removable/external filesystems, prefer non-destructive mount-by-UUID or label, with explicit mountpoint and ownership options where appropriate.
-- For Btrfs subvolume “sizes”, clarify that Btrfs subvolumes are not partitions; use qgroup quotas if the user wants soft/hard-ish capacity policy.
-
-Representative verification commands:
+Use `lsblk` and filesystem signatures, mount information and `/dev/disk/by-id` to identify a device. Before any destructive write, verify the resolved device, model, serial, size, existing partitions, signatures and mounts; device names can change. If the disk is not enumerated, investigate connection, power and kernel logs rather than presenting a mount as ready.
 
 ```bash
-lsblk -b -o NAME,PATH,SIZE,TYPE,FSTYPE,LABEL,UUID,MOUNTPOINTS,MODEL,SERIAL,TRAN,ROTA
-sudo blkid || true
-findmnt -R /mnt /media /run/media 2>/dev/null || true
-for d in /dev/disk/by-id/* /dev/disk/by-label/* /dev/disk/by-uuid/*; do [ -e "$d" ] && printf '%-70s -> %s\n' "$d" "$(readlink -f "$d")"; done | sort
-for b in /sys/block/*; do dev=$(basename "$b"); printf '%s size=%s removable=%s model=%s\n' "$dev" "$(cat "$b/size" 2>/dev/null || echo '?')" "$(cat "$b/removable" 2>/dev/null || echo '?')" "$(cat "$b/device/model" 2>/dev/null | sed 's/[[:space:]]\+$//' || true)"; done
-journalctl -k -b --no-pager | grep -Ei 'usb-storage|uas|SCSI disk|Direct-Access|Attached scsi|sd[a-z]:|I/O error|Synchronize Cache|Cannot enable|disconnect' | tail -n 200 || true
+lsblk -b -o NAME,PATH,SIZE,TYPE,FSTYPE,LABEL,UUID,MOUNTPOINTS,MODEL,SERIAL,TRAN
+blkid
+findmnt
+ls -l /dev/disk/by-id /dev/disk/by-label /dev/disk/by-uuid
+journalctl -k -b -g 'usb-storage|uas|SCSI disk|I/O error|disconnect'
 ```
 
-Example Btrfs layout recalled in this case:
+Use elevated access where needed to see signatures; a missing disk cannot be mounted until it is enumerated.
 
-- Label: `kairos-12tb`
-- Mountpoint: `/mnt/kairos-12tb`
-- Mount options: `noatime,compress=zstd:3`
-- Subvolumes/quotas:
-  - `os_models` — 4TB
-  - `kairos-backups` — 6TB
-  - `kairos-data` — 2TB
+Mount an existing filesystem separately from formatting. For Btrfs, subvolumes are not partitions; qgroups provide subvolume capacity limits. Clarify conflicting requested names before creating a layout.
 
-Pitfall: the user had typo/name drift between `os_models` vs `os-models`, and `kairos-data` vs `cold-storage`. Preserve and call out such conflicts rather than silently choosing names.
+## Guarding destructive operations
+
+Formatting requires explicit authorization for the identified target. A blank-disk formatter should refuse existing child partitions, mounted devices and holders; show signatures using `wipefs --no-act`, require an explicit target-specific confirmation, and fail on failed checks. Inspect every external command including optional branches and verify availability on the execution host before handing off a runnable script. Verify the resulting mounts and filesystem state; perform a small write/read/delete check when appropriate.
+
+For a runnable script, check all commands, including optional branches, with `command -v`. `sgdisk` (gptfdisk) and `partprobe` (parted) may be missing; `sfdisk` and `blockdev --rereadpt` are possible util-linux alternatives, but check their availability and the intended operation. Wait for udev after a partition-table refresh with `udevadm settle`. An optional fstab change belongs in the initial invocation or a separate operation.
+
+Do not advise rerunning a successful formatter to add an fstab entry: the existing partition should make a blank-disk guard refuse. Include that option in the initial operation or use a separate non-formatting operation after verifying filesystem identity.
+
+## Busy devices and hidden mounts
+
+A host `findmnt`, `lsof` or `fuser` view can miss mounts in another process's mount namespace. Compare the device major:minor with `/proc/<pid>/mountinfo` and inspect a candidate namespace with `nsenter`. A rootless container pause process can retain a mount after containers disappear; verify the relevant empty scope before stopping it. Do not force past an exclusive-use failure: identify and release the holder. A partition-table reread is relevant after changing a partition table, not a prerequisite for every format.
+
+A stale container-storage configuration pointing at a retired mount can later recreate state on the wrong filesystem; update the configuration as part of migration.

@@ -1,56 +1,10 @@
-# Kueue webhook down: controller crash loop from a finished-Job backlog
+# Controller, webhook and Job backlog
 
-Scope: Job submission fails because the Kueue mutating webhook has no endpoint, the controller manager is in CrashLoopBackOff, and a large backlog of finished Jobs is the likely trigger. Includes cleanup of your own stopped pipeline run and an adjacent "GPU step Pending while the GPU is idle" trap.
+A missing webhook endpoint can block Job submissions covered by its webhook configuration. Check controller pod state and webhook EndpointSlices; do not assume every Job in the cluster is affected.
 
-## Signature
-
-- Submissions fail with `failed calling webhook "mjob.kb.io": ... no endpoints available for service "kueue-webhook-service"`. This blocks every Job on the cluster, not only yours.
-- `kubectl -n kueue-system get pods` shows `kueue-controller-manager-*` in CrashLoopBackOff with many restarts, and `kubectl -n kueue-system get endpoints kueue-webhook-service` lists no endpoint.
-
-## Diagnose (read-only)
-
-1. **Check the exit reason first**: `kubectl -n kueue-system get pod <pod> -o jsonpath='{.status.containerStatuses[0].lastState}'`. Two variants share one root cause, a large finished-Job backlog re-reconciled at startup:
-   - `OOMKilled` (exit 137) a few seconds after start. Upstream manifests ship a modest default manager memory limit (512Mi); a backlog of well over a thousand finished Jobs has been observed to exceed it, with logs showing only `Reconciling Job` lines before death. Steady-state usage after recovery is far lower.
-   - **Leader election lost**: `kubectl -n kueue-system logs <pod> --previous --tail=60` shows lease-lock rate-limiter errors (`client rate limiter Wait returned an error`), failed lease renewals and then `leader election lost`, roughly every five minutes. This points to client-side throttling during the startup re-reconcile of finished Workloads.
-   - Bound log inspection to the relevant controller incarnation and incident interval. A byte-limited response can stop before the interval ends; narrow the start time or split the interval before concluding a later event is absent. Filter large output before returning it.
-2. **Size the backlog per namespace** that submits Jobs:
-   ```sh
-   for ns in <jobs-ns-1> <jobs-ns-2>; do echo "$ns $(kubectl -n $ns get jobs --no-headers | wc -l)"; done
-   kubectl -n <jobs-ns> get jobs --no-headers | awk '{print $2}' | sort | uniq -c   # completion column
-   ```
-   Count events by reason as well (finished-Workload events grow with the backlog).
-3. **Why it accumulates**: check the `ttlSecondsAfterFinished` the submitter renders. A TTL of days against a campaign that launches hundreds of Jobs per day leaves a standing backlog; the durable fix is a shorter TTL or periodic cleanup in the submitter, not repeated manual deletion.
-
-## Recover (explicit owner approval required: the Jobs belong to another session or campaign)
-
-Offer options: (a) delete only the Complete Jobs in the backlog namespace, keeping Failed ones for debugging; (b) raise the controller's client QPS/burst or memory limit through its manifest; (c) both; (d) wait for the owner. If the manifest already sets higher QPS, the remaining lever is the memory limit; check both before choosing.
-
-For (a), re-list immediately before deleting because another actor may be clearing concurrently:
-
-```sh
-OUT="${SCRATCH_DIR:-.state}/kueue-unblock-$(date -u +%Y%m%d)"; mkdir -p -m 0700 "$OUT"; TS=$(date -u +%Y%m%dT%H%M%SZ)
-kubectl -n <jobs-ns> get jobs -o json > "$OUT/jobs-all-$TS.json"   # snapshot first
-# write the names with condition Complete=True and no status.active to complete-names-$TS.txt
-xargs -a "$OUT/complete-names-$TS.txt" -n 100 \
-  kubectl -n <jobs-ns> delete job --cascade=background --wait=false --ignore-not-found
-```
-
-- Treat `NotFound` as a concurrent deleter, not an error.
-- Verify: the controller stays `1/1 Running` for several minutes, a fresh `LeaderElection` event appears, the webhook EndpointSlice has an address, and a server-side dry-run create of a Job in the managed namespace is admitted. Then resubmit.
-- Log owner approval, counts, snapshot location and the still-open TTL or limit fix in the project's record.
-- For (b), a manifest change to Kueue follows the cluster's admission-safety procedure; render and diff the overlay and expect only the intended lines before applying.
-
-## Cleaning up your own stopped run
-
-Stopping a pipeline run (for example `zenml pipeline runs stop <run>`) marks the run stopped but leaves its orchestrator and step Kubernetes Jobs, and a pending Workload, in the queue. Delete only your run's Jobs by the run-id prefix (`kubectl -n <jobs-ns> get jobs | grep <prefix>`). A submission that failed on the webhook created no Job: resubmit under a new campaign or intent name rather than reusing the failed intent file.
-
-## Adjacent trap: GPU step Pending while the GPU is idle
-
-Read the Workload condition before assuming GPU contention:
-
-```sh
-kubectl -n <jobs-ns> get workload <wl> -o jsonpath='{range .status.conditions[*]}{.type}={.status} {.reason}: {.message}{"\n"}{end}'
-kubectl get clusterqueue <cq> -o json   # spec flavor quotas and status.flavorsUsage
-```
-
-`insufficient unused quota for ephemeral-storage in flavor <f>` means a non-GPU resource is exhausted, often held by an unrelated CPU-only tenant. Size `ephemeral_storage` to about 1.5 times measured peak (get artifact sizes from the pipeline stack's artifact store) rather than copying a value from another training configuration, and check the target node's actual free disk too.
+- Inspect the previous controller termination reason, logs, resource limits, leader-election errors and API rate-limit messages. OOM kills and lost leadership have several causes; a finished-Job or Workload backlog is a hypothesis, not a diagnosis. Correlate startup reconciliation, object counts and resource or API pressure before attributing cause.
+  Check the previous container termination with `kubectl -n <namespace> get pod <pod> -o jsonpath='{.status.containerStatuses[0].lastState}'` and its logs with `kubectl -n <namespace> logs <pod> --previous`. Bound log inspection to the relevant controller incarnation and interval; a truncated response cannot establish that later events are absent.
+- Count finished and active Jobs and Workloads in relevant namespaces, and inspect the submitter's `ttlSecondsAfterFinished` or cleanup policy. Long retention combined with sustained submissions can create a recurring backlog.
+- Match remediation to evidence: controller memory or client rate limits may need adjustment, or completed Jobs may need cleanup. Snapshot and re-list candidates; preserve failed Jobs needed for diagnosis. Deleting another owner's objects or changing controller configuration requires approval. Do not use a partial name-selection script as a deletion command.
+- After an authorized recovery, verify controller stability, an address in the webhook EndpointSlice and successful server-side dry-run admission of a representative Job. Distinguish this from merely restoring the pod.
+- Stopping a pipeline may leave its Kubernetes Jobs and queued Workloads behind; verify actual ownership before any cleanup. A failed webhook submission may have created no Job at all.

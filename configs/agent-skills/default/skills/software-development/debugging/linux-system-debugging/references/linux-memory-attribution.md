@@ -1,52 +1,27 @@
-# Linux memory attribution quick probe
+# Linux memory attribution and pressure
 
-Use when the user asks what is consuming RAM/swap or which desktop/browser process is responsible for a large allocation.
+Use `free -h`, `swapon --show --bytes`, `zramctl`, `/proc/pressure/memory` and kernel OOM logs to distinguish allocation from reclaim stalls. `MemAvailable` is more informative about remaining capacity than free memory alone. PSI `avg10`, `avg60` and `avg300` summarize stalls over their respective time windows, not necessarily the instantaneous state. A logically full zram device can occupy less physical memory due to compression; full swap alone does not prove active stalls.
 
-## Baseline
-
-```bash
-free -h
-swapon --show --bytes || true
-zramctl || true
-cat /proc/pressure/memory || true
-```
-
-Notes:
-- `MemAvailable` matters more than `MemFree`.
-- zram can be logically full but compressed to a smaller physical footprint.
-- `some/full avg10/avg60/avg300` pressure values show current stalls.
-
-## Top processes and groups
-
-Quick first pass:
+Use RSS to find candidates, then inspect `/proc/<pid>/smaps_rollup`: PSS apportions shared pages, whereas summing RSS double-counts them. Group related processes and inspect cgroup `memory.current` and membership for service or container charges that per-process attribution may miss. Trace sidecar parentage before blaming a nearby workload; ending a child may be temporary if its owner restarts it.
 
 ```bash
-ps -eo pid,ppid,user,stat,%mem,rss,vsz,comm,args --sort=-rss | head -n 30
-```
-
-Confirm with `smaps_rollup`:
-
-```bash
+ps -eo pid,ppid,user,stat,%mem,rss,vsz,comm,args --sort=-rss
 PID=<pid>
-grep -E '^(Rss|Pss|Pss_Anon|Pss_File|Pss_Shmem|Shared_Clean|Shared_Dirty|Private_Clean|Private_Dirty|Anonymous|Swap|SwapPss):' /proc/$PID/smaps_rollup
+grep -E '^(Rss|Pss|Pss_Anon|Pss_File|Pss_Shmem|Private_Dirty|Anonymous|Swap|SwapPss):' /proc/$PID/smaps_rollup
 ```
 
-Interpretation:
-- `Pss`: proportional set size, best per-process contribution estimate.
-- `Private_Dirty`: private modified pages. If close to `Pss`, the process really owns the memory.
-- `Anonymous`: heap/private anonymous mappings. If close to `Pss`, suspect app heap/data structures.
-- `RSS`: resident pages mapped by the process; can over-count shared libraries and shared mappings.
+Compare `Private_Dirty` and `Anonymous` with PSS when deciding whether a large allocation is private or shared. For a large cgroup charge, inspect `cgroup.procs` and descendants; container accounting can be useful when process mappings are inaccessible.
 
-## Browser renderer attribution
+A browser renderer's OS process entry does not reliably identify a tab. Compare renderer PSS and use browser task/debug metadata where available; window titles or strings in process memory are only supporting clues.
 
-Chromium/Vivaldi/Chrome renderer process command lines often identify only `--type=renderer` and `--renderer-client-id`. The process manager view does not reliably include tab title from the OS side.
+Under actual pressure, reclaim and swapping can stall a desktop before the kernel OOM killer acts. Consider workload containment, configured proactive OOM handling, or swap changes according to the host and workload. More disk swap can extend stalls; proactive OOM can kill useful work. Btrfs swapfiles have filesystem-specific requirements, for which `btrfs filesystem mkswapfile` is designed.
 
-Practical evidence ladder:
-1. `smaps_rollup`: prove single-process private memory vs combined/shared overcount.
-2. Sibling process list: compare that renderer to other renderer PSS values.
-3. Window manager metadata: visible browser window title (`hyprctl clients -j` on Hyprland).
-4. Optional heuristic: scan readable anonymous/dev-shm memory in `/proc/<pid>/mem` for repeated URL/title/domain strings. Use only as supporting evidence and state confidence.
+If zram is already used, disk swap can be a lower-priority overflow tier. For a known-heavy job, a user scope can contain it using `MemoryHigh`, `MemoryMax`, and `MemorySwapMax`; select limits for the host and workload. `systemd-oomd` requires cgroup accounting and ManagedOOM policy, so check configuration and service state rather than assuming it is active.
 
-Conclusion wording:
+## Other host failures
 
-> This is one renderer process, not the combined browser total. Its PSS and Private_Dirty are both about N GiB, so it is mostly private heap. The strongest page clue is DOMAIN/TITLE based on repeated strings in the renderer memory plus the visible browser window title, but exact PID-to-tab mapping is not exposed by the OS unless browser debugging/task metadata is available.
+For an NVML driver/library mismatch after an upgrade, compare the loaded NVIDIA module version in `/proc/driver/nvidia/version` with installed userspace and check modules for the running kernel. Reloading a module stack requires releasing its GPU users and can interrupt workloads; a reboot is another disruptive option when appropriate, not a universal requirement after every upgrade.
+
+A service MainPID may be a launcher rather than the worker or scheduler. Inspect the process tree before pausing it: stopping the wrapper alone can leave the child running. Scope signals to the intended processes and consider in-flight work and reconciliation. Stopping a process that holds a data stream open can be unsafe.
+
+Publishing by hard-linking a temporary file to its final name generates `IN_CREATE`, not necessarily `IN_CLOSE_WRITE` or `IN_MOVED_TO` for the final name. Include the matching event, establish the watch before a race-closing directory scan, and handle queue overflow. A publication notification does not establish producer success.

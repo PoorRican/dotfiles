@@ -1,24 +1,22 @@
 ---
 name: git-and-github
-description: "Use for costly Git and GitHub work: shared or concurrently edited checkouts, commit splitting and hooks, index-isolated commits, rebases and squash-merge landings with tree proof, dirty-checkout updates, worktree retirement and loss audits, history purges, stacked or overlapping pull requests, review threads and issue APIs, and recovering lost or misattributed work, and auditing conflict-resolved or delegated merges for silently dropped default-branch content. Also covers capturing and checking patch artifacts; branch, tag and release operations."
+description: Use for shared Git checkouts, history changes, worktree retirement, GitHub reviews, and landing or releasing changes with evidence.
 ---
 
 # Git and GitHub
 
-Shared checkouts, history rewrites and PR stacks fail in ways that a clean status, successful rebase or green individual checks can hide. These references preserve the mechanics behind those traps; open the one for branch and content reconciliation, hook-aware commits, ownership and index isolation, landing proof, dirty-checkout updates, worktree retirement, GitHub feedback surfaces, or PR topology and merge policy.
+Shared checkouts and concurrent changes can make a successful Git command conceal lost work or an untested merge. Use these references to preserve ownership and establish what actually landed.
 
-| When you are… | Open |
+| Task | Reference |
 |---|---|
-| Reconciling stale branches, squash history, rebases, artifact purges or branch retention | [references/branch-history-and-landing.md](references/branch-history-and-landing.md) |
-| Splitting a moving working tree into commits, or reasoning about commit hooks and hook failures caused by other actors' files | [references/commit-splitting-and-hooks.md](references/commit-splitting-and-hooks.md) |
-| Working in a shared checkout: ownership, concurrent writers, branch switching, formatter recovery or protecting staged work | [references/shared-checkouts-and-recovery.md](references/shared-checkouts-and-recovery.md) |
-| Committing only your own lines or paths when the file also holds another actor's uncommitted edits | [references/isolated-index-commit.md](references/isolated-index-commit.md) |
-| Updating a dirty or diverged checkout to a fetched target, or fast-forwarding it over foreign edits, with a preservation proof | [references/dirty-checkout-update.md](references/dirty-checkout-update.md) |
-| Landing PR batches or chains of local branches and proving the merged tree is what was tested | [references/landing-proof.md](references/landing-proof.md) |
-| Deciding what could be lost before deleting branches, worktrees or scratch, or removing worktrees other actors may use | [references/worktree-retirement-and-loss-audit.md](references/worktree-retirement-and-loss-audit.md) |
-| Reading or posting GitHub issues, PR comments, formal reviews or inline threads, or judging CI and issue-closure evidence | [references/github-api-reviews-and-issues.md](references/github-api-reviews-and-issues.md) |
-| Choosing branch topology, merge order or policy for stacked and overlapping PRs, splitting a dirty tree into a stack, or sweeping review comments across a stack | [references/pr-stacks-merges-and-reviews.md](references/pr-stacks-merges-and-reviews.md) |
-| Auditing a conflict-resolved or delegated merge for default-branch lines it silently dropped, and repairing them with 3-way merges | [references/merge-drop-audit.md](references/merge-drop-audit.md) |
-| Capturing and checking patch artifacts without staging working files | [references/patch-artifacts.md](references/patch-artifacts.md) |
-| Preparing and verifying branch, tag, pull request and release operations | [references/release-operations.md](references/release-operations.md) |
-
+| Reconcile branches, rebases and rewritten history | [Branch history](references/branch-history-and-landing.md) |
+| Split commits and diagnose hooks | [Commit splitting and hooks](references/commit-splitting-and-hooks.md) |
+| Protect shared checkouts and recover changes | [Shared checkouts](references/shared-checkouts-and-recovery.md) |
+| Commit owned changes in a shared file or index | [Isolated index](references/isolated-index-commit.md) |
+| Update a dirty checkout | [Dirty checkout update](references/dirty-checkout-update.md) |
+| Land and prove PRs or dependent changes | [Landing proof](references/landing-proof.md) |
+| Audit and retire worktrees or branches | [Worktree retirement](references/worktree-retirement-and-loss-audit.md) |
+| Inspect GitHub feedback and checks | [GitHub reviews and issues](references/github-api-reviews-and-issues.md) |
+| Manage stacked or overlapping PRs | [PR stacks](references/pr-stacks-merges-and-reviews.md) |
+| Audit a risky conflict resolution for dropped content | [Merge drop audit](references/merge-drop-audit.md) |
+| Publish branches, tags and releases | [Release operations](references/release-operations.md) |

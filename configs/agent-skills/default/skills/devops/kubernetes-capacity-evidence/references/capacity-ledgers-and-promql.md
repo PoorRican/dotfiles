@@ -1,35 +1,19 @@
 # Capacity ledgers and Prometheus evidence
 
-Scope: a node or cluster where jobs stay Pending or suspended while the host looks idle, or where requests must be sized from observed usage. Compare the three ledgers before changing any quota, then read peaks, growth and live-pod usage carefully.
+## Compare the ledgers
 
-## The three ledgers
+- Compare host actual CPU and memory, scheduler allocatable minus effective requests of bound non-terminal pods, and queue flavor quota and reservations. Queue-managed workloads need not account for unmanaged pods; low actual usage is not scheduler headroom.
+- Calculate effective pod requests according to the cluster's Kubernetes version, including init containers, restartable init sidecars, pod overhead and any enabled pod-level resources. Include system reservation and all relevant resources. Consult the Kueue troubleshooting skill for admission and placement diagnosis.
+- Check queue status and controller logs against scheduler events: `PodsReadyTimeout` evictions together with `FailedScheduling` for insufficient resources indicate placement trouble, where increasing quota alone admits more pods that cannot bind. An `insufficient unused quota` message instead points to a quota wait.
+- Missing pod metrics are missing evidence, not zero. Show coverage and shortfalls per resource. Partial history may inform a decision with stated uncertainty but does not by itself prove over-reservation.
 
-1. **Host actual.** Node-exporter: memory used `node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes`; CPU busy `sum(rate(node_cpu_seconds_total{mode!~"idle|iowait"}[5m]))`, both selected by the node label.
-2. **Scheduler requests.** Node allocatable minus the requests of pods bound to the node (`kubectl get pods -A --field-selector spec.nodeName=<node>`). A pod's effective request is `max(sum of containers, largest init container)` (restartable init containers add to the sum). Check whether allocatable equals capacity (no system or kube reservation configured). Unbound Pending pods reserve nothing on the node.
-3. **Quota ledger.** The ClusterQueue flavor's nominal quota, borrowing limit and `.status.flavorsUsage`. It only accounts namespaces the queue manages; workloads in unmanaged namespaces (controllers, stateful services, workflow-engine run pods launched with their own defaults) are invisible to it.
+## Measure usage
 
-A suspended workload on an idle host usually means the quota controller admitted something the scheduler could not place (`PodsReadyTimeout` evictions plus `FailedScheduling ... Insufficient memory|cpu`). Raising quota then only admits more pods that cannot bind. Real quota waits show up as `insufficient unused quota for <resource> in flavor <f>` in the queue controller's JSON logs (attribute them with `jq -r '.object.namespace'`). See the Kueue troubleshooting skill for the diagnosis procedure.
-
-## PromQL joins that work
-
-- cAdvisor `container_*` series carry no node label. Join on pod info: `<expr> * on(namespace,pod) group_left() max by (namespace,pod)(kube_pod_info{node="<node>"})`.
-- Requests of active pods only: `kube_pod_container_resource_requests{node="<node>",resource="memory"} * on(namespace,pod) group_left() (max by (namespace,pod)(kube_pod_status_phase{phase=~"Running|Pending"})==1)`.
-- Pod peak: `max_over_time((sum by (namespace,pod)(container_memory_working_set_bytes{container!="",container!="POD"}))[24h:2m])`. Summing per-container maxima overstates it.
-- Concurrent class peak: take `max_over_time` of the per-timestep `sum(...)`. Never sum per-pod maxima.
-- Per-container peaks come from live pods only (`pod=~"<current pod names>"`): cAdvisor series of replaced pods linger for minutes after a rollout and mix old and new pods in an unfiltered `sum by (container)`.
-- Workflow-engine runs that carry no per-run resource tag inherit the launcher default; join runs to pods through the run-id pod label to attribute their usage.
-
-## Evidence hygiene
-
-- **Check the oldest retained sample** (`prometheus_tsdb_lowest_timestamp_seconds`, or the first sample of the series) before trusting any peak. Configured retention is not available history, and the retained window changes when Prometheus moves or is resized; re-measure rather than quoting an old figure.
-- **Measure growth within one pod incarnation** (point samples or `deriv(...[12h])`) before any restart, because reboots and rollouts reset leaky processes. A rise over the first hours of a fresh build may be start-up catch-up rather than a leak; do not call it either without a longer window.
-- **An allocator, runtime or binary change resets the evidence.** Re-measure for at least 24 hours on the new build, including the peak load window, before resizing; peaks and slopes from the previous allocator size nothing, and OOM records written before the change are not evidence about the new one (rewrite the manifest comment with the new evidence in the same change).
-- **Requests and limits are different decisions.** A lower request does not reclaim physical memory or cap growth and can worsen OOM and eviction ranking under node pressure; state which of the two a change touches.
-- State the formula and window you used for a request (for example a multiple of the retained working-set peak plus measured growth, rounded up) with the figures, so the next pass can redo it.
-- For contention attribution, retain bounded query responses and a manifest of queries and windows; compare before, during and after at native scrape resolution against actual process wall-clock intervals. Separate receive from transmit and process incarnations. A maximum of rolling p99 estimates is not a pooled p99; interface totals or a configured storage endpoint cannot identify a process or establish historical bytes transferred.
-
-## Reading the cost of a change
-
-- Singleton Deployments with `Recreate` leave a capture gap on restart; `RollingUpdate` surge pods need room for both copies. Resizing a singleton that is the only client of an upstream API restarts that client: ride a planned release instead of a standalone tweak.
-- Pods at a high priority with `PreemptLowerPriority` evict lower-priority pods on a full node; see [staged-rollout-and-headroom-gate.md](staged-rollout-and-headroom-gate.md).
-- When a PR cuts requests, update every render test that pins the expected request tuples, and read the comments next to each `resources:` block before cutting.
+- Check the oldest available samples for each series, not just configured retention. Calculate a simultaneous pod peak as the maximum over time of the per-timestep container sum; calculate a class peak from the per-timestep pod sum. Summing independent maxima overstates concurrent usage.
+- For example: `max_over_time((sum by (namespace,pod) (container_memory_working_set_bytes{container!="",container!="POD"}))[24h:2m])`. Choose a populated window and resolution suited to the workload. Include pod identity when aggregating across generations.
+- Inspect actual scrape labels. If container series lack a node label, join to `kube_pod_info` by namespace and pod, taking care with duplicate or stale identities. Restrict current-pod comparisons to live pod identities because replaced pods' series can linger.
+- Node join example: `<expr> * on(namespace,pod) group_left() max by (namespace,pod)(kube_pod_info{node="<node>"})`. For active-pod requests, filter `kube_pod_container_resource_requests` using a `Running|Pending` phase join; separately account for effective init, overhead and pod-level requests.
+- Measure memory growth within each pod incarnation; startup catch-up and restarts can mimic or conceal a trend. Runtime, allocator or binary changes can invalidate previous peaks; collect a representative window on the new build, including relevant peak cycles.
+- Requests and limits are different decisions: lowering a request does not reclaim physical memory or cap growth, and can change eviction behavior. Explain the sizing formula, evidence window and uncertainty.
+- For attribution, compare bounded measurements at appropriate resolution before, during and after actual process intervals. Interface totals alone do not identify a process; a maximum of rolling p99s is not a pooled p99.
+- Separate receive from transmit and process incarnations; retain bounded query responses and the query windows. Configured storage endpoints do not establish historical bytes transferred.

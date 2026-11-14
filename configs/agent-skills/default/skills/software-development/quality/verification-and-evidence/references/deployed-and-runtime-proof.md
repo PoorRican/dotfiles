@@ -1,36 +1,21 @@
 # Deployed and runtime proof
 
-Scope: distinguish source changes and rendered configuration from the installed, running behavior that a claim concerns.
+## Promotion and provenance
 
-## Promotion states
+- Source complete, merged, deployed, and live exercised are different states. A tag or mounted checkout does not establish the running image digest or imported module. Identify the artifact actually loaded and exercise the claimed behavior, including relevant negative cases.
+- Runtime code overlays are not covered by an image build-input digest. Compare the actual shipped archives and recorded hashes, including member sets and non-code inputs; equivalent source ASTs alone do not establish equivalent data or import side effects.
+- A hand-built image can be the only surviving copy of uncommitted behavior. Applying older declarative manifests can silently roll it back. Compare the running digest and embedded build identity with candidate source; where builds are reproducible, compare rebuilt binary bytes and sidecar contents before asserting provenance.
+- After an authorized rollout, verify the running image identity and safety-relevant configuration, not just the desired manifest. A negative control that installs a bad artifact must not leave the canonical path in a bad state.
 
-- Code-complete, merged, deployed/image-verified, and live-exercised are distinct states. A tag is weaker evidence than the running image digest, and a mounted checkout can show new source while the interpreter imports an older installed package. A deployed-behavior claim depends on the artifact actually loaded by the process and behavior exercised there, including negative cases. (src: verifying-deployed-change, 2026-07-27; destructive-path-verification-audit, 2026-07-27)
-- A new guard paired with an old canonical artifact can arm a failure trap, while a corrected sibling path may be inert. A negative control that deliberately installs a bad artifact can leave it behind, so canonical-path status is a separate fact to establish. (src: staged-fix-promotion-verification, 2026-08-09)
-- Removing defect tokens by imputation can still shift the distribution of values actually served; a clean token count does not establish distributional parity with the training population. (src: staged-fix-promotion-verification, 2026-08-09)
-- A probe that treats a module constant as a function can raise the same error for every input and look like uniform fail-closed behavior; callable identity is part of the claim. (src: verifying-deployed-change, 2026-07-27)
-- Runtime-store-only settings disappear when that store is reset; declarative deployment configuration is the durable source for a load-bearing value, with runtime state only as defense in depth. (src: verifying-deployed-change, 2026-07-27)
+## Runtime boundaries
 
-## Image and interpreter behavior
+- A mounted executable can fail because its shebang interpreter is absent; a shell on the host does not prove that the target image contains that shell or required applets. Exercise the actual image, script, failure case, and scheduled architectures.
+- A desired configuration or populated current store is not proof of durable behavior after recreation. Exercise the event relevant to the claim and read the resulting state independently.
+- Dashboard JSON cannot exercise browser interpolation, frontend transforms, empty states, or resolved links. Check the rendered failure and empty states and follow the links in the deployed versions.
+- A stale last-known-good file or cached log buffer can make a dead process appear healthy. Compare freshness and process identity against the system of record.
+- A Deployment safety or readiness gate must follow the Pod → ReplicaSet → Deployment controller ownerReference chain by name and UID, not assume a direct Pod → Deployment link. Capture the chain before and after; fixtures can repeat the same mistaken ownership assumption.
 
-- A mounted script can exist and be executable yet fail with `ENOENT` because its shebang interpreter is absent. A shell in an image does not imply `bash`, and minimal images may have neither shell nor `env`; YAML or manifest validation cannot prove the image filesystem contract. These properties are specific to the target image and exact interpreter/tool invocations. (src: container-script-runtime-preflight, 2026-08-19)
-- Host syntax checks do not establish compatibility with the target image's shell, and a silently missing BusyBox applet can disable a freshness/TTL guard. Mixed scheduled architectures can produce `exec format error`; runtime evidence therefore depends on the actual image, script, failure case, and scheduled-architecture set. (src: container-script-runtime-preflight, 2026-08-19)
-- Dashboard behavior depends on the deployed Grafana and datasource versions: JSON review cannot exercise browser interpolation, frontend transformations, or resolved links. The 2026-09-08/2026-09-07 checks found traps including grouping by absent labels collapsing series, `${var:regex}` producing a PromQL-invalid escape, table links needing field rather than label context after transforms, and zero-series queries yielding no frame for `noValue`. These are version-sensitive probes rather than defaults; rendered failure/empty states and resolved links are stronger evidence than JSON inspection. (src: grafana-dashboard-runtime-proof, 2026-09-08; grafana-dashboard-runtime-verification, 2026-09-07)
-- Other version-sensitive observations from the 2026-09-08/2026-09-07 checks include `filterByValue` not interpolating variables and potentially aborting a transform chain, `:queryparam` already supplying the variable key, field-derived links belonging in field defaults, and zero timestamps needing a guard before age arithmetic. Their behavior is a current-version question, not a permanent assumption. (src: grafana-dashboard-runtime-proof, 2026-09-08; grafana-dashboard-runtime-verification, 2026-09-07)
-- Dashboard fixtures require a real alerting rule to synthesize `ALERTS`, counters that increase with wall-clock time for meaningful `rate()`, and label fidelity such as `honor_labels`. Grafana virtualizes off-screen panels, so rendered `innerText` may be absent until a panel is scrolled into view. Clicking the resolved drill-down link and checking selections, preserved `from`/`to`, and `viewPanel` tests behavior that rendering alone does not. (src: grafana-dashboard-runtime-verification, 2026-09-07)
+## External API assumptions
 
-## Same code across runs
-
-- A build-input digest covers only what the image was built from. When code is overlaid at run time, matching build-input digests prove nothing about the code, and submission timestamps do not prove archive contents. Compare the shipped-code digests (the archive actually uploaded) and never assert equivalence from timestamps. (src: code-digest-adjudication, 2026-11-03)
-- To adjudicate whether runs shipped the same code: pick one run per digest, fetch both archives through the tool that uploaded them, verify the recorded SHA, compare member sets, compare `ast.dump` for shared Python files (byte-only differences are usually formatting), and hash non-Python files plus every shipped table or manifest. Record one verdict: "AST-equivalent (N files), table and profile hashes equal" with any extra members, a list of differing files, or "code equivalence unverified". (src: code-digest-adjudication, 2026-11-03)
-- Strongest proof when the archive is byte-deterministic (sorted members, zeroed mtimes): rebuild from a clean worktree with and without the suspected extra file and require the digests to match exactly. (src: code-digest-adjudication, 2026-11-03)
-
-## Launch wrappers and ownership chains
-
-- A remotely launched CLI wrapper (a systemd unit that starts the real job) needs its failure paths exercised, as the real native wrapper, on isolated CPU-only resources before any GPU launch. Mocked or arithmetic deadline tests missed three boundaries: `select` plus `readline` on a `TextIOWrapper` (buffered data invisible to `select`), a renamed module imported bare, and a unit that stopped itself before the remote files were deleted. (src: native-wrapper-smoke)
-- A Deployment safety or readiness gate must prove Pod to ReplicaSet to Deployment through controller `ownerReference` name and UID, not Pod to Deployment, and keep that chain in the before/after evidence. Fake boundary tests can pass falsely when their fixtures repeat the wrong ownership assumption. (src: ownership-chain-gate, 2026-10-07)
-
-## Stateful cutover observation
-
-- Enumerate exact workload names and namespaces before filtering; substring matches can include unrelated workloads. Compare observed process state with the actual running configuration, not just the desired configuration.
-- Capture a timestamped inventory of the controller, replacement Pod, claim, source and destination volumes, and endpoints. Record object identities, scheduling condition and the claim's bound volume; re-read changed objects before drawing conclusions. Earlier health does not establish present availability.
-- Compare live placement constraints with the volume actually bound to the claim, including node affinity and local path. A matching destination claim reference or selector change alone does not move an already-bound claim. Treat null endpoint collections as empty when summarizing and isolate per-object summary failures. Corroborate missing endpoints with a bounded readiness request; missing endpoints alone do not establish data corruption.
+- Before building on a design's API claims, use small permitted requests to check response shape, filters, status values, limits, and cursor behavior. A successful response does not establish complete historical coverage.
+- Preserve raw responses separately from selected fixtures, with request identity, status, retrieval time and digest. A reserialized object is not the original wire body; recheck observed behavior when relying on it later.

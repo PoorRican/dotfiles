@@ -66,23 +66,36 @@ OMP's `~/.omp/agent/managed-skills` remains agent-owned and is never managed by 
 module. OMP can continue creating and updating skills there independently of the
 portable coding collection published under `~/.omp/agent/skills`.
 
-## Inclusion policy
+## What belongs here
 
-The initial catalog migration incorporated:
+The catalog holds what some collection or profile actually loads. A skill that
+nothing selects is removed rather than kept in case; git history has it.
 
-- live Hermes skills, excluding backups and runtime metadata;
-- repository-managed Claude Code skills;
-- direct Codex user skills, excluding `.system`;
-- shared user skills from `~/.agents/skills`;
-- a snapshot of selected OMP-managed skills, pending provenance review and removal
-  from the portable catalog.
+A skill holds the reusable judgement and procedure an agent needs for a piece of
+work and would not otherwise have:
 
-It intentionally excluded:
+- **Workflow skills** (interviews, planning, review, task protocols): the steps,
+  decision points, question sets, templates and tool calls. The procedure is the
+  product; keep it complete and state defaults as defaults, not as law.
+- **Tool skills** (a CLI, service, SDK or host procedure): the invocation surface
+  an agent cannot cheaply discover or would get wrong, and every trap. Link to
+  upstream documentation instead of copying it.
+- **Judgement skills** (debugging, verification, evaluation, engineering
+  practice): traps with their mechanism, decision rules and trust checks. Generic
+  truths and textbook material stay out.
 
-- agent plugin/marketplace/package caches;
-- runtime-provided system skills;
-- project, session, and memory-generated skills;
-- Hermes `.bak`, curator, usage, hub, and bundled-manifest state.
+Results, incident narration, dates, provenance tails and rules learned from one
+case do not belong in any of them. Each statement lives in one skill.
+
+This repository is public. A skill here carries no facts about private projects,
+their repositories, hosts beyond this flake's own, people, addresses, volume
+labels or measurements. Private knowledge lives in a private catalog that a
+private flake adds with `skills.roots`.
+
+Upstream copies stay as close to upstream as their use allows, so they can be
+refreshed; local additions go in a clearly separate reference file. Agent
+plugin and package caches, runtime-provided system skills, and project, session
+and memory-generated skills are never part of the catalog.
 
 ## Adding or promoting a skill
 

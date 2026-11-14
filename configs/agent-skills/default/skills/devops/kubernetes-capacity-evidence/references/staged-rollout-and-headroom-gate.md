@@ -1,73 +1,21 @@
-# Staged rollout with a headroom gate
+# Staged rollout and headroom
 
-Scope: applying a manifest change (resources, config, image) that restarts several Deployments on a node where new pods can preempt others. A single whole-overlay `kubectl apply -k` starts every surge at once, so roll in stages. Staged stays the default even when earlier whole-overlay applies preempted nothing because the node happened to have large request headroom.
+A concurrent rollout can create multiple surge pods. On a full node, high-priority surge pods can preempt lower-priority workloads; a `Recreate` singleton instead has a service gap. Consider staging when that risk matters.
 
-## Why staging matters
+## Before each stage
 
-- High-priority pods with `PreemptLowerPriority` evict lower-priority pods when a surge pod cannot fit on a full node. Once batch pods at the lowest priorities are gone, the next victims are priority-0 services (the metrics store, experiment tracking, orchestration servers and their databases, CI runner pods that share priority 0 with `preemptionPolicy: Never`).
-- `Recreate` Deployments leave a capture or serving gap but free memory first; `RollingUpdate` Deployments with `maxSurge: 1, maxUnavailable: 0, minReadySeconds: N` need room for two copies and finish one handoff in roughly `minReadySeconds` plus readiness time.
+- Compare the intended render with live objects, including coupled configuration, to expose unrelated changes that a broad apply would carry. A changed content-hashed ConfigMap can restart every workload referencing it; a fixed-name configuration may instead require an explicit reload.
+- Check healthy old replicas, startup dependencies and the readiness of the new template. A rollout requiring zero unavailable replicas cannot complete if the replacement never becomes Ready.
+- Estimate each eligible node's unreserved resources from allocatable less effective requests of bound non-terminal pods, then compare with the replacement pod's effective requests, including init containers and overhead. Check placement constraints and other resources as well as CPU and memory. Account for concurrent arrivals; headroom is not a reservation.
+- Stage related changes according to their actual dependency and disruption requirements. A singleton `Recreate` frees resources before its replacement but interrupts service; a rolling surge needs space for both copies. Wait for each stage to stabilize and inspect restarts, readiness and actual image identities.
+- Apply only the intended rendered objects, skipping those with an empty server-side diff. Check lists and deployment strategies before applying, and dry-run helpers first. If a startup dependency is resolved only at boot, check it before removing a healthy `Recreate` pod.
 
-## Preflight
+## Verify and recover
 
-1. Apply only from a clean detached worktree at the remote default branch that contains the merge. Run `kubectl diff -k` on the target overlay and every coupled overlay (below) before merging, to catch unapplied drift from other PRs that would ride along.
-2. Every target Deployment must have `availableReplicas == replicas` with all containers Ready.
-   - A permanently not-Ready container in the old pod does not block the handoff if the new pod can go Ready.
-   - A not-Ready container in the new template makes a `maxSurge: 1 / maxUnavailable: 0` rollout unfinishable.
-3. Content-hashed ConfigMaps restart every Deployment that mounts them, so bundle config edits with an image release when you can.
-4. Verify startup dependencies a `Recreate` will exercise before removing the healthy pod: a service that resolves discovery entries against an upstream API at startup can crash-loop on a transient 404 after the healthy pod is gone (one such restart took about eleven minutes to recover). Resolve every rendered entry from the node first and stop unless all succeed.
-
-## Order
-
-1. New hashed ConfigMap first, applied alone; it is a new name, so it is harmless.
-2. `Recreate` Deployments next, one at a time (capture gaps of seconds to a few tens of seconds), because they free memory before any surge.
-3. `RollingUpdate` Deployments one stage at a time, each gated on room.
-4. Leave singleton orchestrators (the only client of an upstream API) alone for resource-only tweaks; ride the next release.
-
-## Headroom gate
-
-Before each `RollingUpdate`, require the node's unreserved CPU and memory (allocatable minus the requests of Running and Pending pods on the node) to be at least the new pod's summed requests. Read the new pod's requests from the render, not from remembered numbers (they change when requests and limits are split or re-sized). If there is no room, wait and poll with a time budget rather than proceeding.
-
-## Apply
-
-- Extract only the target objects from the master render (`kubectl kustomize ... > render.yaml`) and skip any whose server-side `kubectl diff -f -` is empty.
-- Dry-run any helper script first; it catches render and name mistakes. List and strategy assertions should run before anything is applied so a wrong list fails closed.
-- After each rollout, require Ready, zero restarts, no `OOMKilled` in `lastState` and unchanged image digests. A broad selector can stop on an unrelated sibling pod that restarted earlier; read the printed pods.
-
-## Coupled overlays
-
-- A capture-reference or fingerprint object that hashes the collector config or manifest bytes rolls through an annotation. If merged PRs regenerated it independently, resolve conflicts by re-running the render script on the merged tree; never hand-merge hashes.
-- Fixed-name config objects (a metrics scrape config) do not restart the pod; run the explicit reload step after applying and verify through the status API (the last-reload timestamp lags one self-scrape, so recheck after about 20 s). Rule files that are content-hashed roll the Deployment instead.
-- Dashboard ConfigMaps update in place; verify the mounted file.
-
-## Verify each stage
-
-- **Resources**: compare live against render with quantity normalization (`500Mi` and `0.5Gi`, `1000m` and `1` are equal); a string compare gives false mismatches.
-- **Data plane**: sample a per-lane open-bytes (or equivalent progress) series twice, 90 to 120 seconds apart, and require growth per container; count a lane whose bytes dropped as sealed (activity). Report grow/total lane counts per container. Subscribe-only lanes, low-cadence snapshot lanes and weekend-quiet markets may stay flat; non-growth in a short window is not proof of loss.
-- **Counters created at first event**: `increase()` over the hour reads 0 on freshly rolled pods because the series did not exist before the first seal. Read first-sample timestamps from a short range vector a few minutes after the hour instead.
-- **Warm-up alerts**: latency rules can fire on a warming surge pod while the old pod still captures. Break `ALERTS` down by pod before acting.
-- **Preemptions**: attribute `reason=Preempted` events by matching the preemptor UID in the event message against your pods' UIDs; events expire after about an hour, so for older rollouts compare long-running priority-0 pod start times with the rollout window.
-- **Final state**: `kubectl diff -k` exits 0 for the target overlay and every coupled overlay you touched.
-
-## Stuck handoff (new pod capturing, old never removed)
-
-1. Prove the new pod's lanes are growing (two samples as above).
-2. Patch `maxUnavailable: 1` (`kubectl patch deploy <name> --type=merge -p '{"spec":{"strategy":{"rollingUpdate":{"maxUnavailable":1}}}}'`) and wait for the old pod to be deleted, or scale the old ReplicaSet to 0.
-3. Re-apply the master render of that Deployment. The strategy is not part of the pod template, so this starts no new rollout.
-4. Confirm `kubectl diff` exits 0.
-
-Slow readiness is not a stall: a pod that waits on another component's readiness, or a workload loading a large state, can take many minutes (tens of minutes on a cold start). Wait before intervening.
-
-## StatefulSets and guarded JSON patches
-
-- A StatefulSet with `podManagementPolicy: OrderedReady` does not roll a pod that is not Ready, so a template change never reaches it; `kubectl delete pod <name>` is the roll, and the controller recreates it from the updated template.
-- Apply JSON patches (`--type=json`) with leading `test` ops that assert the values you expect to replace, so a drifted object fails the patch instead of being overwritten. Snapshot the objects first (`kubectl get <kind> <name> -o yaml`), and run the same patch with `--dry-run=server` before applying it. (src: statefulset-rollout-and-json-patch, 2026-11-10; not re-run)
-
-## Separately authorized isolated diagnostics
-
-- Acquire a process-wide lock for the diagnostic profile, refuse a nonempty evidence directory and write outputs outside the source tree. Record ownership only after successful API creation returns a UID; read it back and use an atomic UID precondition for deletion. A failed or colliding create gives no deletion authority.
-- Continue bounded cleanup even when a receipt fails. If cleanup of the exact owned workload and its pods cannot be confirmed, retain deny-all isolation and report unresolved resources.
-- On deny-all NetworkPolicy readback, omitted ingress or egress arrays count as empty; require the intended pod selector, both `Ingress` and `Egress` policy types and no nonempty rules. Verify API deletion semantics separately: a dry-run flag on a raw request may not prevent deletion. (not re-run)
-
-## Report
-
-Separate merged, applied and runtime-verified. Name which Deployments had `Recreate` gaps and how long. Do not claim historical capture loss from readiness or missing metric series alone; that needs landing files or row-level evidence.
+- Compare live resource quantities numerically: `1000m` CPU equals `1`, whereas `500Mi` does not equal `0.5Gi`. Verify application progress separately from pod readiness; a flat low-cadence series in a short window does not prove data loss.
+- Counters created only on their first event may yield zero `increase()` after a rollout because no earlier sample exists; inspect first-sample timestamps before interpreting zero as inactivity. Break warm-up alerts down by pod before acting.
+- Attribute preemption events to the actual preemptor and affected pods. Events expire, so absence of an old event is not proof of no preemption. Distinguish merged, applied and runtime-verified state.
+- Investigate a slow handoff before intervening: startup dependencies and large state can delay readiness. Changing rollout strategy or deleting a pod is disruptive and requires authorization; restore intended configuration after any temporary intervention.
+- If an authorized recovery changes `maxUnavailable` or removes an old ReplicaSet, first establish that the replacement is actually progressing, wait for handoff, then reapply the intended Deployment render and check for drift. A readiness delay alone is not proof of a stuck handoff.
+- With `OrderedReady` StatefulSets, a not-Ready pod can prevent the updated template from rolling out; investigate the unhealthy pod before an authorized manual deletion to let the controller recreate it.
+- For guarded JSON patches, use `test` operations for expected old values, snapshot the object and server-side dry-run before applying. A drifted object must fail rather than be overwritten.

@@ -4,7 +4,7 @@ This is the question bank and challenge protocol for the research-proposal-inter
 
 ## The balanced challenge protocol
 
-Apply this after every substantive answer the user gives. It's the spine of the skill.
+Apply this when an important assumption needs challenge, adapting to the conversation.
 
 1. **Name the implicit assumption.** Reflect back the unstated belief their answer rests on. ("It sounds like you're assuming X is stable across regimes — is that right?")
 2. **Ask for evidence.** What's the basis for that assumption? Lived experience, a paper, a prior experiment, intuition? All are valid answers; the goal is to make the basis explicit.
@@ -54,7 +54,7 @@ The tone is "thoughtful committee member," not "hostile reviewer." The user shou
 **Challenge prompt:**
 - "What's the steel-man version of the position that this research isn't needed because the answer is already known?"
 
-*(After this section, trigger the prior-art scout — see exploration.md.)*
+*(After the lines of attack are drafted, consider the prior-art scout — see exploration.md.)*
 
 ### Section 4 — Theory of the Problem
 
@@ -98,7 +98,7 @@ The tone is "thoughtful committee member," not "hostile reviewer." The user shou
 - "What's an alternative explanation that would produce the same expected result, and how would you distinguish?"
 - "If you got exactly the result you expect, would a skeptic be convinced? What would they ask for?"
 
-*(After this section, trigger the methodological critic — see exploration.md.)*
+*(After this section, consider the methodological critic — see exploration.md.)*
 
 ### Section 7 — Conditional Next Steps
 
@@ -112,7 +112,7 @@ The tone is "thoughtful committee member," not "hostile reviewer." The user shou
 **Challenge prompt:**
 - "If your immediate experiment is null, what's the difference between 'we got the answer (it's no)' and 'our setup couldn't have detected the effect'? How would you tell them apart?"
 
-### Section 8 — Risks, Kill Criteria, Assumptions
+### Section 9 — Risks & Assumptions
 
 **Primary question:**
 - "Under what observations would you abandon this entire line of inquiry?"
@@ -124,9 +124,9 @@ The tone is "thoughtful committee member," not "hostile reviewer." The user shou
 **Challenge prompt:**
 - "If you ran this project for a year and produced no clear answer, what would you bet was the cause? Let's plan against that now."
 
-*(After this section, trigger the pre-mortem agent — see exploration.md.)*
+*(After this section, consider the pre-mortem — see exploration.md.)*
 
-### Section 9 — Speculative Horizon
+### Section 8 — Speculative Horizon
 
 **Primary question:**
 - "If everything worked, what's the deliverable — the paper, the system, the decision you'd make?"
@@ -144,4 +144,4 @@ The tone is "thoughtful committee member," not "hostile reviewer." The user shou
 - **Stacking challenges.** One challenge per answer. A second challenge becomes interrogation.
 - **Filling in the doc with the user's exact words verbatim.** Synthesize. The doc should be tighter and more structured than the conversation.
 - **Letting "speculative" answers be tagged "committed."** Push back on overconfidence in the tags.
-- **Skipping the doc update.** If you've gone three turns without editing the file, stop and write before asking the next question.
+- **Skipping the doc update.** Update the file as substantive answers emerge.

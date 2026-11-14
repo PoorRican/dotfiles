@@ -1,17 +1,15 @@
 ---
 name: performance-and-throughput
-description: "Use when a pipeline, model, training loop, or data path is slow or memory-hungry; for cost attribution, performance-claim review, RSS growth, CPU/GPU benchmarking, loader starvation, CPU-bound training, container-only CUDA faults, streaming-cache thrash, and memory or numerical blowups. Also covers fused Triton kernel replacement and native-heap (jemalloc) attribution."
+description: Diagnose slow or memory-hungry pipelines and training workloads, benchmark performance changes, and investigate native heap growth or GPU kernel replacements.
 ---
 
 # Performance and throughput
 
-Performance claims often confuse a measured component with end-to-end cost, or mistake a workload’s current representation for an inherent limit. The references separate cost attribution and benchmark validity, memory and numerical behavior, training-loop bottlenecks, and streaming-dataset cache/layout effects. They emphasize mechanisms that can make an apparent speedup misleading or change the computation being measured.
+Performance diagnosis separates the cost of the executed workload from unrelated phases, measurement overhead, and changes to the computation. Misattribution can make a fast component look like an end-to-end improvement or conceal a correctness regression.
 
-| When you are… | Open |
+| When | Reference |
 |---|---|
-| Attributing elapsed time, checking a proposed hotspot, or comparing component costs | [references/cost-attribution.md](references/cost-attribution.md) |
-| Diagnosing RSS growth, peak memory, accumulation, or non-finite values | [references/memory-growth-and-numerics.md](references/memory-growth-and-numerics.md) |
-| Distinguishing CPU, GPU, loader, and step bottlenecks or investigating CUDA faults | [references/training-loop-throughput.md](references/training-loop-throughput.md) |
-| Working with Mosaic StreamingDataset caches, shuffling, or merged shard indexes | [references/mosaic-streaming.md](references/mosaic-streaming.md) |
-| Replacing an eager PyTorch recursion or custom autograd Function with fused Triton kernels | [references/fused-kernel-replacement.md](references/fused-kernel-replacement.md) |
-| Attributing a native (Rust/C) service's RSS to live heap, allocator retention, or a leak, or reading jemalloc profiles | [references/native-heap-attribution.md](references/native-heap-attribution.md) |
+| Attribute costs or compare benchmarks | [Cost attribution](references/cost-attribution.md) |
+| Diagnose memory growth, native heaps, or numerical failures | [Memory growth and numerics](references/memory-growth-and-numerics.md) |
+| Diagnose loader, CPU, GPU, and streaming-cache throughput | [Training-loop throughput](references/training-loop-throughput.md) |
+| Replace an eager recursion with a fused GPU kernel | [Fused kernel replacement](references/fused-kernel-replacement.md) |

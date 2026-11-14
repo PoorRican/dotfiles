@@ -1,30 +1,21 @@
-# Workspace gates, cutovers, and commit splits
+# Workspace gates, Cargo and runtime traps
 
-Scope: Cargo workspace formatting and lint boundaries, deletion correctness, and coupling among workspace additions.
+## Gate scope and cutovers
 
-## Workspace gates and formatting scope
+- In a workspace with sibling path dependencies, `cargo fmt --all` can descend into and rewrite sibling checkouts, while `cargo clippy --workspace` treats path dependencies as dependencies rather than primary packages to lint. A generated package list must be nonempty, and shell process substitution can hide the generator's failure.
+- A first Clippy pass may stop before reporting other failing crates; `--keep-going` can reveal further failures. An unpinned CI toolchain can introduce new deny-warnings failures without a source change; reproduce with the CI toolchain before changing code.
+- A library-only check does not prove removed configuration or deserialization behavior is gone. Inspect consumers, tests, and manifest dependencies separately; without `deny_unknown_fields`, obsolete configuration keys can be silently ignored.
+- Compile-time includes and path dependencies constrain independently buildable workspace changes. After deletion, reconsider abstractions or vocabulary that no longer describe the surviving behavior.
+- A shared `CARGO_TARGET_DIR` across worktrees can give misleading freshness evidence. When source identity matters, use an isolated target directory and verify that the intended source was compiled.
 
-- In a workspace with sibling path dependencies, `cargo fmt --all` can descend into and rewrite sibling checkouts, while `cargo clippy --workspace` treats path dependencies as dependencies rather than primary packages to lint. Formatting and lint scope are therefore asymmetric. (src: rust-workspace-ci-gate-preflight, 2026-08-08; cargo-workspace-incremental-commit-split, 2026-09-21)
-- A package-scoped formatting gate can silently become unscoped if its derived package list is empty. Shell process substitution can also hide the helper's failure status, so the consumer's nonempty-list check is part of keeping the boundary closed. (src: rust-workspace-ci-gate-preflight, 2026-08-08)
-- Clippy may stop after its first failing crate set, so a first pass can understate the warnings a new gate exposes; a follow-up using `--keep-going` can reveal more failing crate sets. A deny-warnings gate also changes compatibility for untouched code; mechanical fixes and structural refactors have different scope and risk. (src: rust-workspace-ci-gate-preflight, 2026-08-08)
+## Bounded verification and cleanup
 
-## Deletions and cutovers
+An existing target directory is only a candidate cache. If builds are resource-bounded, supervise the authorized command and stop if it exceeds its permitted scope; report source compilation and test evidence separately from formatting or static inspection. A direct `rustc` harness against cached artifacts can exercise selected checked-out modules but is not evidence of a locked Cargo, full-package, or workspace build.
 
-- `cargo check --workspace --lib` can pass while removed config types remain because parsing and tests may be their only consumers. What independent evidence establishes that removed symbols and behavior are actually gone, including deserialization paths? (src: rust-workspace-deletion-refactor, 2026-07-26)
-- Builds and clippy do not reveal unused manifest dependencies; dependency declarations need a separate review after consumer deletion. (src: rust-workspace-deletion-refactor, 2026-07-26)
-- Without `#[serde(deny_unknown_fields)]`, an obsolete configuration key can be silently ignored and the new behavior used under the old name. (src: rust-workspace-deletion-refactor, 2026-07-26)
-- When deletion leaves a one-variant enum, one-implementation trait, constant tuple-key component, or empty options type, the remaining abstraction may be dead weight rather than a useful seam. Stale metrics and module vocabulary can also misdescribe the surviving system. (src: rust-workspace-deletion-refactor, 2026-07-26)
+Cargo cache and target cleanup deletes reusable artifacts and can force downloads or rebuilds. Obtain authorization for the deletion scope, inspect the affected paths and use the installed cleanup tool's dry run and help before deleting. Review dirty worktrees before removing them.
 
-## Multi-crate workspace boundaries
+## Async and storage runtime traps
 
-- Cargo tolerates crate directories under a workspace that are omitted from `[workspace].members`, so member inclusion can be cumulative; lockfile metadata follows the selected member set. (src: cargo-workspace-incremental-commit-split, 2026-09-21)
-- `include_str!` and `include_bytes!` make external config or fixture files compile-time crate dependencies; a split that lands those files later cannot compile that crate. Path dependencies likewise constrain which crate can compile before another. (src: cargo-workspace-incremental-commit-split, 2026-09-21)
+A panic in a spawned Tokio task can terminate that task while the process and unrelated health flags remain alive. Await or supervise long-lived task handles and surface their failure; check task panic logs when one event stream stops but the process remains healthy. Validate fallible conversions at the transport boundary, and use reconciliation where loss of a stream would otherwise leave state stale.
 
-## Open conflict: history rewriting
-
-- Open question: which worktree ownership and branch preconditions, if any, make history rewriting appropriate during a workspace cutover? The deletion source warns against reset in a shared tree, but later recommends a soft reset for squashing without reconciling those conditions; neither recommendation is general guidance. (src: rust-workspace-deletion-refactor, 2026-07-26)
-
-## Toolchain drift and shared build directories
-
-- CI clippy on an unpinned stable toolchain (no `rust-toolchain.toml`) means a new stable release can turn the main branch red: one release (rustc 1.98) added a lint, `clippy::result_large_err`, that fired in several places. Reproduce with the CI toolchain (`rustup toolchain install <VER> --profile minimal --component clippy,rustfmt`, then `cargo +<VER> clippy ... -D warnings`) and prefer a targeted `#[allow]` on cold paths over a mass refactor. (src: unpinned-toolchain-drift, 2026)
-- Sharing one `CARGO_TARGET_DIR` across worktrees of the same Rust workspace makes gates untrustworthy: path crates are keyed by workspace-relative path with mtime-based freshness, so another worktree's build counts as Fresh. The safe pattern on btrfs: `cp -a --reflink=always target <private copy>`, touch the sources, run the gate, delete the copy afterwards. (src: shared-target-dir-freshness, 2026-09-27)
+`object_store::path::Path::join("a/b")` appends one path part and encodes the slash as `%2F`. A local filesystem can mask the difference from remote object keys; construct multi-segment paths with `Path::from_iter` over the `split('/')` parts, and check the resulting keys against the intended backend.
