@@ -2,11 +2,11 @@
   "nodes": {
     "agent-profiles": {
       "locked": {
-        "lastModified": 1794452141,
-        "narHash": "sha256-t/wHYh4+9RadFsesYO9bJi4UjRkqZBWGXEcoXfg8q0s=",
-        "ref": "refs/heads/master",
-        "rev": "3b84df7765307da12772ca3afa198b28447d2afd",
-        "revCount": 53,
+        "lastModified": 1794634242,
+        "narHash": "sha256-k9glDuDswOvl9HoWWz0shl6sgbPnVtr6KyUY72Ouk1s=",
+        "ref": "deploy/celeste-march",
+        "rev": "e31dd057d9fabe148fd2a641713fc7e4a336bcd4",
+        "revCount": 54,
         "type": "git",
         "url": "file:///home/swe/kairos/agent-profiles"
       },
