@@ -329,10 +329,12 @@ let
   # Skill view first so the store path is part of the rendered settings.
   effectiveSettings = name: profile:
     lib.recursiveUpdate profile.settings {
-      skills.external_dirs =
+      skills.external_dirs = lib.unique (
         [ (toString (skillView name profile)) ]
         ++ lib.optional (profile.skills.bundledNames != [ ])
-          (toString (bundledSkillView name profile));
+          (toString (bundledSkillView name profile))
+        ++ (profile.settings.skills.external_dirs or [ ])
+      );
     };
 
   configFile = name: profile:

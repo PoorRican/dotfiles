@@ -67,6 +67,8 @@ or through the generated `<name>` launcher. Every enabled profile gets:
   should then show exactly the allowlisted names; "builtin" in its Source
   column only means a name matches the bundled manifest, not that the package
   tree is scanned.
+  Additional `settings.skills.external_dirs` entries are preserved after the
+  immutable views, with duplicate directory entries removed.
 - `cron.jobs.<name>` — reconciled into `cron/jobs.json` through Hermes' own
   cron API at activation. Jobs carry `managed_by: nix`; a job removed from Nix
   is removed from the profile, everything else in `jobs.json` is left alone.
